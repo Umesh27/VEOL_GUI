@@ -1,0 +1,758 @@
+__author__ = 'Umesh'
+
+import os, sys
+from tkinter import *
+from tkinter import filedialog
+import VEOL.tmp.Veol.GUI_Changes.material_prop as mat_prop
+import VEOL.tmp.Veol.GUI_Changes.create_input as create_input
+from tkinter import messagebox
+
+
+class App:
+    def __init__(self, master):
+
+        self.master = master
+        self.curveLength = 2
+        self.frame = Frame(self.master)
+        self.frame.pack()
+        self.rowN = 0
+        self.curveLines = []
+        self.sectionLines = []
+        self.curveNo = 0
+        self.inShellSection = False
+        self.inSolidSection = False
+        self.inMat54 = False
+        self.inMat24 = False
+        self.inRigid = False
+        # self.projectPath = r"D:\Umesh\AxiomProject\VEOL_GUI\TestCase2"
+        self.template_path = r"D:\Umesh\VEOL\tmp\Veol\GUI_Changes\Template"
+        self.case_path = r"D:\Umesh\AxiomProject\VEOL_GUI\TestCase2"
+        # Create a Tkinter variable for configuration selections
+
+
+        # create input keyword
+        self.rowN += 1
+        self.ProjectPath = Button(self.frame, text="ProjectPath", command=self.openFolder)
+        self.ProjectPath.grid(row=self.rowN, column=0)
+        self.ProjectPathEntry = Entry(self.frame, width = 70)
+        self.ProjectPathEntry.grid(row=self.rowN, column=2)
+        self.ProjectPathEntry.insert(0, self.case_path)
+        self.createButton("Create Input", self.create_input_keyword, self.rowN, 3)
+        self.rowN += 1
+
+        # Read Input Mesh
+        self.InputMeshPath = Button(self.frame, text="MeshPath", command=self.openFile)
+        self.InputMeshPath.grid(row=self.rowN, column=0)
+        self.InputMeshPathEntry = Entry(self.frame, width = 70)
+        self.InputMeshPathEntry.grid(row=self.rowN, column=2)
+        self.createButton("Show Info", self.show_info, self.rowN, 3)
+        self.rowN += 1
+
+        # Material Properties
+        self.matType = StringVar(self.frame)
+        self.materialType = "MAT54/55"
+        self.matTypeList = set(sorted({'MAT54/55', 'RIGID', 'MAT24'}))
+        self.matType.set('MAT54/55')
+        self.mat55_template = os.path.join(self.template_path, "mat55.k")
+        self.rigid_template = os.path.join(self.template_path, "rigid.k")
+        self.mapMat = {'MAT54/55':self.mat55_template, 'RIGID':self.rigid_template, 'MAT24':self.rigid_template}
+        popupMenu = OptionMenu(self.frame, self.matType, *self.matTypeList, command=self.getMatType)
+        popupMenu.grid(row = self.rowN, column=1)
+        self.matType.trace('w', self.change_dropdown)
+
+        self.template = Entry(self.frame, width = 70)
+        self.template.grid(row=self.rowN, column=2)
+        self.template.insert(0, self.mat55_template)
+        self.createButton("Add_data", self.addData, self.rowN, 3)
+        self.rowN += 1
+
+        # Control cards
+
+        self.loadType = StringVar(self.frame)
+        self.loadingType = "Topload"
+        self.loadTypeList = set(sorted({'Topload', 'Sideclamp', 'Vibration', 'Drop'}))
+        self.loadType.set('Topload')
+        self.controlCards_template = os.path.join(self.template_path, "control_cards.k")
+        self.mapControlCards = {'Topload':self.controlCards_template, 'Sideclamp':self.controlCards_template, 'Vibration':self.controlCards_template, 'Drop':self.controlCards_template}
+        popupMenu = OptionMenu(self.frame, self.loadType, *self.loadTypeList, command=self.getLoadType)
+        popupMenu.grid(row = self.rowN, column=1)
+        self.loadType.trace('w', self.change_dropdown)
+        self.template_controlcards = Entry(self.frame, width = 70)
+        self.template_controlcards.grid(row=self.rowN, column=2)
+        self.template_controlcards.insert(0, self.controlCards_template)
+        self.createButton("Add_data", self.addData_controlCards, self.rowN, 3)
+
+        # Exit
+        self.rowN += 1
+        self.createButton("Exit", self.frame.quit, self.rowN, 2)
+
+    def create_input_keyword(self):
+        """
+
+        :return:
+        """
+        self.projectPath = self.ProjectPathEntry.get()
+        input1 = create_input.CreateInput()
+        input1.create_input_k(self.projectPath)
+
+    def openFolder(self):
+        fName = filedialog.askdirectory()
+        self.ProjectPathEntry.insert(0,fName)
+
+    def openFile(self):
+        fName = filedialog.askopenfilename()
+        self.InputMeshPathEntry.delete(0,'end')
+        self.InputMeshPathEntry.insert(0,fName)
+
+    def show_info(self):
+        """
+
+        :return:
+        """
+        self.meshFile = self.InputMeshPathEntry.get()
+
+        with open(self.meshFile) as readFile:
+            readlines = readFile.readlines()
+
+        inOtherBlock = False
+        inPartBlock = False
+        inTitleBlock = False
+        inPartIdBlock = False
+        for line in readlines:
+            count = 0
+            if line.startswith("*PART"):
+                inPartBlock = True
+                inTitleBlock = True
+                inOtherBlock = False
+                # print(line)
+                continue
+            if line.__contains__("*"):
+                inOtherBlock = True
+                inPartBlock = False
+                continue
+            if inPartBlock:
+                if line.startswith("$"):
+                    continue
+                if inTitleBlock:
+                    # print("In part title Block :")
+                    # print(line)
+                    inTitleBlock = False
+                    inPartIdBlock = True
+                    continue
+                if inPartIdBlock:
+                    print("In partId Block :")
+                    # print(line)
+                    inPartIdBlock = False
+                    inTitleBlock = True
+                    continue
+            if inOtherBlock:
+                continue
+
+    def addData(self):
+        """
+
+        :return:
+        """
+
+        print(self.template.get())
+        template_path = self.template.get()
+        with open(template_path, 'r') as inFile:
+            self.template_lines = inFile.readlines()
+
+        self.mat_out = os.path.join(self.projectPath, "mat.k")
+        with open(self.mat_out, 'w') as outFile:
+            outFile.write("")
+
+        rowN = 0
+        self.window2 = Toplevel(self.frame)
+        self.material1 = mat_prop.MaterialProp()
+        self.mat54_prop = ['Title', 'Id', 'Density', 'E1', 'E2', 'Mu', 'GAB', 'GBC', 'FBRT', 'YCFAC', 'XC', 'XT', 'YC', 'YT', 'SECTION']
+        self.mat20_prop = ['Title', 'Id', 'Density', 'E1', 'Mu', 'CMO', 'CON1', 'CON2', 'SECTION']
+        self.mat24_prop = ['Title', 'Id', 'Density', 'E1', 'Mu', 'SIGY', 'ETAN', 'FAIL', 'LCSS', 'SECTION']
+
+        # 'MAT54/55', 'RIGID'
+
+        if self.materialType == "MAT54/55":
+            self.inMat54 = True
+            self.inMat24 = False
+            self.inRigid = False
+            self.materialProp = self.mat54_prop
+        elif self.materialType == "RIGID":
+            self.inMat54 = False
+            self.inMat24 = False
+            self.inRigid = True
+            self.materialProp = self.mat20_prop
+        elif self.materialType == "MAT24":
+            self.inMat54 = False
+            self.inMat24 = True
+            self.inRigid = False
+            self.materialProp = self.mat24_prop
+        else:
+            messagebox.showerror("Error", "Select correct Material Card :")
+        self.entry_list = []
+        self.label_list = []
+        for i in range(len(self.materialProp)):
+            rowN = i + 1
+            # print(rowN)
+
+            if self.materialProp[i] == 'SECTION':
+                self.label_list.append(Label(self.window2, text=self.materialProp[i], width=20))
+                self.label_list[i].grid(row=rowN, column=0)
+
+                self.shell_button = Button(self.window2, text="Shell", command=self.shell_button_click)
+                self.shell_button.grid(row=rowN, column=1)
+                self.solid_button = Button(self.window2, text="Solid", command=self.solid_button_click)
+                self.solid_button.grid(row=rowN, column=2)
+                continue
+
+            self.entry_list.append(Entry(self.window2, width=50))
+            self.entry_list[i].grid(row=rowN, column=2)
+            self.entry_list[i].insert(0,self.material1.material_prop[self.materialProp[i]])
+
+            self.label_list.append(Label(self.window2, text=self.materialProp[i], width=20))
+            self.label_list[i].grid(row=rowN, column=0)
+
+        rowN = rowN + 1
+        # print(rowN)
+        add_button = Button(self.window2, text="Add", command=self.add_new)
+        add_button.grid(row=rowN, column=1)
+        button_ = Button(self.window2, text="Save", command=self.save_data2)
+        button_.grid(row=rowN, column=2)
+        Exitbutton_ = Button(self.window2, text="Exit", command=self.close_window)
+        Exitbutton_.grid(row=rowN, column=3)
+
+    def shell_button_click(self):
+        """
+
+        :return:
+        """
+        self.inShellSection = True
+        self.inSolidSection = False
+        rowN = 0
+        self.window2_shell = Toplevel(self.frame)
+
+        self.shell_section_prop = ['TITLE', 'SECID', 'ELFORM', 'SHRF', 'NIP', 'PROPT', 'QR/IRID', 'ICOMP', 'SETYP', 'T1', 'NLOC']
+
+        self.shell_entry_list = []
+        self.shell_label_list = []
+        for i in range(len(self.shell_section_prop)):
+            rowN = i + 1
+            # print(rowN)
+            self.shell_label_list.append(Label(self.window2_shell, text=self.shell_section_prop[i], width=20))
+            self.shell_label_list[i].grid(row=rowN, column=0)
+
+            self.shell_entry_list.append(Entry(self.window2_shell, width=50))
+            self.shell_entry_list[i].grid(row=rowN, column=2)
+            self.shell_entry_list[i].insert(0,0)
+
+        rowN = rowN + 1
+        # print(rowN)
+        add_button = Button(self.window2_shell, text="Add", command=self.section_add_new)
+        add_button.grid(row=rowN, column=1)
+        button_ = Button(self.window2_shell, text="Save", command=self.section_save_data)
+        button_.grid(row=rowN, column=2)
+        Exitbutton_ = Button(self.window2_shell, text="Exit", command=self.section_close_window)
+        Exitbutton_.grid(row=rowN, column=3)
+
+    def solid_button_click(self):
+        """
+
+        :return:
+        """
+        self.inSolidSection = True
+        self.inShellSection = False
+        rowN = 0
+        self.window2_solid = Toplevel(self.frame)
+
+        self.solid_section_prop = ['TITLE', 'SECID', 'ELFORM', 'AET']
+
+        self.solid_entry_list = []
+        self.solid_label_list = []
+        for i in range(len(self.solid_section_prop)):
+            rowN = i + 1
+            # print(rowN)
+            self.solid_label_list.append(Label(self.window2_solid, text=self.solid_section_prop[i], width=20))
+            self.solid_label_list[i].grid(row=rowN, column=0)
+
+            self.solid_entry_list.append(Entry(self.window2_solid, width=50))
+            self.solid_entry_list[i].grid(row=rowN, column=2)
+            self.solid_entry_list[i].insert(0,0)
+
+        rowN = rowN + 1
+        # print(rowN)
+        add_button = Button(self.window2_solid, text="Add", command=self.section_add_new)
+        add_button.grid(row=rowN, column=1)
+        button_ = Button(self.window2_solid, text="Save", command=self.section_save_data)
+        button_.grid(row=rowN, column=2)
+        Exitbutton_ = Button(self.window2_solid, text="Exit", command=self.section_close_window)
+        Exitbutton_.grid(row=rowN, column=3)
+
+    def section_add_new(self):
+        """
+                        *SECTION_SHELL
+                        $HMNAME PROPERTIES         3thk
+                                 3        16       1.0         2
+                               3.1       3.1       3.1       3.1
+                        *SECTION_SOLID
+                        $HMNAME PROPERTIES         2sld
+                                 2         2
+        :return:
+        """
+        # ['TITLE', 'SECID', 'ELFORM', 'SHRF', 'NIP', 'PROPT', 'QR/IRID', 'ICOMP', 'SETYP', 'T1', 'NLOC']
+
+        if self.inShellSection:
+            self.sectionTitle = self.shell_entry_list[0].get()
+            self.sectId = self.shell_entry_list[1].get()
+            self.elform = self.shell_entry_list[2].get()
+            self.shrf = self.shell_entry_list[3].get()
+            self.nip = self.shell_entry_list[4].get()
+            self.propt = self.shell_entry_list[5].get()
+            self.qr = self.shell_entry_list[6].get()
+            self.icomp = self.shell_entry_list[7].get()
+            self.setyp = self.shell_entry_list[8].get()
+            self.thk = self.shell_entry_list[9].get()
+            self.nloc = self.shell_entry_list[10].get()
+
+            tmp_section_lines = "*SECTION_SHELL\n" \
+                                "$HMNAME PROPERTIES         3%s\n" \
+                                "%s%s%s%s\n" \
+                                "%s%s%s%s%s\n"%(str(self.sectionTitle).rjust(10), self.sectId.rjust(10), self.elform.rjust(10), self.shrf.rjust(10), self.nip.rjust(10),
+                                                self.thk.rjust(10), self.thk.rjust(10), self.thk.rjust(10), self.thk.rjust(10), self.nloc.rjust(10))
+            # print(tmp_section_lines)
+
+            self.sectionLines.append(tmp_section_lines)
+
+        elif self.inSolidSection:
+            # self.solid_section_prop = ['TITLE', 'SECID', 'ELFORM', 'AET']
+            self.sectionTitle = self.solid_entry_list[0]
+            self.sectId = self.solid_entry_list[1]
+            self.elform = self.solid_entry_list[2]
+            self.aet = self.solid_entry_list[3]
+
+            tmp_section_lines = "*SECTION_SOLID\n" \
+                                "$HMNAME PROPERTIES         3%s\n" \
+                                "%s%s%s\n"%(str(self.sectionTitle).rjust(10), self.sectId.rjust(10), self.elform.rjust(10), self.aet.rjust(10))
+            # print(tmp_section_lines)
+
+            self.sectionLines.append(tmp_section_lines)
+
+        else:
+            messagebox.showerror("ERROR", "Not selected section type :")
+
+
+    def section_save_data(self):
+        """
+
+        :return:
+        """
+        # ['TITLE', 'SECID', 'ELFORM', 'SHRF', 'NIP', 'PROPT', 'QR/IRID', 'ICOMP', 'SETYP', 'T1']
+
+        if self.inShellSection:
+            self.sectionTitle = self.shell_entry_list[0].get()
+            self.sectId = self.shell_entry_list[1].get()
+            self.elform = self.shell_entry_list[2].get()
+            self.shrf = self.shell_entry_list[3].get()
+            self.nip = self.shell_entry_list[4].get()
+            self.propt = self.shell_entry_list[5].get()
+            self.qr = self.shell_entry_list[6].get()
+            self.icomp = self.shell_entry_list[7].get()
+            self.setyp = self.shell_entry_list[8].get()
+            self.thk = self.shell_entry_list[9].get()
+            self.nloc = self.shell_entry_list[10].get()
+            tmp_section_lines = "*SECTION_SHELL\n" \
+                                "$HMNAME PROPERTIES         3%s\n" \
+                                "%s%s%s%s\n" \
+                                "%s%s%s%s%s\n"%(str(self.sectionTitle).rjust(10), self.sectId.rjust(10), self.elform.rjust(10), self.shrf.rjust(10), self.nip.rjust(10),
+                                                self.thk.rjust(10), self.thk.rjust(10), self.thk.rjust(10), self.thk.rjust(10), self.nloc.rjust(10))
+            # print(tmp_section_lines)
+
+            self.sectionLines.append(tmp_section_lines)
+            self.window2_shell.destroy()
+
+        elif self.inSolidSection:
+            # self.solid_section_prop = ['TITLE', 'SECID', 'ELFORM', 'AET']
+            self.sectionTitle = self.solid_entry_list[0]
+            self.sectId = self.solid_entry_list[1]
+            self.elform = self.solid_entry_list[2]
+            self.aet = self.solid_entry_list[3]
+
+            tmp_section_lines = "*SECTION_SOLID\n" \
+                                "$HMNAME PROPERTIES         3%s\n" \
+                                "%s%s%s\n"%(str(self.sectionTitle).rjust(10), self.sectId.rjust(10), self.elform.rjust(10), self.aet.rjust(10))
+            # print(tmp_section_lines)
+
+            self.sectionLines.append(tmp_section_lines)
+            self.window2_solid.destroy()
+
+        else:
+            messagebox.showerror("ERROR", "Not selected section type :")
+
+    def section_close_window(self):
+        """
+
+        :return:
+        """
+
+        if self.inShellSection:
+            self.window2_shell.destroy()
+        elif self.inSolidSection:
+            self.window2_solid.destroy()
+
+
+    def close_window(self):
+        """
+
+        :return:
+        """
+        self.window2.destroy()
+
+    def close_window_CC(self):
+        """
+
+        :return:
+        """
+        self.window_CC.destroy()
+
+
+    def addData_controlCards(self):
+        """
+
+        :return:
+        """
+
+        print(self.template_controlcards.get())
+        template_path = self.template_controlcards.get()
+        with open(template_path, 'r') as inFile:
+            self.template_lines_control_cards = inFile.readlines()
+
+        self.control_cards_out = os.path.join(self.projectPath, "control_cards.k")
+        with open(self.control_cards_out, 'w') as outFile:
+            outFile.write("")
+
+        rowN = 0
+        self.window_CC = Toplevel(self.frame)
+
+        self.label_CC = ['EndTime', 'TimeStepScaleFact', 'DT2MS', 'TiedProj', 'DT', 'D3Dump', 'DefineCurve']#_Title', 'CurveId']
+        self.label_CC_val = [60, 0.9, 1e-3, 1, 0.60, 6000, 2]
+        self.entry_list_CC = []
+        self.label_list_CC = []
+        for i in range(len(self.label_CC)):
+            rowN = i + 1
+            # print(rowN)
+            if self.label_CC[i] == 'DefineCurve':
+                # print("row id at define curve :", rowN)
+                add_table = Button(self.window_CC, text="Add Table", command=self.add_table)
+                add_table.grid(row=rowN, column=3)
+                continue
+
+            self.label_list_CC.append(Label(self.window_CC, text=self.label_CC[i], width=20))
+            self.label_list_CC[i].grid(row=rowN, column=0)
+
+            self.entry_list_CC.append(Entry(self.window_CC, width=50))
+            self.entry_list_CC[i].grid(row=rowN, column=2)
+            self.entry_list_CC[i].insert(0,self.label_CC_val[i])
+
+
+        rowN = rowN + 1
+        # print(rowN)
+        button_ = Button(self.window_CC, text="Save", command=self.save_data_CC)
+        button_.grid(row=rowN, column=2)
+
+        button_ = Button(self.window_CC, text="Exit", command=self.close_window_CC)
+        button_.grid(row=rowN, column=3)
+
+        rowN = rowN + 1
+        showButton_ = Button(self.window_CC, text="Show", command=self.show_curve_info)
+        showButton_.grid(row=rowN, column=3)
+
+    def show_curve_info(self):
+        """
+
+        :return:
+        """
+        print("\n".join(self.curveLines))
+
+    def add_table(self):
+        """
+
+        :return:
+        """
+        rowN = 0
+        self.noOfCurve = int(self.entry_list_CC[6].get())
+
+        self.entry_list_all = []
+
+        # for i in range(self.noOfCurve):
+        # self.curveNo = i+1
+        self.window_CC2 = Toplevel(self.frame)
+
+        self.curveTitle = Label(self.window_CC2, text="Title")
+        self.curveTitle.grid(row=rowN, column=0)
+        self.curveTitle_entry = Entry(self.window_CC2, width=10)
+        self.curveTitle_entry.grid(row=rowN, column=1)
+        self.curveTitle_entry.insert(0, "Title")
+
+        rowN += 1
+        self.curveId = Label(self.window_CC2, text="ID")
+        self.curveId.grid(row=rowN, column=0)
+        self.curveId_entry = Entry(self.window_CC2, width=10)
+        self.curveId_entry.grid(row=rowN, column=1)
+        self.curveId_entry.insert(0, 1)
+
+        rowN += 1
+        self.curveLength_ = Label(self.window_CC2, text="Length")
+        self.curveLength_.grid(row=rowN, column=0)
+        self.curveLength_entry = Entry(self.window_CC2, width=10)
+        self.curveLength_entry.grid(row=rowN, column=1)
+        self.curveLength_entry.insert(0, 1)
+
+        rowN += 1
+        self.createTable = Button(self.window_CC2, text="addData", command=self.create_table)
+        self.createTable.grid(row=rowN, column=1)
+
+    def create_table(self):
+        """
+            create table by counting the number of rows
+        :return:
+        """
+        self.curveLength = int(self.curveLength_entry.get())
+        self.entry_list_CC21 = []
+        self.entry_list_CC22 = []
+        rowN = 4
+        # self.curveLength = int(self.entry_list_CC[6].get())
+        for i in range(self.curveLength):
+            rowN += i + 1
+            # print(rowN)
+            self.entry_list_CC21.append(Entry(self.window_CC2, width=10))
+            self.entry_list_CC21[i].grid(row=rowN, column=0)
+            self.entry_list_CC21[i].insert(0,0)
+
+            self.entry_list_CC22.append(Entry(self.window_CC2, width=10))
+            self.entry_list_CC22[i].grid(row=rowN, column=1)
+            self.entry_list_CC22[i].insert(0,0)
+
+        rowN = rowN + 1
+        # print(rowN)
+        self.createTable.forget()
+        self.createTable.grid(row=rowN, column=1)
+        rowN = rowN + 1
+        button_ = Button(self.window_CC2, text="Save", command=self.save_tableData)
+        button_.grid(row=rowN, column=1)
+        rowN = rowN + 1
+        clearEntry = Button(self.window_CC2, text="clearEntry", command=self.clear_entry)
+        clearEntry.grid(row=rowN, column=1)
+
+    def clear_entry(self):
+        """
+
+        :return:
+        """
+        for i in range(len(self.entry_list_CC21)):
+            # print(i)
+            self.entry_list_CC21[i].destroy()
+            self.entry_list_CC22[i].destroy()
+
+    def save_tableData(self):
+        """
+                *DEFINE_CURVE
+                $HMNAME CURVES       1$TITLE$
+                $HWCOLOR CURVES       1      11
+                $HMCURVE     1    2 $TITLE$
+                $CURVEID$         0       1.0       1.0       0.0       0.0         0
+                $A$$O$
+        :return:
+        """
+        print("In the save data method !")
+        self.curveTitle_ = self.curveTitle_entry.get()
+        self.curveId_ = self.curveId_entry.get()
+        # self.loads_CC2 = []
+        # self.times_CC2 = []
+        self.curve = "*DEFINE_CURVE\n" \
+                     "$HMNAME CURVES       1%s\n" \
+                     "$HWCOLOR CURVES       1      11\n" \
+                     "$HMCURVE     1    2 %s\n" \
+                     "%s         0       1.0       1.0       0.0       0.0         0\n"%(str(self.curveTitle_).rjust(10), str(self.curveTitle_).rjust(10), str(self.curveId_).rjust(10))
+        for i in range(self.curveLength):
+            if i == (self.curveLength - 1):
+                self.curve += str(self.entry_list_CC21[i].get()).rjust(20) + str(self.entry_list_CC22[i].get()).rjust(20)
+            else:
+                self.curve += str(self.entry_list_CC21[i].get()).rjust(20) + str(self.entry_list_CC22[i].get()).rjust(20) + '\n'
+            # self.loads_CC2.append(self.entry_list_CC21[i].get())
+            # self.times_CC2.append(self.entry_list_CC22[i].get())
+
+        # print(self.loads_CC2)
+        # print(self.times_CC2)
+        print(self.curve)
+        self.curveLines.append(self.curve)
+        # self.curveInfo.update({self.curveNo:[self.curveTitle_, self.curveId_, self.curve]})
+        # self.window_CC2.destroy()
+
+    def add_new(self):
+        """
+
+        :return:
+        """
+        self.save_data2()
+        # for i in range(len(self.materialProp)):
+        #     self.entry_list[i].delete(0,'end')
+
+    def save_data2(self):
+        """
+
+        :return:
+        """
+        final_section_lines = '\n'.join(self.sectionLines)
+        print(final_section_lines)
+        outlines = []
+
+        if self.inMat54:
+            print(self.entry_list)
+            # self.materialProp = ['Title', 'Id', 'Density', 'E1', 'E2', 'Mu', 'GAB', 'GBC', 'FBRT', 'YCFAC', 'xc', 'xt', 'yc', 'yt']
+            for line in self.template_lines:
+                # print(line)
+                line = line.replace("$TITLE$", self.entry_list[0].get())
+                line = line.replace("$ID$", self.entry_list[1].get().rjust(10))
+                line = line.replace("$DENSITY$", self.entry_list[2].get().rjust(10))
+                line = line.replace("$E1$", self.entry_list[3].get().rjust(10))
+                line = line.replace("$E2$", self.entry_list[4].get().rjust(10))
+                line = line.replace("$MU$", self.entry_list[5].get().rjust(10))
+                line = line.replace("$GAB$", self.entry_list[6].get().rjust(10))
+                line = line.replace("$GBC$", self.entry_list[7].get().rjust(10))
+                line = line.replace("$DEFINE$", ("-" + self.entry_list[1].get()).rjust(10))
+                line = line.replace("$FBRT$", self.entry_list[8].get().rjust(10))
+                line = line.replace("$YCFAC$", self.entry_list[9].get().rjust(10))
+                line = line.replace("$XC$", self.entry_list[10].get().rjust(10))
+                line = line.replace("$XT$", self.entry_list[11].get().rjust(10))
+                line = line.replace("$YC$", self.entry_list[12].get().rjust(10))
+                line = line.replace("$YT$", self.entry_list[13].get().rjust(10))
+                line = line.replace("$SECTION$", final_section_lines)
+                outlines.append(line)
+                continue
+        if self.inMat24:
+            # self.mat24_prop = ['Title', 'Id', 'Density', 'E1', 'Mu', 'SIGY', 'ETAN', 'FAIL', 'LCSS', 'SECTION']
+            print(self.entry_list)
+            for line in self.template_lines:
+                # print(line)
+                line = line.replace("$TITLE$", self.entry_list[0].get())
+                line = line.replace("$ID$", self.entry_list[1].get().rjust(10))
+                line = line.replace("$DENSITY$", self.entry_list[2].get().rjust(10))
+                line = line.replace("$E1$", self.entry_list[3].get().rjust(10))
+                line = line.replace("$MU$", self.entry_list[4].get().rjust(10))
+                line = line.replace("$SIGY$", self.entry_list[5].get().rjust(10))
+                line = line.replace("$ETAN$", self.entry_list[6].get().rjust(10))
+                line = line.replace("$FAIL$", ("-" + self.entry_list[7].get()).rjust(10))
+                line = line.replace("$LCSS$", self.entry_list[8].get().rjust(10))
+                line = line.replace("$SECTION$", final_section_lines)
+                outlines.append(line)
+        if self.inRigid:
+            # self.mat20_prop = ['Title', 'Id', 'Density', 'E1', 'Mu', 'CMO', 'CON1', 'CON2', 'SECTION']
+            print(self.entry_list)
+            for line in self.template_lines:
+                # print(line)
+                line = line.replace("$TITLE$", self.entry_list[0].get())
+                line = line.replace("$ID$", self.entry_list[1].get().rjust(10))
+                line = line.replace("$DENSITY$", self.entry_list[2].get().rjust(10))
+                line = line.replace("$E1$", self.entry_list[3].get().rjust(10))
+                line = line.replace("$MU$", self.entry_list[4].get().rjust(10))
+                line = line.replace("$CMO$", self.entry_list[5].get().rjust(10))
+                line = line.replace("$CON1$", self.entry_list[6].get().rjust(10))
+                line = line.replace("$CON2$", self.entry_list[7].get()).rjust(10)
+                line = line.replace("$SECTION$", final_section_lines)
+                outlines.append(line)
+
+        with open(self.mat_out, 'a') as outFile:
+            outFile.writelines(outlines)
+
+    def save_data_CC(self):
+        """
+
+        :return:
+        """
+        # self.label_CC = ['EndTime', 'TimeStepScaleFact', 'DT2MS', 'TiedProj', 'DT', 'D3Dump', 'CurveId', 'DefineCurve_Title']
+        # self.add_table()
+        # self.save_tableData()
+        try:
+            outlines = []
+            final_curve = "\n".join(self.curveLines)
+
+            for line in self.template_lines_control_cards:
+                # print(line)
+                line = line.replace("$ENDTIM$", self.entry_list_CC[0].get().rjust(10))
+                line = line.replace("$TIMESTSC$", self.entry_list_CC[1].get().rjust(10))
+                line = line.replace("$DT2MS$", self.entry_list_CC[2].get().rjust(10))
+                line = line.replace("$TIEDPRJ$", self.entry_list_CC[3].get().rjust(10))
+                line = line.replace("$DT$", self.entry_list_CC[4].get().rjust(10))
+                line = line.replace("$D3DUMP$", self.entry_list_CC[5].get().rjust(10))
+                line = line.replace("$DEFINE_CURVE$", final_curve)
+                # line = line.replace("$TITLE$", self.curveTitle_.rjust(10))
+                # line = line.replace("$CURVEID$", self.curveId_.rjust(10))
+                # line = line.replace("$A$$O$", self.curve)
+                outlines.append(line)
+
+            with open(self.control_cards_out, 'a') as outFile:
+                outFile.writelines(outlines)
+        except:
+
+            messagebox.showwarning("Warning", "Define Curve Info")
+
+    def change_dropdown(self, *args):
+
+        # Material
+        self.materialType = self.matType.get()
+        print(self.materialType)
+        self.template.delete(0, 'end')
+        self.template.insert(0, self.mapMat[self.materialType])
+
+        # Control Cards
+        self.template_controlcards.delete(0, 'end')
+        self.template_controlcards.insert(0, self.mapControlCards[self.loadingType])
+
+    def getLoadType(self, loadingType):
+        """
+        :return:
+        """
+        self.loadingType = loadingType
+        print(self.loadingType)
+
+    def getMatType(self, materialType):
+        """
+        :return:
+        """
+        self.materialType = materialType
+        print(self.materialType)
+
+    def createButton(self, buttonName, buttonMethod, rowN, colN):
+        """
+
+        :return:
+        """
+        button_ = Button(self.frame, text=buttonName, command=buttonMethod)
+        button_.grid(row=rowN, column=colN)
+
+    def createLabel(self, labelName, rowN, colN):
+        """
+
+        :return:
+        """
+        label_ = Label(self.frame, text=labelName)
+        label_.grid(row=rowN, column=colN)
+
+    def createEntry(self, value_, widthV, rowN, colN):
+        """
+
+        :return:
+        """
+
+        entry_ = Entry(self.frame, width=widthV)
+        entry_.grid(row=rowN, column=colN)
+        entry_.insert(0, value_)
+
+        return entry_
+
+
+if __name__ == '__main__':
+
+    root = Tk()
+    app = App(root)
+    root.mainloop()
+
