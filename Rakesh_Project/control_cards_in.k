@@ -87,4 +87,12 @@ $HMCURVE     1    1 grav
          3                 1.0       1.0                    
                  0.0              9810.0
                  1.0              9810.0
-                              
+$$ Base Accelerations and Angular Velocities
+*LOAD_BODY_Y
+$HMNAME LOADCOLS       1grav                                                                    
+$HWCOLOR LOADCOLS       1      11
+         3      -1.0                                                  
+*LOAD_BODY_PARTS
+$HMNAME LOADCOLS       1grav                                                                    
+$HWCOLOR LOADCOLS       1      11
+         1
