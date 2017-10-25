@@ -113,6 +113,7 @@ class App:
 
     def openFolder(self):
         fName = filedialog.askdirectory()
+        self.ProjectPathEntry.delete(0,'end')
         self.ProjectPathEntry.insert(0,fName)
 
     def openFile(self):
@@ -550,7 +551,7 @@ class App:
                 popupMenu = OptionMenu(self.window_BPM, self.partInfoList, *self.partInfo.keys(), command=self.getPartId)
                 popupMenu.grid(row = rowN, column=2)
                 self.partInfoList.set(list(self.partInfo.keys())[0])
-                self.partInfoList.trace('w', self.change_dropdown)
+                self.partInfoList.trace('w', self.change_dropdown1)
                 self.entry_list_BPM.append(Entry(self.window_BPM, width=50))
                 # self.entry_list_BPM[rowN].grid(row=rowN, column=2)
                 # self.entry_list_BPM[rowN].insert(0,value)
@@ -562,7 +563,7 @@ class App:
                 popupMenu = OptionMenu(self.window_BPM, self.curveInfoList, *self.curveInfo.keys(), command=self.getCurveId)
                 popupMenu.grid(row = rowN, column=2)
                 self.curveInfoList.set(list(self.curveInfo.keys())[0])
-                self.curveInfoList.trace('w', self.change_dropdown)
+                self.curveInfoList.trace('w', self.change_dropdown2)
                 self.entry_list_BPM.append(Entry(self.window_BPM, width=50))
                 # self.entry_list_BPM[rowN].grid(row=rowN, column=2)
                 # self.entry_list_BPM[rowN].insert(0,value)
@@ -874,14 +875,26 @@ class App:
         self.template_controlcards.delete(0, 'end')
         self.template_controlcards.insert(0, self.mapControlCards[self.loadingType])
 
+    def change_dropdown1(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
         # Part ID
         self.partInfo_Id = self.partInfoList.get()
         print(self.partInfo_Id)
 
+
+    def change_dropdown2(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
         # Curve ID
         self.curveInfo_Id = self.curveInfoList.get()
         print(self.curveInfo_Id)
-
 
     def getCurveId(self, curveId):
         """
