@@ -98,7 +98,7 @@ class CreateInput:
         self.writeKfile(title)
         self.addIncludeRelPathBlock("Output")
         self.addIncludeBlock(["mesh.k", "mat.k","control_cards.k"])
-
+        self.endKfile()
 
 if __name__ == '__main__':
 
