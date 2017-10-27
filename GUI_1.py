@@ -65,13 +65,13 @@ class App:
 
         # Material Properties
         self.matType = StringVar(self.frame)
-        self.materialType = "MAT54/55"
-        self.matTypeList = set(sorted({'MAT54/55', 'RIGID', 'MAT24'}))
-        self.matType.set('MAT54/55')
+        self.materialType = "MAT_54_55"
+        self.matTypeList = set(sorted({'MAT_54_55', 'MAT_20', 'MAT_24'}))
+        self.matType.set('MAT_54_55')
         self.mat55_template = os.path.join(self.template_path, "mat55.k")
         self.mat24_template = os.path.join(self.template_path, "mat24.k")
         self.rigid_template = os.path.join(self.template_path, "rigid.k")
-        self.mapMat = {'MAT54/55':self.mat55_template, 'RIGID':self.rigid_template, 'MAT24':self.mat24_template}
+        self.mapMat = {'MAT_54_55':self.mat55_template, 'MAT_20':self.rigid_template, 'MAT_24':self.mat24_template}
         popupMenu = OptionMenu(self.frame, self.matType, *self.matTypeList, command=self.getMatType)
         popupMenu.grid(row = self.rowN, column=1)
         self.matType.trace('w', self.change_dropdown)
@@ -261,6 +261,127 @@ class App:
         print(self.partInfo)
 
     def add_materialInfo(self):
+        """
+
+        :return:
+        """
+
+        print(self.template.get())
+        template_path = self.template.get()
+        with open(template_path, 'r') as inFile:
+            self.template_lines = inFile.readlines()
+
+        self.window2 = Toplevel(self.frame)
+        self.material1 = mat_prop.MaterialProp()
+        self.mat54_prop = ["MAT_54_55", "Title", "mid,ro,ea,eb,(ec),prba,(prca),(prcb),"
+                                                 "gab,gbc,gca,(kf),aopt,2way,,"
+                                                 "xp,yp,zp,a1,a2,a3,mangle,,"
+                                                 "v1,v2,v3,d1,d2,d3,dfailm,dfails,"
+                                                 "tfail,alph,soft,fbrt,ycfac,dfailt,dfailc,efs,"
+                                                 "xc,xt,yc,yt,sc,crit,beta,,"
+                                                 "pel,epsf,epsr,tsmd,soft2,,"
+                                                 "slimt1,slimc1,slimt2,slimc2,slims,ncyred,softg,,"
+                                                 "lcxc, lcxt, lcyc, lcyt, lcsc, dt"]
+
+        self.mat24_prop = ["MAT_24", "Title", "mid,ro,e,pr,sigy,etan,fail,tdel,"
+                                              "c,p,lcss,lcsr,vp,lcf,,"
+                                              "eps1,eps2,eps3,eps4,eps5,eps6,eps7,eps8,"
+                                              "es1,es2,es3,es4,es5,es6,es7,es8"]
+
+        self.mat20_prop = ["MAT_20", "Title", "mid,ro,e,pr,n,couple,m,alias,"
+                                                 "cmo,con1,con2,,"
+                                                 "lco or a1,a2,a3,v1,v2,v3,,"]
+
+        csv_file = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\material_prop.csv"
+        import csv
+        self.materialProp = []
+        with open(csv_file) as readIn:
+            csv_reader = csv.reader(readIn)
+
+            for line in csv_reader:
+                print(len(line))
+                self.materialProp.append(line)
+
+        # sys.exit()
+        # self.materialProp = [self.mat54_prop, self.mat20_prop, self.mat24_prop]
+        # 'MAT54/55', 'RIGID'
+
+        # if self.materialType == "MAT54/55":
+        #     self.inMat54 = True
+        #     self.inMat24 = False
+        #     self.inRigid = False
+        #     self.materialProp = self.mat54_prop
+        # elif self.materialType == "RIGID":
+        #     self.inMat54 = False
+        #     self.inMat24 = False
+        #     self.inRigid = True
+        #     self.materialProp = self.mat20_prop
+        # elif self.materialType == "MAT24":
+        #     self.inMat54 = False
+        #     self.inMat24 = True
+        #     self.inRigid = False
+        #     self.materialProp = self.mat24_prop
+        # else:
+        #     messagebox.showerror("Error", "Select correct Material Card :")
+        self.entry_list = []
+        self.label_list = []
+        colN = 0
+        rowN = 0
+        count = 0
+        for i in range(len(self.materialProp)):
+            # print(self.materialProp[i], rowN, colN)
+            # self.materialProp_curr = []
+            self.entry_list = []
+            self.label_list = []
+            if self.materialProp[i][0] == self.materialType:
+                """
+                """
+                print(self.materialProp[i][0], self.materialType)
+                self.materialProp_curr = self.materialProp[i][2].split(',')
+                print(self.materialProp_curr)
+                for j in range(len(self.materialProp_curr)):
+                    if count == 8:
+                        rowN += 2
+                        colN = 0
+                        count = 0
+                        print(count, rowN, colN)
+                        print(count, self.materialProp_curr[j], rowN, colN)
+
+                    if self.materialProp_curr[j] == "":
+                        self.label_list.append(Label(self.window2, text=self.materialProp_curr[j], width=10))
+                        # self.label_list[j].grid(row=rowN, column=colN)
+
+                        self.entry_list.append(Entry(self.window2, width=10))
+                        # self.entry_list[j].grid(row=rowN+1, column=colN)
+                        # self.entry_list[j].insert(0,0)
+                        rowN += 2
+                        colN = 0
+                        count = 0
+                        print(count, rowN, colN)
+                        print(count, self.materialProp_curr[j], rowN, colN)
+                        continue
+
+                    print(count, j, self.materialProp_curr[j], rowN, colN)
+                    self.label_list.append(Label(self.window2, text=self.materialProp_curr[j], width=10))
+                    self.label_list[j].grid(row=rowN, column=colN)
+
+                    self.entry_list.append(Entry(self.window2, width=10))
+                    self.entry_list[j].grid(row=rowN+1, column=colN)
+                    # self.entry_list[j].insert(0,self.material1.material_prop[self.materialProp_curr[j].strip()])#.strip(), 0.0))
+                    self.entry_list[j].insert(0,self.material1.material_prop.get(self.materialProp_curr[j].strip(), 0.0))
+                    count += 1
+                    colN += 1
+
+        rowN += 3
+        # print(rowN)
+        add_button = Button(self.window2, text="Add", command=self.add_new)
+        add_button.grid(row=rowN, column=0)
+        button_ = Button(self.window2, text="Save", command=self.save_data2)
+        button_.grid(row=rowN, column=1)
+        Exitbutton_ = Button(self.window2, text="Exit", command=self.close_window)
+        Exitbutton_.grid(row=rowN, column=2)
+
+    def add_materialInfo_orig(self):
         """
 
         :return:
@@ -954,8 +1075,6 @@ class App:
         rowN = rowN + 1
         self.clear_entry1.forget()
         self.clear_entry1.grid(row=rowN, column=1)
-
-
 
     def add_table(self):
         """
