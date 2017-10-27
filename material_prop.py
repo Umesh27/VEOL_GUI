@@ -9,7 +9,8 @@ class MaterialProp:
         :return:
         """
         self.meshInfo = {}
-        self.material_prop = {"Title":"PartName", "Id":1, "Density":4.4000e-09, "E1":5029.9333, "E2":1050.0, "Mu":0.32, "GAB":1905.2778, "GBC":397.7273, "FBRT":0.1, "YCFAC":2.0, "XC":22.59, "XT":45.182, "YC":5.504, "YT":11.01,
+        self.material_prop = {"Title":"PartName", "Id":1, "Density":4.4000e-09, "E1":5029.9333, "E2":1050.0, "PR":0.32, "E3":5029.9333,
+                              "GAB":1905.2778, "GBC":397.7273, "FBRT":0.1, "YCFAC":2.0, "XC":22.59, "XT":45.182, "YC":5.504, "YT":11.01,
                               'CMO':1.0, 'CON1':7, 'CON2':7, 'SIGY':33.90, 'ETAN':146.00, 'FAIL':1E21, 'LCSS':0}
 
         # Default values

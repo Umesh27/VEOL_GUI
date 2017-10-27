@@ -19,6 +19,7 @@ class App:
         self.curveTitleList = []
         self.curveIdList = []
         self.curveValList = []
+
         self.master = master
         self.curveLength = 2
         self.frame = Frame(self.master)
@@ -78,7 +79,7 @@ class App:
         self.template = Entry(self.frame, width = 70)
         self.template.grid(row=self.rowN, column=2)
         self.template.insert(0, self.mat55_template)
-        self.createButton("Add_data", self.addData, self.rowN, 3)
+        self.createButton("Add_data", self.add_materialInfo, self.rowN, 3)
         self.rowN += 1
 
         self.section_label = Label(self.frame, text="Section", width=20, fg='red')
@@ -106,7 +107,7 @@ class App:
         self.template_controlcards = Entry(self.frame, width = 70)
         self.template_controlcards.grid(row=self.rowN, column=2)
         self.template_controlcards.insert(0, self.mapControlCards[self.loadingType])# self.controlCards_template)
-        self.createButton("Add_data", self.addData_controlCards, self.rowN, 3)
+        self.createButton("Add_data", self.add_controlCards, self.rowN, 3)
 
         # Open Input
         self.rowN += 1
@@ -114,13 +115,13 @@ class App:
 
         # Run Input
         # self.rowN += 1
-        self.createButton("Run", self.run_input, self.rowN, 2, fg='red')
+        self.createButton("Run", self.run_info, self.rowN, 2, fg='red')
 
         # Exit
         # self.rowN += 1
         self.createButton("Exit", self.frame.quit, self.rowN, 3, fg='red')
 
-    def run_input(self):
+    def run_info(self):
         """
 
         :return:
@@ -145,10 +146,10 @@ class App:
         self.memory_entry.insert(0,"400")
 
         rowN += 1
-        self.shell_button = Button(self.window_run, text="Run", command=self.run_input2, fg='red')
+        self.shell_button = Button(self.window_run, text="Run", command=self.run_input, fg='red')
         self.shell_button.grid(row=rowN, column=0)
 
-    def run_input2(self):
+    def run_input(self):
         """
 
         :return:
@@ -166,7 +167,6 @@ class App:
 
         p = subprocess.Popen("run.bat", cwd=self.projectPath, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         out,err = p.communicate()
-
 
     def create_input_keyword(self):
         """
@@ -260,7 +260,7 @@ class App:
                 continue
         print(self.partInfo)
 
-    def addData(self):
+    def add_materialInfo(self):
         """
 
         :return:
@@ -271,12 +271,11 @@ class App:
         with open(template_path, 'r') as inFile:
             self.template_lines = inFile.readlines()
 
-        rowN = 0
         self.window2 = Toplevel(self.frame)
         self.material1 = mat_prop.MaterialProp()
-        self.mat54_prop = ['Title', 'Id', 'Density', 'E1', 'E2', 'Mu', 'GAB', 'GBC', 'FBRT', 'YCFAC', 'XC', 'XT', 'YC', 'YT']#, 'SECTION']
-        self.mat20_prop = ['Title', 'Id', 'Density', 'E1', 'Mu', 'CMO', 'CON1', 'CON2']#, 'SECTION']
-        self.mat24_prop = ['Title', 'Id', 'Density', 'E1', 'Mu', 'SIGY', 'ETAN', 'FAIL', 'LCSS']#, 'SECTION']
+        self.mat54_prop = ['Title', 'Id', 'Density', 'E1', 'E2', 'E3', 'PR', 'GAB', 'GBC', 'FBRT', 'YCFAC', 'XC', 'XT', 'YC', 'YT']#, 'SECTION']
+        self.mat20_prop = ['Title', 'Id', 'Density', 'E1', 'PR', 'CMO', 'CON1', 'CON2']#, 'SECTION']
+        self.mat24_prop = ['Title', 'Id', 'Density', 'E1', 'PR', 'SIGY', 'ETAN', 'FAIL', 'LCSS']#, 'SECTION']
 
         # 'MAT54/55', 'RIGID'
 
@@ -299,35 +298,51 @@ class App:
             messagebox.showerror("Error", "Select correct Material Card :")
         self.entry_list = []
         self.label_list = []
+        colN = 0
+        rowN = 0
         for i in range(len(self.materialProp)):
-            rowN = i + 1
-            # print(rowN)
+            # print(self.materialProp[i], rowN, colN)
 
-            # if self.materialProp[i] == 'SECTION':
-            #     self.label_list.append(Label(self.window2, text=self.materialProp[i], width=20))
-            #     self.label_list[i].grid(row=rowN, column=0)
-            #
-            #     self.shell_button = Button(self.window2, text="Shell", command=self.shell_button_click)
-            #     self.shell_button.grid(row=rowN, column=1)
-            #     self.solid_button = Button(self.window2, text="Solid", command=self.solid_button_click)
-            #     self.solid_button.grid(row=rowN, column=2)
-            #     continue
-            #
-            self.entry_list.append(Entry(self.window2, width=50))
-            self.entry_list[i].grid(row=rowN, column=2)
+            if self.materialProp[i] == 'PR':
+                self.label_list.append(Label(self.window2, text=self.materialProp[i], width=10))
+                self.label_list[i].grid(row=rowN, column=colN)
+
+                self.entry_list.append(Entry(self.window2, width=10))
+                self.entry_list[i].grid(row=rowN+1, column=colN)
+                self.entry_list[i].insert(0,self.material1.material_prop[self.materialProp[i]])
+                rowN += 2
+                colN = 0
+                continue
+
+            if self.materialProp[i] == 'XC':
+                rowN += 2
+                colN = 0
+                self.label_list.append(Label(self.window2, text=self.materialProp[i], width=10))
+                self.label_list[i].grid(row=rowN, column=colN)
+
+                self.entry_list.append(Entry(self.window2, width=10))
+                self.entry_list[i].grid(row=rowN+1, column=colN)
+                self.entry_list[i].insert(0,self.material1.material_prop[self.materialProp[i]])
+                colN += 1
+                continue
+
+            self.label_list.append(Label(self.window2, text=self.materialProp[i], width=10))
+            self.label_list[i].grid(row=rowN, column=colN)
+
+            self.entry_list.append(Entry(self.window2, width=10))
+            self.entry_list[i].grid(row=rowN+1, column=colN)
             self.entry_list[i].insert(0,self.material1.material_prop[self.materialProp[i]])
 
-            self.label_list.append(Label(self.window2, text=self.materialProp[i], width=20))
-            self.label_list[i].grid(row=rowN, column=0)
+            colN += 1
 
-        rowN = rowN + 1
+        rowN += 3
         # print(rowN)
         add_button = Button(self.window2, text="Add", command=self.add_new)
-        add_button.grid(row=rowN, column=1)
+        add_button.grid(row=rowN, column=0)
         button_ = Button(self.window2, text="Save", command=self.save_data2)
-        button_.grid(row=rowN, column=2)
+        button_.grid(row=rowN, column=1)
         Exitbutton_ = Button(self.window2, text="Exit", command=self.close_window)
-        Exitbutton_.grid(row=rowN, column=3)
+        Exitbutton_.grid(row=rowN, column=2)
 
     def shell_button_click(self):
         """
@@ -447,7 +462,6 @@ class App:
         else:
             messagebox.showerror("ERROR", "Not selected section type :")
 
-
     def section_save_data(self):
         """
 
@@ -509,7 +523,6 @@ class App:
         elif self.inSolidSection:
             self.window2_solid.destroy()
 
-
     def close_window(self):
         """
 
@@ -524,8 +537,7 @@ class App:
         """
         self.window_CC.destroy()
 
-
-    def addData_controlCards(self):
+    def add_controlCards(self):
         """
 
         :return:
@@ -562,6 +574,8 @@ class App:
                 # print("row id at define curve :", rowN)
                 add_table = Button(self.window_CC, text="Add Table", command=self.add_table)
                 add_table.grid(row=rowN, column=2, sticky=W)
+                import_table = Button(self.window_CC, text="Import Table", command=self.import_table)
+                import_table.grid(row=rowN, column=2)#, sticky=W)
                 show_table = Button(self.window_CC, text="Show Curve", command=self.show_curve)
                 show_table.grid(row=rowN, column=3, sticky=W)
                 continue
@@ -592,15 +606,15 @@ class App:
 
         rowN = rowN + 1
         # print(rowN)
-        button_ = Button(self.window_CC, text="Save", command=self.save_data_CC)
+        button_ = Button(self.window_CC, text="Save", command=self.save_data_CC, fg='red')
         button_.grid(row=rowN, column=2, sticky=W)
 
-        button_ = Button(self.window_CC, text="Exit", command=self.close_window_CC)
+        button_ = Button(self.window_CC, text="Exit", command=self.close_window_CC, fg='red')
         button_.grid(row=rowN, column=2)#, sticky=W)
 
-        rowN = rowN + 1
-        showButton_ = Button(self.window_CC, text="Show", command=self.show_curve_info)
-        showButton_.grid(row=rowN, column=2)#, sticky=W)
+        # rowN = rowN + 1
+        # showButton_ = Button(self.window_CC, text="Show", command=self.show_curve_info)
+        # showButton_.grid(row=rowN, column=2)#, sticky=W)
 
     def add_loadBodyY(self):
         """
@@ -847,6 +861,102 @@ class App:
         """
         # print("\n".join(self.curveLines))
 
+    def import_table(self):
+        """
+
+        :return:
+        """
+
+        rowN = 0
+        # self.noOfCurve = int(self.entry_list_CC[6].get())
+
+        self.entry_list_all = []
+
+        # for i in range(self.noOfCurve):
+        # self.curveNo = i+1
+        self.window_CC3 = Toplevel(self.frame)
+
+        self.curveTitle = Label(self.window_CC3, text="Title")
+        self.curveTitle.grid(row=rowN, column=0)
+        self.curveTitle_entry = Entry(self.window_CC3, width=10)
+        self.curveTitle_entry.grid(row=rowN, column=1)
+        self.curveTitle_entry.insert(0, "Title")
+
+        rowN += 1
+        self.curveId = Label(self.window_CC3, text="ID")
+        self.curveId.grid(row=rowN, column=0)
+        self.curveId_entry = Entry(self.window_CC3, width=10)
+        self.curveId_entry.grid(row=rowN, column=1)
+        self.curveId_entry.insert(0, 1)
+
+        rowN += 1
+        self.import_data = Button(self.window_CC3, text="Import Data", command=self.getData)
+        self.import_data.grid(row=rowN, column=0)
+        # self.curveLength_entry = Entry(self.window_CC3, width=10)
+        # self.curveLength_entry.grid(row=rowN, column=1)
+        # self.curveLength_entry.insert(0, 1)
+
+        # rowN += 1
+        # self.createTable = Button(self.window_CC3, text="addData", command=self.create_table)
+        # self.createTable.grid(row=rowN, column=1)
+        rowN = rowN + 1
+        self.save_tableData1 = Button(self.window_CC3, text="Save", command=self.save_tableData)
+        self.save_tableData1.grid(row=rowN, column=1)
+        rowN = rowN + 1
+        self.clear_entry1 = Button(self.window_CC3, text="clearEntry", command=self.clear_entry)
+        self.clear_entry1.grid(row=rowN, column=1)
+
+    def getData(self):
+        """
+
+        :return:
+        """
+        import csv
+        fName = filedialog.askopenfilename()
+        # self.ProjectPathEntry.delete(0,'end')
+        # self.getCSVPath.insert(0,fName)
+
+        # csvPath = self.getCSVPath.get()
+        print(fName)
+        col1 = []
+        col2 = []
+        with open(fName, 'r') as csvFile:
+            csv_reader = csv.reader(csvFile)
+            print(csv_reader)
+            for row in csv_reader:
+                col1.append(row[0])
+                col2.append(row[1])
+                print(row[0], row[1])
+
+        self.curveLength = len(col1)
+        self.entry_list_CC21 = []
+        self.entry_list_CC22 = []
+        rowN = 4
+        # self.curveLength = int(self.entry_list_CC[6].get())
+        for i in range(self.curveLength):
+            rowN += i + 1
+            # print(rowN)
+            self.entry_list_CC21.append(Entry(self.window_CC3, width=10))
+            self.entry_list_CC21[i].grid(row=rowN, column=0)
+            self.entry_list_CC21[i].insert(0,col1[i])
+
+            self.entry_list_CC22.append(Entry(self.window_CC3, width=10))
+            self.entry_list_CC22[i].grid(row=rowN, column=1)
+            self.entry_list_CC22[i].insert(0,col2[i])
+
+        # rowN = rowN + 1
+        # # print(rowN)
+        # self.createTable.forget()
+        # self.createTable.grid(row=rowN, column=1)
+        rowN = rowN + 1
+        self.save_tableData1.forget()
+        self.save_tableData1.grid(row=rowN, column=1)
+        rowN = rowN + 1
+        self.clear_entry1.forget()
+        self.clear_entry1.grid(row=rowN, column=1)
+
+
+
     def add_table(self):
         """
 
@@ -1011,16 +1121,17 @@ class App:
                 line = line.replace("$DENSITY$", self.entry_list[2].get().rjust(10))
                 line = line.replace("$E1$", self.entry_list[3].get().rjust(10))
                 line = line.replace("$E2$", self.entry_list[4].get().rjust(10))
-                line = line.replace("$MU$", self.entry_list[5].get().rjust(10))
-                line = line.replace("$GAB$", self.entry_list[6].get().rjust(10))
-                line = line.replace("$GBC$", self.entry_list[7].get().rjust(10))
+                line = line.replace("$E3$", self.entry_list[5].get().rjust(10))
+                line = line.replace("$MU$", self.entry_list[6].get().rjust(10))
+                line = line.replace("$GAB$", self.entry_list[7].get().rjust(10))
+                line = line.replace("$GBC$", self.entry_list[8].get().rjust(10))
                 line = line.replace("$DEFINE$", ("-" + self.entry_list[1].get()).rjust(10))
-                line = line.replace("$FBRT$", self.entry_list[8].get().rjust(10))
-                line = line.replace("$YCFAC$", self.entry_list[9].get().rjust(10))
-                line = line.replace("$XC$", self.entry_list[10].get().rjust(10))
-                line = line.replace("$XT$", self.entry_list[11].get().rjust(10))
-                line = line.replace("$YC$", self.entry_list[12].get().rjust(10))
-                line = line.replace("$YT$", self.entry_list[13].get().rjust(10))
+                line = line.replace("$FBRT$", self.entry_list[9].get().rjust(10))
+                line = line.replace("$YCFAC$", self.entry_list[10].get().rjust(10))
+                line = line.replace("$XC$", self.entry_list[11].get().rjust(10))
+                line = line.replace("$XT$", self.entry_list[12].get().rjust(10))
+                line = line.replace("$YC$", self.entry_list[13].get().rjust(10))
+                line = line.replace("$YT$", self.entry_list[14].get().rjust(10))
                 # line = line.replace("$SECTION$", final_section_lines)
                 outlines.append(line)
                 continue
@@ -1123,7 +1234,6 @@ class App:
         # Part ID
         self.partInfo_Id = self.partInfoList.get()
         print(self.partInfo_Id)
-
 
     def change_dropdown2(self, *args):
         """
