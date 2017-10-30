@@ -1,6 +1,6 @@
 __author__ = 'Umesh'
 
-import os, sys
+import os, sys, csv
 from tkinter import *
 from tkinter import filedialog
 import material_prop as mat_prop
@@ -64,21 +64,57 @@ class App:
         self.rowN += 1
 
         # Material Properties
+        self.materialProp1 = []
+        self.materialProp = []
+        self.matTypeList = []
+        self.csv_file = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\material_prop.csv"
+        with open(self.csv_file) as readIn:
+            csv_reader = csv.reader(readIn)
+
+            for line in csv_reader:
+                self.materialProp.append(line)
+                self.matTypeList.append(line[0])
+
+        # import json
+        #
+        # self.json_file = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\file.json"
+        # with open(self.json_file) as readIn:
+        #     self.prop_mat = json.load(readIn)
+        #
+        # for key in self.prop_mat.keys():
+        #     self.matTypeList.append(key)
+        #
+
+        # for key, value in self.prop_mat.items():
+        #     print(key, value)
+        #     self.matTypeList.append(key)
+        #     self.materialProp.append(key)
+        #     for key2, value2 in value.items():
+        #         print(key2, value2)
+        #         self.materialProp1.append(key2)
+        #         if key2.startswith("mid"):
+        #             self.mat_prop = key.split(',')
+        #             self.mat_prop2 = value2[0].split(',')
+        #             self.mat_prop3 = value2[1].split(',')
+
         self.matType = StringVar(self.frame)
-        self.materialType = "MAT_54_55"
-        self.matTypeList = set(sorted({'MAT_54_55', 'MAT_20', 'MAT_24'}))
-        self.matType.set('MAT_54_55')
+        self.materialType = "MAT_54"
+        # self.matTypeList = set(sorted({'MAT_54', 'MAT_55', 'MAT_20', 'MAT_24'}))
+        self.matTypeList = set(sorted(self.matTypeList))
+        self.matType.set('MAT_54')
         self.mat55_template = os.path.join(self.template_path, "mat55.k")
         self.mat24_template = os.path.join(self.template_path, "mat24.k")
         self.rigid_template = os.path.join(self.template_path, "rigid.k")
-        self.mapMat = {'MAT_54_55':self.mat55_template, 'MAT_20':self.rigid_template, 'MAT_24':self.mat24_template}
+        self.mapMat = {'MAT_54':self.mat55_template, 'MAT_55':self.mat55_template, 'MAT_20':self.rigid_template, 'MAT_24':self.mat24_template}
         popupMenu = OptionMenu(self.frame, self.matType, *self.matTypeList, command=self.getMatType)
         popupMenu.grid(row = self.rowN, column=1)
         self.matType.trace('w', self.change_dropdown)
 
-        self.template = Entry(self.frame, width = 70)
-        self.template.grid(row=self.rowN, column=2)
-        self.template.insert(0, self.mat55_template)
+        self.addNewMat = Button(self.frame, text="AddNewMaterial", command=self.add_new_material)
+        self.addNewMat.grid(row=self.rowN, column=2)
+        # self.template = Entry(self.frame, width = 70)
+        # self.template.grid(row=self.rowN, column=2)
+        # self.template.insert(0, self.mat55_template)
         self.createButton("Add_data", self.add_materialInfo, self.rowN, 3)
         self.rowN += 1
 
@@ -182,13 +218,6 @@ class App:
         with open(self.mat_out, 'w') as outFile:
             outFile.write("")
 
-
-        # def generateRunScript_new(self):
-        # """
-        #
-        # :return:
-        # """
-
     def open_input(self):
         """
 
@@ -260,114 +289,145 @@ class App:
                 continue
         print(self.partInfo)
 
+    def add_new_material(self):
+        """
+
+        :return:
+        """
+        self.window_newMat = Toplevel(self.frame)
+
+        rowN = 0
+        self.matTitle = Label(self.window_newMat, text="MAT_Title", width=10)
+        self.matTitle.grid(row=rowN, column=0)
+        self.matTitle_entry= Entry(self.window_newMat, width=10)
+        self.matTitle_entry.grid(row=rowN, column=1)
+        self.matTitle_entry.insert(0,"MAT_Title")
+
+        rowN += 1
+        self.partTitle = Label(self.window_newMat, text="Part_Title", width=10)
+        self.partTitle.grid(row=rowN, column=0)
+        self.partTitle_entry= Entry(self.window_newMat, width=10)
+        self.partTitle_entry.grid(row=rowN, column=1)
+        self.partTitle_entry.insert(0,"Part_Title")
+
+        rowN += 1
+        self.cardTitle = Label(self.window_newMat, text="Card_Title", width=10)
+        self.cardTitle.grid(row=rowN, column=0)
+        self.cardTitle_entry= Entry(self.window_newMat, width=10)
+        self.cardTitle_entry.grid(row=rowN, column=1)
+        self.cardTitle_entry.insert(0,"Card_Title")
+
+        rowN += 1
+        self.cardInfo = Label(self.window_newMat, text="Card_Info", width=10)
+        self.cardInfo.grid(row=rowN, column=0)
+        self.matRow = rowN
+        self.cardInfoText=Button(self.window_newMat, text="+", width=5, command=self.add_entry)
+        self.cardInfoText.grid(row=rowN, column=1)
+        self.cardInfoSave=Button(self.window_newMat, text="save", width=5, command=self.save_newMatInfo)
+        self.cardInfoSave.grid(row=rowN, column=2)
+        self.newMatInfo_label = []
+        self.newMatInfo = []
+        self.newMatInfo_all = []
+
+    def add_entry(self):
+        """
+
+        :return:
+        """
+        self.matRow += 1
+        self.mat_label = Entry(self.window_newMat, text="", width=10)
+        self.mat_label.grid(row=self.matRow, column=1)
+
+        self.newMatInfo_label.append(self.mat_label)
+
+    def save_newMatInfo(self):
+        """
+
+        :return:
+        """
+
+        print(self.newMatInfo_label, len(self.newMatInfo_label))
+
+        for item in self.newMatInfo_label:
+            self.newMatInfo.append(item.get())
+
+        line = ",".join(self.newMatInfo)
+        self.newMatInfo_all.append([self.matTitle_entry.get(), self.partTitle_entry.get(), self.cardTitle_entry.get(), line])
+        print(self.newMatInfo_all)
+        with open(self.csv_file, 'a') as outFile:
+            csv_writer = csv.writer(outFile)
+            csv_writer.writerows(self.newMatInfo_all)
+
     def add_materialInfo(self):
         """
 
         :return:
         """
 
-        print(self.template.get())
-        template_path = self.template.get()
-        with open(template_path, 'r') as inFile:
-            self.template_lines = inFile.readlines()
-
         self.window2 = Toplevel(self.frame)
         self.material1 = mat_prop.MaterialProp()
-        self.mat54_prop = ["MAT_54_55", "Title", "mid,ro,ea,eb,(ec),prba,(prca),(prcb),"
-                                                 "gab,gbc,gca,(kf),aopt,2way,,"
-                                                 "xp,yp,zp,a1,a2,a3,mangle,,"
-                                                 "v1,v2,v3,d1,d2,d3,dfailm,dfails,"
-                                                 "tfail,alph,soft,fbrt,ycfac,dfailt,dfailc,efs,"
-                                                 "xc,xt,yc,yt,sc,crit,beta,,"
-                                                 "pel,epsf,epsr,tsmd,soft2,,"
-                                                 "slimt1,slimc1,slimt2,slimc2,slims,ncyred,softg,,"
-                                                 "lcxc, lcxt, lcyc, lcyt, lcsc, dt"]
+        # self.mat54_prop = ["MAT_54", "Title", "*MAT_ENHANCED_COMPOSITE_DAMAGE", "mid,ro,ea,eb,(ec),prba,(prca),(prcb),"
+        #                                          "gab,gbc,gca,(kf),aopt,2way,,"
+        #                                          "xp,yp,zp,a1,a2,a3,mangle,,"
+        #                                          "v1,v2,v3,d1,d2,d3,dfailm,dfails,"
+        #                                          "tfail,alph,soft,fbrt,ycfac,dfailt,dfailc,efs,"
+        #                                          "xc,xt,yc,yt,sc,crit,beta,,"
+        #                                          "pel,epsf,epsr,tsmd,soft2,,"
+        #                                          "slimt1,slimc1,slimt2,slimc2,slims,ncyred,softg,,"
+        #                                          "lcxc, lcxt, lcyc, lcyt, lcsc, dt"]
+        #
+        # self.mat55_prop = ["MAT_55", "Title", "*MAT_ENHANCED_COMPOSITE_DAMAGE", "mid,ro,ea,eb,(ec),prba,(prca),(prcb),"
+        #                                          "gab,gbc,gca,(kf),aopt,2way,,"
+        #                                          "xp,yp,zp,a1,a2,a3,mangle,,"
+        #                                          "v1,v2,v3,d1,d2,d3,dfailm,dfails,"
+        #                                          "tfail,alph,soft,fbrt,ycfac,dfailt,dfailc,efs,"
+        #                                          "xc,xt,yc,yt,sc,crit,beta,,"
+        #                                          "pel,epsf,epsr,tsmd,soft2,,"
+        #                                          "slimt1,slimc1,slimt2,slimc2,slims,ncyred,softg,,"]
+        #
+        # self.mat24_prop = ["MAT_24", "Title", "*MAT_PIECEWISE_LINEAR_PLASTICITY", "mid,ro,e,pr,sigy,etan,fail,tdel,"
+        #                                       "c,p,lcss,lcsr,vp,lcf,,"
+        #                                       "eps1,eps2,eps3,eps4,eps5,eps6,eps7,eps8,"
+        #                                       "es1,es2,es3,es4,es5,es6,es7,es8"]
+        #
+        # self.mat20_prop = ["MAT_20", "Title", "*MAT_RIGID", "mid,ro,e,pr,n,couple,m,alias,"
+        #                                          "cmo,con1,con2,,"
+        #                                          "lco or a1,a2,a3,v1,v2,v3,,"]
 
-        self.mat24_prop = ["MAT_24", "Title", "mid,ro,e,pr,sigy,etan,fail,tdel,"
-                                              "c,p,lcss,lcsr,vp,lcf,,"
-                                              "eps1,eps2,eps3,eps4,eps5,eps6,eps7,eps8,"
-                                              "es1,es2,es3,es4,es5,es6,es7,es8"]
 
-        self.mat20_prop = ["MAT_20", "Title", "mid,ro,e,pr,n,couple,m,alias,"
-                                                 "cmo,con1,con2,,"
-                                                 "lco or a1,a2,a3,v1,v2,v3,,"]
 
-        csv_file = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\material_prop.csv"
-        import csv
-        self.materialProp = []
-        with open(csv_file) as readIn:
-            csv_reader = csv.reader(readIn)
-
-            for line in csv_reader:
-                print(len(line))
-                self.materialProp.append(line)
-
-        # sys.exit()
-        # self.materialProp = [self.mat54_prop, self.mat20_prop, self.mat24_prop]
-        # 'MAT54/55', 'RIGID'
-
-        # if self.materialType == "MAT54/55":
-        #     self.inMat54 = True
-        #     self.inMat24 = False
-        #     self.inRigid = False
-        #     self.materialProp = self.mat54_prop
-        # elif self.materialType == "RIGID":
-        #     self.inMat54 = False
-        #     self.inMat24 = False
-        #     self.inRigid = True
-        #     self.materialProp = self.mat20_prop
-        # elif self.materialType == "MAT24":
-        #     self.inMat54 = False
-        #     self.inMat24 = True
-        #     self.inRigid = False
-        #     self.materialProp = self.mat24_prop
-        # else:
-        #     messagebox.showerror("Error", "Select correct Material Card :")
         self.entry_list = []
         self.label_list = []
         colN = 0
         rowN = 0
         count = 0
         for i in range(len(self.materialProp)):
-            # print(self.materialProp[i], rowN, colN)
-            # self.materialProp_curr = []
-            self.entry_list = []
-            self.label_list = []
             if self.materialProp[i][0] == self.materialType:
-                """
-                """
-                print(self.materialProp[i][0], self.materialType)
-                self.materialProp_curr = self.materialProp[i][2].split(',')
-                print(self.materialProp_curr)
+                crit_fail = float(self.materialType.split("_")[-1])
+                self.material1.material_prop['crit'] = str(crit_fail)
+                self.materialProp_curr = self.materialProp[i][3].split(',')
                 for j in range(len(self.materialProp_curr)):
                     if count == 8:
                         rowN += 2
                         colN = 0
                         count = 0
-                        print(count, rowN, colN)
-                        print(count, self.materialProp_curr[j], rowN, colN)
 
                     if self.materialProp_curr[j] == "":
                         self.label_list.append(Label(self.window2, text=self.materialProp_curr[j], width=10))
-                        # self.label_list[j].grid(row=rowN, column=colN)
-
                         self.entry_list.append(Entry(self.window2, width=10))
-                        # self.entry_list[j].grid(row=rowN+1, column=colN)
-                        # self.entry_list[j].insert(0,0)
                         rowN += 2
                         colN = 0
                         count = 0
-                        print(count, rowN, colN)
-                        print(count, self.materialProp_curr[j], rowN, colN)
                         continue
 
-                    print(count, j, self.materialProp_curr[j], rowN, colN)
-                    self.label_list.append(Label(self.window2, text=self.materialProp_curr[j], width=10))
+                    # if self.mat_prop3[j] == "y":
+                    #     self.label_list.append(Label(self.window2, text=self.materialProp_curr[j].upper(), width=10, fg="yellow"))
+                    # else:
+                    self.label_list.append(Label(self.window2, text=self.materialProp_curr[j].upper(), width=10))
                     self.label_list[j].grid(row=rowN, column=colN)
 
                     self.entry_list.append(Entry(self.window2, width=10))
                     self.entry_list[j].grid(row=rowN+1, column=colN)
-                    # self.entry_list[j].insert(0,self.material1.material_prop[self.materialProp_curr[j].strip()])#.strip(), 0.0))
                     self.entry_list[j].insert(0,self.material1.material_prop.get(self.materialProp_curr[j].strip(), 0.0))
                     count += 1
                     colN += 1
@@ -380,6 +440,73 @@ class App:
         button_.grid(row=rowN, column=1)
         Exitbutton_ = Button(self.window2, text="Exit", command=self.close_window)
         Exitbutton_.grid(row=rowN, column=2)
+
+    def add_new(self):
+        """
+
+        :return:
+        """
+        self.save_data2()
+        # for i in range(len(self.materialProp)):
+        #     self.entry_list[i].delete(0,'end')
+
+    def save_data2(self):
+        """
+
+        :return:
+        """
+        outlines = []
+        colN = 0
+        rowN = 0
+        count = 0
+        for i in range(len(self.materialProp)):
+            if self.materialProp[i][0] == self.materialType:
+                print(self.materialProp[i][0], self.materialType)
+                line = "\n" + self.materialProp[i][2]# + "\n"
+                outlines.append(line)
+                self.materialProp_curr = self.materialProp[i][3].split(',')
+                # print(self.materialProp_curr)
+                newline = []
+                index = 0
+                # print(self.entry_list)
+                for j in range(len(self.materialProp_curr)):
+                    if count == 8:
+                        rowN += 2
+                        colN = 0
+                        count = 0
+                        print(count, rowN, colN)
+                        print(count, self.materialProp_curr[j], rowN, colN)
+                        line1 = "\n" + "".join(newline)# + "\n"
+                        print(line1)
+                        outlines.append(line1)
+                        newline = []
+
+                    if self.materialProp_curr[j] == "":
+                        rowN += 2
+                        colN = 0
+                        count = 0
+                        print(count, rowN, colN)
+                        print(count, self.materialProp_curr[j], rowN, colN)
+                        line1 = "\n" + "".join(newline) #+ "\n"
+                        print(line1)
+                        outlines.append(line1)
+                        newline = []
+                        index += 1
+                        continue
+
+                    print(count, j, self.materialProp_curr[j], rowN, colN)
+                    print("##############################################################")
+                    print(index, len(self.entry_list))
+                    print("##############################################################")
+                    tmp_prop = self.entry_list[index].get()
+                    newline.append(tmp_prop.rjust(10))
+
+                    count += 1
+                    colN += 1
+                    index += 1
+
+        with open(self.mat_out, 'a') as outFile:
+            outFile.writelines(outlines)
 
     def add_materialInfo_orig(self):
         """
@@ -1211,85 +1338,6 @@ class App:
         # self.curveInfo.update({self.curveNo:[self.curveTitle_, self.curveId_, self.curve]})
         # self.window_CC2.destroy()
 
-    def add_new(self):
-        """
-
-        :return:
-        """
-        self.save_data2()
-        # for i in range(len(self.materialProp)):
-        #     self.entry_list[i].delete(0,'end')
-
-    def save_data2(self):
-        """
-
-        :return:
-        """
-        # final_section_lines = '\n'.join(self.sectionLines)
-        # print(final_section_lines)
-
-        outlines = []
-
-        if self.inMat54:
-            # print(self.entry_list)
-            # self.materialProp = ['Title', 'Id', 'Density', 'E1', 'E2', 'Mu', 'GAB', 'GBC', 'FBRT', 'YCFAC', 'xc', 'xt', 'yc', 'yt']
-            for line in self.template_lines:
-                # print(line)
-                line = line.replace("$TITLE$", self.entry_list[0].get())
-                line = line.replace("$ID$", self.entry_list[1].get().rjust(10))
-                line = line.replace("$DENSITY$", self.entry_list[2].get().rjust(10))
-                line = line.replace("$E1$", self.entry_list[3].get().rjust(10))
-                line = line.replace("$E2$", self.entry_list[4].get().rjust(10))
-                line = line.replace("$E3$", self.entry_list[5].get().rjust(10))
-                line = line.replace("$MU$", self.entry_list[6].get().rjust(10))
-                line = line.replace("$GAB$", self.entry_list[7].get().rjust(10))
-                line = line.replace("$GBC$", self.entry_list[8].get().rjust(10))
-                line = line.replace("$DEFINE$", ("-" + self.entry_list[1].get()).rjust(10))
-                line = line.replace("$FBRT$", self.entry_list[9].get().rjust(10))
-                line = line.replace("$YCFAC$", self.entry_list[10].get().rjust(10))
-                line = line.replace("$XC$", self.entry_list[11].get().rjust(10))
-                line = line.replace("$XT$", self.entry_list[12].get().rjust(10))
-                line = line.replace("$YC$", self.entry_list[13].get().rjust(10))
-                line = line.replace("$YT$", self.entry_list[14].get().rjust(10))
-                # line = line.replace("$SECTION$", final_section_lines)
-                outlines.append(line)
-                continue
-        if self.inMat24:
-            # self.mat24_prop = ['Title', 'Id', 'Density', 'E1', 'Mu', 'SIGY', 'ETAN', 'FAIL', 'LCSS', 'SECTION']
-            # print(self.entry_list)
-            for line in self.template_lines:
-                # print(line)
-                line = line.replace("$TITLE$", self.entry_list[0].get())
-                line = line.replace("$ID$", self.entry_list[1].get().rjust(10))
-                line = line.replace("$DENSITY$", self.entry_list[2].get().rjust(10))
-                line = line.replace("$E1$", self.entry_list[3].get().rjust(10))
-                line = line.replace("$MU$", self.entry_list[4].get().rjust(10))
-                line = line.replace("$SIGY$", self.entry_list[5].get().rjust(10))
-                line = line.replace("$ETAN$", self.entry_list[6].get().rjust(10))
-                line = line.replace("$FAIL$", self.entry_list[7].get().rjust(10))
-                line = line.replace("$LCSS$", self.entry_list[8].get().rjust(10))
-                # line = line.replace("$SECTION$", final_section_lines)
-                outlines.append(line)
-        if self.inRigid:
-            # self.mat20_prop = ['Title', 'Id', 'Density', 'E1', 'Mu', 'CMO', 'CON1', 'CON2', 'SECTION']
-            # print(self.entry_list)
-            for line in self.template_lines:
-                # print(line)
-                line = line.replace("$TITLE$", self.entry_list[0].get())
-                line = line.replace("$ID$", self.entry_list[1].get().rjust(10))
-                line = line.replace("$DENSITY$", self.entry_list[2].get().rjust(10))
-                line = line.replace("$E1$", self.entry_list[3].get().rjust(10))
-                line = line.replace("$MU$", self.entry_list[4].get().rjust(10))
-                line = line.replace("$CMO$", self.entry_list[5].get().rjust(10))
-                line = line.replace("$CON1$", self.entry_list[6].get().rjust(10))
-                line = line.replace("$CON2$", self.entry_list[7].get().rjust(10))
-                # line = line.replace("$SECTION$", final_section_lines)
-                outlines.append(line)
-
-        # print(self.mat_out)
-        with open(self.mat_out, 'a') as outFile:
-            outFile.writelines(outlines)
-
     def save_data_CC(self):
         """
 
@@ -1336,8 +1384,8 @@ class App:
         # Material
         self.materialType = self.matType.get()
         # print(self.materialType)
-        self.template.delete(0, 'end')
-        self.template.insert(0, self.mapMat[self.materialType])
+        # self.template.delete(0, 'end')
+        # self.template.insert(0, self.mapMat[self.materialType])
 
         # Control Cards
         self.template_controlcards.delete(0, 'end')
