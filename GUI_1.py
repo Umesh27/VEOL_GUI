@@ -6,6 +6,7 @@ from tkinter import filedialog
 import material_prop as mat_prop
 import create_input as create_input
 from tkinter import messagebox
+import json
 import subprocess
 
 
@@ -50,8 +51,8 @@ class App:
         self.ProjectPath.grid(row=self.rowN, column=1)
         self.ProjectPathEntry = Entry(self.frame, width = 70)
         self.ProjectPathEntry.grid(row=self.rowN, column=2)
-        self.ProjectPathEntry.insert(0, self.case_path)
-        self.projectPath = self.case_path
+        self.projectPath = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1"#self.case_path
+        self.ProjectPathEntry.insert(0, self.projectPath)
         self.createButton("Create Input", self.create_input_keyword, self.rowN, 3)
         self.rowN += 1
 
@@ -67,35 +68,12 @@ class App:
         self.materialProp1 = []
         self.materialProp = []
         self.matTypeList = []
-        self.csv_file = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\material_prop.csv"
-        with open(self.csv_file) as readIn:
-            csv_reader = csv.reader(readIn)
+        self.json_file = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\file.json"
+        with open(self.json_file) as readIn:
+            self.prop_mat = json.load(readIn)
 
-            for line in csv_reader:
-                self.materialProp.append(line)
-                self.matTypeList.append(line[0])
-
-        # import json
-        #
-        # self.json_file = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\file.json"
-        # with open(self.json_file) as readIn:
-        #     self.prop_mat = json.load(readIn)
-        #
-        # for key in self.prop_mat.keys():
-        #     self.matTypeList.append(key)
-        #
-
-        # for key, value in self.prop_mat.items():
-        #     print(key, value)
-        #     self.matTypeList.append(key)
-        #     self.materialProp.append(key)
-        #     for key2, value2 in value.items():
-        #         print(key2, value2)
-        #         self.materialProp1.append(key2)
-        #         if key2.startswith("mid"):
-        #             self.mat_prop = key.split(',')
-        #             self.mat_prop2 = value2[0].split(',')
-        #             self.mat_prop3 = value2[1].split(',')
+        for key in self.prop_mat.keys():
+            self.matTypeList.append(key)
 
         self.matType = StringVar(self.frame)
         self.materialType = "MAT_54"
@@ -112,9 +90,6 @@ class App:
 
         self.addNewMat = Button(self.frame, text="AddNewMaterial", command=self.add_new_material)
         self.addNewMat.grid(row=self.rowN, column=2)
-        # self.template = Entry(self.frame, width = 70)
-        # self.template.grid(row=self.rowN, column=2)
-        # self.template.insert(0, self.mat55_template)
         self.createButton("Add_data", self.add_materialInfo, self.rowN, 3)
         self.rowN += 1
 
@@ -297,36 +272,53 @@ class App:
         self.window_newMat = Toplevel(self.frame)
 
         rowN = 0
-        self.matTitle = Label(self.window_newMat, text="MAT_Title", width=10)
+        self.matTitle = Label(self.window_newMat, text="MAT_Title", width=20)
         self.matTitle.grid(row=rowN, column=0)
-        self.matTitle_entry= Entry(self.window_newMat, width=10)
+        self.matTitle_entry= Entry(self.window_newMat, width=20)
         self.matTitle_entry.grid(row=rowN, column=1)
         self.matTitle_entry.insert(0,"MAT_Title")
 
         rowN += 1
-        self.partTitle = Label(self.window_newMat, text="Part_Title", width=10)
+        self.partTitle = Label(self.window_newMat, text="Part_Title", width=20)
         self.partTitle.grid(row=rowN, column=0)
-        self.partTitle_entry= Entry(self.window_newMat, width=10)
+        self.partTitle_entry= Entry(self.window_newMat, width=20)
         self.partTitle_entry.grid(row=rowN, column=1)
         self.partTitle_entry.insert(0,"Part_Title")
+        self.partTitle_entry_freq= Entry(self.window_newMat, width=5, fg='blue')
+        self.partTitle_entry_freq.grid(row=rowN, column=2)
+        self.partTitle_entry_freq.insert(0,"y")
 
         rowN += 1
-        self.cardTitle = Label(self.window_newMat, text="Card_Title", width=10)
+        self.cardTitle = Label(self.window_newMat, text="Card_Title", width=20)
         self.cardTitle.grid(row=rowN, column=0)
-        self.cardTitle_entry= Entry(self.window_newMat, width=10)
+        self.cardTitle_entry= Entry(self.window_newMat, width=20)
         self.cardTitle_entry.grid(row=rowN, column=1)
         self.cardTitle_entry.insert(0,"Card_Title")
+        self.cardTitle_entry_freq= Entry(self.window_newMat, width=5, fg='blue')
+        self.cardTitle_entry_freq.grid(row=rowN, column=2)
+        self.cardTitle_entry_freq.insert(0,"y")
 
         rowN += 1
-        self.cardInfo = Label(self.window_newMat, text="Card_Info", width=10)
+        self.cardInfo = Label(self.window_newMat, text="Card_Info", width=20)
         self.cardInfo.grid(row=rowN, column=0)
-        self.matRow = rowN
         self.cardInfoText=Button(self.window_newMat, text="+", width=5, command=self.add_entry)
         self.cardInfoText.grid(row=rowN, column=1)
         self.cardInfoSave=Button(self.window_newMat, text="save", width=5, command=self.save_newMatInfo)
         self.cardInfoSave.grid(row=rowN, column=2)
+
+        rowN += 1
+        self.cardInfo_label = Label(self.window_newMat, text="Parameter_Label", width=20)
+        self.cardInfo_label.grid(row=rowN, column=0)
+        self.cardInfo_default = Label(self.window_newMat, text="Defaults", width=20)
+        self.cardInfo_default.grid(row=rowN, column=1)
+        self.cardInfo_freq = Label(self.window_newMat, text="Frequency", width=20)
+        self.cardInfo_freq.grid(row=rowN, column=2)
+
+        self.matRow = rowN
         self.newMatInfo_label = []
         self.newMatInfo = []
+        self.newMatInfo_default = []
+        self.newMatInfo_freq = []
         self.newMatInfo_all = []
 
     def add_entry(self):
@@ -336,9 +328,13 @@ class App:
         """
         self.matRow += 1
         self.mat_label = Entry(self.window_newMat, text="", width=10)
-        self.mat_label.grid(row=self.matRow, column=1)
+        self.mat_label.grid(row=self.matRow, column=0)
+        self.mat_default = Entry(self.window_newMat, text="", width=10)
+        self.mat_default.grid(row=self.matRow, column=1)
+        self.mat_freq = Entry(self.window_newMat, text="", width=10)
+        self.mat_freq.grid(row=self.matRow, column=2)
 
-        self.newMatInfo_label.append(self.mat_label)
+        self.newMatInfo_label.append([self.mat_label, self.mat_default, self.mat_freq])
 
     def save_newMatInfo(self):
         """
@@ -349,14 +345,22 @@ class App:
         print(self.newMatInfo_label, len(self.newMatInfo_label))
 
         for item in self.newMatInfo_label:
-            self.newMatInfo.append(item.get())
+            self.newMatInfo.append(item[0].get())
+            self.newMatInfo_default.append(item[1].get())
+            self.newMatInfo_freq.append(item[2].get())
 
-        line = ",".join(self.newMatInfo)
-        self.newMatInfo_all.append([self.matTitle_entry.get(), self.partTitle_entry.get(), self.cardTitle_entry.get(), line])
-        print(self.newMatInfo_all)
-        with open(self.csv_file, 'a') as outFile:
-            csv_writer = csv.writer(outFile)
-            csv_writer.writerows(self.newMatInfo_all)
+
+        newMatInfo = ",".join(self.newMatInfo)
+        newMatInfo_default = ",".join(self.newMatInfo_default)
+        newMatInfo_freq = ",".join(self.newMatInfo_freq)
+
+        self.prop_mat.update({self.matTitle_entry.get():
+                                  {"Part_Title":[self.partTitle_entry.get(), self.partTitle_entry_freq.get()],
+                                   "Card_Title":[self.cardTitle_entry.get(), self.cardTitle_entry_freq.get()],
+                                   "Mat_Parameters":[newMatInfo, newMatInfo_default, newMatInfo_freq]}})
+
+        with open(self.json_file, 'w') as outFile:
+            json.dump(self.prop_mat, outFile)
 
     def add_materialInfo(self):
         """
@@ -401,36 +405,46 @@ class App:
         colN = 0
         rowN = 0
         count = 0
-        for i in range(len(self.materialProp)):
-            if self.materialProp[i][0] == self.materialType:
-                crit_fail = float(self.materialType.split("_")[-1])
-                self.material1.material_prop['crit'] = str(crit_fail)
-                self.materialProp_curr = self.materialProp[i][3].split(',')
-                for j in range(len(self.materialProp_curr)):
-                    if count == 8:
-                        rowN += 2
-                        colN = 0
-                        count = 0
+        # for i in range(len(self.materialProp)):
+        #     if self.materialProp[i][0] == self.materialType:
+        try:
+            crit_fail = float(self.materialType.split("_")[-1])
+        except Exception as Ex:
+            crit_fail = 0.0
+            print(Ex)
+            pass
+        self.material1.material_prop['crit'] = str(crit_fail)
+        self.materialProp_curr = self.prop_mat[self.materialType]["Mat_Parameters"][0].split(',')
+        self.materialProp_curr_default = self.prop_mat[self.materialType]["Mat_Parameters"][1].split(',')
+        self.materialProp_curr_freq = self.prop_mat[self.materialType]["Mat_Parameters"][2].split(',')
 
-                    if self.materialProp_curr[j] == "":
-                        self.label_list.append(Label(self.window2, text=self.materialProp_curr[j], width=10))
-                        self.entry_list.append(Entry(self.window2, width=10))
-                        rowN += 2
-                        colN = 0
-                        count = 0
-                        continue
+        for j in range(len(self.materialProp_curr)):
+            if count == 8:
+                rowN += 2
+                colN = 0
+                count = 0
 
-                    # if self.mat_prop3[j] == "y":
-                    #     self.label_list.append(Label(self.window2, text=self.materialProp_curr[j].upper(), width=10, fg="yellow"))
-                    # else:
-                    self.label_list.append(Label(self.window2, text=self.materialProp_curr[j].upper(), width=10))
-                    self.label_list[j].grid(row=rowN, column=colN)
+            if self.materialProp_curr[j] == "":
+                self.label_list.append(Label(self.window2, text=self.materialProp_curr[j], width=10))
+                self.entry_list.append(Entry(self.window2, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                continue
 
-                    self.entry_list.append(Entry(self.window2, width=10))
-                    self.entry_list[j].grid(row=rowN+1, column=colN)
-                    self.entry_list[j].insert(0,self.material1.material_prop.get(self.materialProp_curr[j].strip(), 0.0))
-                    count += 1
-                    colN += 1
+            if self.materialProp_curr_freq[j].strip() == "y":
+                self.label_list.append(Label(self.window2, text=self.materialProp_curr[j].upper(), width=10, fg="blue"))
+                self.entry_list.append(Entry(self.window2, width=10, fg="blue"))
+            else:
+                self.label_list.append(Label(self.window2, text=self.materialProp_curr[j].upper(), width=10))
+                self.entry_list.append(Entry(self.window2, width=10))
+            self.label_list[j].grid(row=rowN, column=colN)
+
+            self.entry_list[j].grid(row=rowN+1, column=colN)
+            # self.entry_list[j].insert(0,self.material1.material_prop.get(self.materialProp_curr[j].strip(), 0.0))
+            self.entry_list[j].insert(0,self.materialProp_curr_default[j])
+            count += 1
+            colN += 1
 
         rowN += 3
         # print(rowN)
@@ -455,55 +469,41 @@ class App:
 
         :return:
         """
+        # print("##############################################################")
         outlines = []
         colN = 0
         rowN = 0
         count = 0
-        for i in range(len(self.materialProp)):
-            if self.materialProp[i][0] == self.materialType:
-                print(self.materialProp[i][0], self.materialType)
-                line = "\n" + self.materialProp[i][2]# + "\n"
-                outlines.append(line)
-                self.materialProp_curr = self.materialProp[i][3].split(',')
-                # print(self.materialProp_curr)
+        newline = []
+        index = 0
+        outlines.append("\n")
+        outlines.append(self.prop_mat[self.materialType]["Card_Title"][0])
+        for j in range(len(self.materialProp_curr)):
+            print("[{}] {}: {}".format(index, self.materialProp_curr[j], self.entry_list[index].get()))
+            tmp_prop = self.entry_list[index].get()
+            newline.append(tmp_prop.rjust(10))
+
+            if count == 8 or j == (len(self.materialProp_curr)-1):
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                outlines.append(line1)
                 newline = []
-                index = 0
-                # print(self.entry_list)
-                for j in range(len(self.materialProp_curr)):
-                    if count == 8:
-                        rowN += 2
-                        colN = 0
-                        count = 0
-                        print(count, rowN, colN)
-                        print(count, self.materialProp_curr[j], rowN, colN)
-                        line1 = "\n" + "".join(newline)# + "\n"
-                        print(line1)
-                        outlines.append(line1)
-                        newline = []
 
-                    if self.materialProp_curr[j] == "":
-                        rowN += 2
-                        colN = 0
-                        count = 0
-                        print(count, rowN, colN)
-                        print(count, self.materialProp_curr[j], rowN, colN)
-                        line1 = "\n" + "".join(newline) #+ "\n"
-                        print(line1)
-                        outlines.append(line1)
-                        newline = []
-                        index += 1
-                        continue
+            if self.materialProp_curr[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                outlines.append(line1)
+                newline = []
+                index += 1
+                continue
 
-                    print(count, j, self.materialProp_curr[j], rowN, colN)
-                    print("##############################################################")
-                    print(index, len(self.entry_list))
-                    print("##############################################################")
-                    tmp_prop = self.entry_list[index].get()
-                    newline.append(tmp_prop.rjust(10))
-
-                    count += 1
-                    colN += 1
-                    index += 1
+            count += 1
+            colN += 1
+            index += 1
 
         with open(self.mat_out, 'a') as outFile:
             outFile.writelines(outlines)
