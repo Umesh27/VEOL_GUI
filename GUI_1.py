@@ -1,6 +1,6 @@
 __author__ = 'Umesh'
 
-import os, sys, csv
+import os, sys, csv, re
 from tkinter import *
 from tkinter import filedialog
 import material_prop as mat_prop
@@ -65,20 +65,22 @@ class App:
         self.rowN += 1
 
         # Material Properties
-        self.materialProp1 = []
-        self.materialProp = []
-        self.matTypeList = []
-        self.json_file = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\file.json"
+        self.matTypeList1 = []
+        self.mapMatInfo = {}
+        self.mapMatParameters = {}
+        self.json_file = os.path.join(self.template_path, "material_cards.json")
         with open(self.json_file) as readIn:
             self.prop_mat = json.load(readIn)
 
         for key in self.prop_mat.keys():
-            self.matTypeList.append(key)
+            self.matTypeList1.append(key)
+            self.mapMatInfo.update({self.prop_mat[key]["Card_Title"][0]:key})
+            # self.mapMatParameters.update({key:self.prop_mat[key]["Mat_Parameters"][0]})
 
         self.matType = StringVar(self.frame)
         self.materialType = "MAT_54"
         # self.matTypeList = set(sorted({'MAT_54', 'MAT_55', 'MAT_20', 'MAT_24'}))
-        self.matTypeList = set(sorted(self.matTypeList))
+        self.matTypeList = set(sorted(self.matTypeList1))
         self.matType.set('MAT_54')
         self.mat55_template = os.path.join(self.template_path, "mat55.k")
         self.mat24_template = os.path.join(self.template_path, "mat24.k")
@@ -89,20 +91,42 @@ class App:
         self.matType.trace('w', self.change_dropdown)
 
         self.addNewMat = Button(self.frame, text="AddNewMaterial", command=self.add_new_material)
-        self.addNewMat.grid(row=self.rowN, column=2)
+        self.addNewMat.grid(row=self.rowN, column=2, sticky=W)
+        # self.readMatFile_label = self.createLabel("ReadMaterial", self.rowN, 1)
+        self.readMatFile_button = self.createButton("ReadMaterial",self.read_mat_file, self.rowN, 2)
         self.createButton("Add_data", self.add_materialInfo, self.rowN, 3)
         self.rowN += 1
 
-        self.section_label = Label(self.frame, text="Section", width=20, fg='red')
-        self.section_label.grid(row=self.rowN, column=1, sticky=W)
+        self.sectionCards_json = os.path.join(self.template_path, "section_cards.json")
+        with open(self.sectionCards_json) as readIn:
+            self.section_cards = json.load(readIn)
 
-        self.shell_button = Button(self.frame, text="Shell", command=self.shell_button_click)
-        self.shell_button.grid(row=self.rowN, column=2, sticky=W)
-        self.solid_button = Button(self.frame, text="Solid", command=self.solid_button_click)
-        self.solid_button.grid(row=self.rowN, column=2)#, sticky="nsew")
+        self.section_cards_List = []
+        self.mapSectionInfo = {}
+        self.sectionCardType = StringVar(self.frame)
+        for key in self.section_cards.keys():
+            self.mapSectionInfo.update({self.section_cards[key]["Card_Title"][0]:key})
+            self.section_cards_List.append(key)
+
+        self.sectionType = self.section_cards_List[0]
+        self.sectionCardType.set(self.sectionType)
+        popupMenu = OptionMenu(self.frame, self.sectionCardType, *self.section_cards_List, command=self.getSectionType)
+        popupMenu.grid(row = self.rowN, column=1)
+        self.sectionCardType.trace('w', self.section_dropdown)
+        self.add_section_button = Button(self.frame, text="Add_Section", command=self.add_section)
+        self.add_section_button.grid(row=self.rowN, column=2, sticky=W)
+
+        # self.section_label = Label(self.frame, text="Section", width=20, fg='red')
+        # self.section_label.grid(row=self.rowN, column=1, sticky=W)
+        #
+        # self.shell_button = Button(self.frame, text="Shell", command=self.shell_button_click)
+        # self.shell_button.grid(row=self.rowN, column=2, sticky=W)
+        # self.solid_button = Button(self.frame, text="Solid", command=self.solid_button_click)
+        # self.solid_button.grid(row=self.rowN, column=2)#, sticky="nsew")
+
+        # self.rowN += 1
 
         self.rowN += 1
-
         # Control cards
 
         self.loadType = StringVar(self.frame)
@@ -131,6 +155,192 @@ class App:
         # Exit
         # self.rowN += 1
         self.createButton("Exit", self.frame.quit, self.rowN, 3, fg='red')
+
+    def read_mat_file(self):
+        """
+
+        :return:
+        """
+        print("In read material file function !")
+        self.presentMatFile = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+
+        with open(self.presentMatFile) as readIn:
+            inlines = readIn.readlines()
+
+        card_titles = []
+        count = 0
+        self.matReadList = []
+        self.materialPara_tmp = []
+        self.materialPara = {}
+        for line in inlines:
+            if line.startswith("*"):
+                print(line)
+                card_title = line.strip()
+                card_titles.append(card_title)
+                count = 1
+                if card_title == "*MAT_ENHANCED_COMPOSITE_DAMAGE":
+                    self.materialPara_tmp = []
+                else:
+                    if not self.materialPara_tmp == []:
+                        self.materialPara.update({self.mapMatInfo[card_title]:self.materialPara_tmp})
+                        self.materialPara_tmp = []
+                continue
+
+            if count == 1:
+                mat_id = int(line[:10].strip())
+                if not card_title == "*MAT_ENHANCED_COMPOSITE_DAMAGE":
+                    tmp_line = ",".join([str(self.mapMatInfo[card_title]), str(mat_id)])
+                    self.matReadList.append(tmp_line)
+
+            if count == 6:
+                crit_fail = int(float(line[51:60].strip()))
+                print(line)
+                print(crit_fail)
+                # count = 0
+                if crit_fail == 54:
+                    tmp_line = ",".join(["MAT_54", str(mat_id)])
+                    self.matReadList.append(tmp_line)
+                    self.materialPara.update({"MAT_54":self.materialPara_tmp})
+                else:
+                    tmp_line = ",".join(["MAT_55", str(mat_id)])
+                    self.matReadList.append(tmp_line)
+                    self.materialPara.update({"MAT_55":self.materialPara_tmp})
+
+            # print(len(line))
+            list1 = re.findall('.{%d}'%10, line)
+            # print(list1)
+            if len(list1) < 9:
+                self.materialPara_tmp.extend(list1)
+            else:
+                list1.pop()
+                self.materialPara_tmp.extend(list1)
+            count += 1
+
+        self.materialPara.update({self.matReadList[-1]:self.materialPara_tmp})
+        print(card_titles)
+        print(self.matReadList)
+        self.rowN += 3
+        self.matReadType = self.matReadList[0]
+        popupMenu = OptionMenu(self.frame, self.matType, *self.matReadList, command=self.getMatReadType)
+        popupMenu.grid(row = self.rowN, column=1)
+        self.matType.set(self.matReadList[0])
+        self.matReadList = set(sorted(self.matReadList))
+        self.matType.trace('w', self.matRead_dropdown)
+        self.editMatData = self.createButton("Update", self.edit_mat, self.rowN, 2, sticky_=W)
+
+    def edit_mat(self):
+        """
+
+        :return:
+        """
+        print("In edit button !")
+        rowN = 1
+        self.window2 = Toplevel(self.frame)
+        matReadType = self.matReadType.split(',')[0]
+        self.materialProp_curr = self.prop_mat[matReadType]["Mat_Parameters"][0].split(',')
+        materialPara_curr_freq = self.prop_mat[matReadType]["Mat_Parameters"][2].split(',')
+        count = 0
+        colN = 0
+        crit_fail = str(float(matReadType.split('_')[-1]))
+        self.entry_list = []
+        self.label_list = []
+        index = 0
+        print("###############################################################")
+        print(len(self.materialProp_curr), self.materialProp_curr)
+        print(len(self.materialPara[matReadType]), (self.materialPara[matReadType]))
+        for j in range(len(self.materialProp_curr)):
+            # print("{%d} {%d}"%(index,j))
+            if count == 8:
+                rowN += 2
+                colN = 0
+                count = 0
+
+            if self.materialProp_curr[j] == "":
+                self.label_list.append(Label(self.window2, text=self.materialProp_curr[j], width=10))
+                self.entry_list.append(Entry(self.window2, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                # index += 1
+                continue
+
+            if materialPara_curr_freq[j].strip() == "y":
+                self.label_list.append(Label(self.window2, text=self.materialProp_curr[j].upper(), width=10, fg="blue"))
+                self.entry_list.append(Entry(self.window2, width=10, fg="blue"))
+            else:
+                self.label_list.append(Label(self.window2, text=self.materialProp_curr[j].upper(), width=10))
+                self.entry_list.append(Entry(self.window2, width=10))
+            self.label_list[j].grid(row=rowN, column=colN)
+
+            self.entry_list[j].grid(row=rowN+1, column=colN)
+            # self.entry_list[j].insert(0,self.material1.material_prop.get(self.materialProp_curr[j].strip(), 0.0))
+            if self.materialProp_curr[j] == "crit":
+                self.entry_list[j].insert(0,str(crit_fail))
+            else:
+                try:
+                    self.entry_list[j].insert(0,self.materialPara[matReadType][index])
+                except Exception as Ex:
+                    print(Ex)
+                    self.entry_list[j].insert(0,"")
+
+            count += 1
+            colN += 1
+            index += 1
+
+        rowN += 3
+        # print(rowN)
+        button_ = Button(self.window2, text="Save", command=self.update_mat)
+        button_.grid(row=rowN, column=1)
+        Exitbutton_ = Button(self.window2, text="Exit", command=self.close_window)
+        Exitbutton_.grid(row=rowN, column=2)
+
+    def update_mat(self):
+        """
+
+        :return:
+        """
+        outlines = []
+        colN = 0
+        rowN = 0
+        count = 0
+        newline = []
+        index = 0
+        outlines.append("\n")
+        matReadType = self.matReadType.split(',')[0]
+        outlines.append(self.prop_mat[matReadType]["Card_Title"][0])
+        for j in range(len(self.materialProp_curr)):
+            if count == 8 or j == (len(self.materialProp_curr)-1):
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                outlines.append(line1)
+                newline = []
+
+            if self.materialProp_curr[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                outlines.append(line1)
+                newline = []
+                index += 1
+                continue
+
+            print("[{}] {}: {}".format(index, self.materialProp_curr[j], self.entry_list[index].get()))
+            tmp_prop = self.entry_list[index].get().strip()
+            newline.append(tmp_prop.rjust(10))
+
+            count += 1
+            colN += 1
+            index += 1
+
+        # self.mat_out = filedialog.asksaveasfilename()
+        self.presentMatFile_out = os.path.join(os.path.split(self.presentMatFile)[0], "mat_out")
+        if not os.path.exists(self.presentMatFile_out):
+            open(self.presentMatFile_out, 'a').close()
+        with open(self.presentMatFile_out, 'a') as outFile:
+            outFile.writelines(outlines)
 
     def run_info(self):
         """
@@ -212,7 +422,7 @@ class App:
         self.ProjectPathEntry.insert(0,fName)
 
     def openFile(self):
-        fName = filedialog.askopenfilename()
+        fName = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
         self.InputMeshPathEntry.delete(0,'end')
         self.InputMeshPathEntry.insert(0,fName)
 
@@ -405,8 +615,6 @@ class App:
         colN = 0
         rowN = 0
         count = 0
-        # for i in range(len(self.materialProp)):
-        #     if self.materialProp[i][0] == self.materialType:
         try:
             crit_fail = float(self.materialType.split("_")[-1])
         except Exception as Ex:
@@ -432,7 +640,7 @@ class App:
                 count = 0
                 continue
 
-            if self.materialProp_curr_freq[j].strip() == "y":
+            if self.materialProp_curr_freq[j].strip().upper() == "Y":
                 self.label_list.append(Label(self.window2, text=self.materialProp_curr[j].upper(), width=10, fg="blue"))
                 self.entry_list.append(Entry(self.window2, width=10, fg="blue"))
             else:
@@ -442,7 +650,11 @@ class App:
 
             self.entry_list[j].grid(row=rowN+1, column=colN)
             # self.entry_list[j].insert(0,self.material1.material_prop.get(self.materialProp_curr[j].strip(), 0.0))
-            self.entry_list[j].insert(0,self.materialProp_curr_default[j])
+            if self.materialProp_curr[j] == "crit":
+                self.entry_list[j].insert(0,str(crit_fail))
+            else:
+                self.entry_list[j].insert(0,self.materialProp_curr_default[j])
+
             count += 1
             colN += 1
 
@@ -461,8 +673,6 @@ class App:
         :return:
         """
         self.save_data2()
-        # for i in range(len(self.materialProp)):
-        #     self.entry_list[i].delete(0,'end')
 
     def save_data2(self):
         """
@@ -479,10 +689,6 @@ class App:
         outlines.append("\n")
         outlines.append(self.prop_mat[self.materialType]["Card_Title"][0])
         for j in range(len(self.materialProp_curr)):
-            print("[{}] {}: {}".format(index, self.materialProp_curr[j], self.entry_list[index].get()))
-            tmp_prop = self.entry_list[index].get()
-            newline.append(tmp_prop.rjust(10))
-
             if count == 8 or j == (len(self.materialProp_curr)-1):
                 rowN += 2
                 colN = 0
@@ -501,129 +707,131 @@ class App:
                 index += 1
                 continue
 
+            print("[{}] {}: {}".format(index, self.materialProp_curr[j], self.entry_list[index].get()))
+            tmp_prop = self.entry_list[index].get().strip()
+            newline.append(tmp_prop.rjust(10))
+
             count += 1
             colN += 1
             index += 1
 
+        # self.mat_out = filedialog.asksaveasfilename()
         with open(self.mat_out, 'a') as outFile:
             outFile.writelines(outlines)
 
-    def add_materialInfo_orig(self):
+    def add_section(self):
         """
 
         :return:
         """
 
-        print(self.template.get())
-        template_path = self.template.get()
-        with open(template_path, 'r') as inFile:
-            self.template_lines = inFile.readlines()
-
-        self.window2 = Toplevel(self.frame)
-        self.material1 = mat_prop.MaterialProp()
-        self.mat54_prop = ['Title', 'Id', 'Density', 'E1', 'E2', 'E3', 'PR', 'GAB', 'GBC', 'FBRT', 'YCFAC', 'XC', 'XT', 'YC', 'YT']#, 'SECTION']
-        self.mat20_prop = ['Title', 'Id', 'Density', 'E1', 'PR', 'CMO', 'CON1', 'CON2']#, 'SECTION']
-        self.mat24_prop = ['Title', 'Id', 'Density', 'E1', 'PR', 'SIGY', 'ETAN', 'FAIL', 'LCSS']#, 'SECTION']
-
-        # 'MAT54/55', 'RIGID'
-
-        if self.materialType == "MAT54/55":
-            self.inMat54 = True
-            self.inMat24 = False
-            self.inRigid = False
-            self.materialProp = self.mat54_prop
-        elif self.materialType == "RIGID":
-            self.inMat54 = False
-            self.inMat24 = False
-            self.inRigid = True
-            self.materialProp = self.mat20_prop
-        elif self.materialType == "MAT24":
-            self.inMat54 = False
-            self.inMat24 = True
-            self.inRigid = False
-            self.materialProp = self.mat24_prop
-        else:
-            messagebox.showerror("Error", "Select correct Material Card :")
-        self.entry_list = []
-        self.label_list = []
+        self.window2_shell = Toplevel(self.frame)
+        self.entry_list_sect = []
+        self.label_list_sect = []
         colN = 0
         rowN = 0
-        for i in range(len(self.materialProp)):
-            # print(self.materialProp[i], rowN, colN)
+        count = 0
 
-            if self.materialProp[i] == 'PR':
-                self.label_list.append(Label(self.window2, text=self.materialProp[i], width=10))
-                self.label_list[i].grid(row=rowN, column=colN)
+        self.sectionProp_curr = self.section_cards[self.sectionType]["Section_Parameters"][0].split(',')
+        self.sectionProp_curr_default = self.section_cards[self.sectionType]["Section_Parameters"][1].split(',')
+        self.sectionProp_curr_freq = self.section_cards[self.sectionType]["Section_Parameters"][2].split(',')
 
-                self.entry_list.append(Entry(self.window2, width=10))
-                self.entry_list[i].grid(row=rowN+1, column=colN)
-                self.entry_list[i].insert(0,self.material1.material_prop[self.materialProp[i]])
+        for j in range(len(self.sectionProp_curr)):
+            if count == 8:
                 rowN += 2
                 colN = 0
-                continue
+                count = 0
 
-            if self.materialProp[i] == 'XC':
+            if self.sectionProp_curr[j] == "":
+                self.label_list_sect.append(Label(self.window2_shell, text=self.sectionProp_curr[j], width=10))
+                self.entry_list_sect.append(Entry(self.window2_shell, width=10))
                 rowN += 2
                 colN = 0
-                self.label_list.append(Label(self.window2, text=self.materialProp[i], width=10))
-                self.label_list[i].grid(row=rowN, column=colN)
-
-                self.entry_list.append(Entry(self.window2, width=10))
-                self.entry_list[i].grid(row=rowN+1, column=colN)
-                self.entry_list[i].insert(0,self.material1.material_prop[self.materialProp[i]])
-                colN += 1
+                count = 0
                 continue
 
-            self.label_list.append(Label(self.window2, text=self.materialProp[i], width=10))
-            self.label_list[i].grid(row=rowN, column=colN)
+            if self.sectionProp_curr_freq[j].strip().upper() == "Y":
+                self.label_list_sect.append(Label(self.window2_shell, text=self.sectionProp_curr[j].upper(), width=10, fg="blue"))
+                self.entry_list_sect.append(Entry(self.window2_shell, width=10, fg="blue"))
+            else:
+                self.label_list_sect.append(Label(self.window2_shell, text=self.sectionProp_curr[j].upper(), width=10))
+                self.entry_list_sect.append(Entry(self.window2_shell, width=10))
+            self.label_list_sect[j].grid(row=rowN, column=colN)
 
-            self.entry_list.append(Entry(self.window2, width=10))
-            self.entry_list[i].grid(row=rowN+1, column=colN)
-            self.entry_list[i].insert(0,self.material1.material_prop[self.materialProp[i]])
+            self.entry_list_sect[j].grid(row=rowN+1, column=colN)
+            # self.entry_list[j].insert(0,self.material1.material_prop.get(self.materialProp_curr[j].strip(), 0.0))
+            self.entry_list_sect[j].insert(0,self.sectionProp_curr_default[j])
 
+            count += 1
             colN += 1
 
         rowN += 3
         # print(rowN)
-        add_button = Button(self.window2, text="Add", command=self.add_new)
+        add_button = Button(self.window2_shell, text="Add", command=self.add_section_)
         add_button.grid(row=rowN, column=0)
-        button_ = Button(self.window2, text="Save", command=self.save_data2)
+        button_ = Button(self.window2_shell, text="Save", command=self.save_section_)
         button_.grid(row=rowN, column=1)
-        Exitbutton_ = Button(self.window2, text="Exit", command=self.close_window)
+        Exitbutton_ = Button(self.window2_shell, text="Exit", command=self.close_section_)
         Exitbutton_.grid(row=rowN, column=2)
 
-    def shell_button_click(self):
+    def add_section_(self):
         """
 
         :return:
         """
-        self.inShellSection = True
-        self.inSolidSection = False
+        self.save_section_()
+
+    def save_section_(self):
+        """
+
+        :return:
+        """
+                # print("##############################################################")
+        outlines = []
+        colN = 0
         rowN = 0
-        self.window2_shell = Toplevel(self.frame)
+        count = 0
+        newline = []
+        index = 0
+        outlines.append("\n")
+        outlines.append(self.section_cards[self.sectionType]["Card_Title"][0])
+        for j in range(len(self.sectionProp_curr)):
+            if count == 8 or j == (len(self.sectionProp_curr)-1):
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                outlines.append(line1)
+                newline = []
 
-        self.shell_section_prop = ['TITLE', 'SECID', 'ELFORM', 'SHRF', 'NIP', 'PROPT', 'QR/IRID', 'ICOMP', 'SETYP', 'T1', 'NLOC']
+            if self.sectionProp_curr[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                outlines.append(line1)
+                newline = []
+                index += 1
+                continue
 
-        self.shell_entry_list = []
-        self.shell_label_list = []
-        for i in range(len(self.shell_section_prop)):
-            rowN = i + 1
-            # print(rowN)
-            self.shell_label_list.append(Label(self.window2_shell, text=self.shell_section_prop[i], width=20))
-            self.shell_label_list[i].grid(row=rowN, column=0)
+            print("[{}] {}: {}".format(index, self.sectionProp_curr[j], self.entry_list_sect[index].get()))
+            tmp_prop = self.entry_list_sect[index].get().strip()
+            newline.append(tmp_prop.rjust(10))
 
-            self.shell_entry_list.append(Entry(self.window2_shell, width=50))
-            self.shell_entry_list[i].grid(row=rowN, column=2)
-            self.shell_entry_list[i].insert(0,0)
+            count += 1
+            colN += 1
+            index += 1
 
-        rowN = rowN + 1
-        # print(rowN)
-        add_button = Button(self.window2_shell, text="Add", command=self.section_add_new)
-        add_button.grid(row=rowN, column=1)
-        button_ = Button(self.window2_shell, text="Save", command=self.section_save_data)
-        button_.grid(row=rowN, column=2)
-        Exitbutton_ = Button(self.window2_shell, text="Exit", command=self.section_close_window)
-        Exitbutton_.grid(row=rowN, column=3)
+        # self.mat_out = filedialog.asksaveasfilename()
+        with open(self.mat_out, 'a') as outFile:
+            outFile.writelines(outlines)
+
+    def close_section_(self):
+        """
+
+        :return:
+        """
+        self.window2_shell.destroy()
 
     def solid_button_click(self):
         """
@@ -1392,6 +1600,14 @@ class App:
         self.loadingType = self.loadType.get()
         self.template_controlcards.insert(0, self.mapControlCards[self.loadingType])
 
+    def section_dropdown(self, *args):
+        # Material Section
+        self.sectionType = self.sectionCardType.get()
+
+    def matRead_dropdown(self, *args):
+        # Material
+        self.matReadType = self.matType.get()
+
     def change_dropdown1(self, *args):
         """
 
@@ -1440,13 +1656,28 @@ class App:
         self.materialType = materialType
         # print(self.materialType)
 
-    def createButton(self, buttonName, buttonMethod, rowN, colN, fg='black'):
+    def getSectionType(self, sectionType):
+        """
+        :return:
+        """
+        self.sectionType = sectionType
+        # print(self.materialType)
+
+    def getMatReadType(self, materialType):
+        """
+        :return:
+        """
+        self.matReadType = materialType
+        # print(self.materialType)
+
+    def createButton(self, buttonName, buttonMethod, rowN, colN, fg='black', sticky_=N):
         """
 
         :return:
         """
+        print(buttonName, sticky_)
         button_ = Button(self.frame, text=buttonName, command=buttonMethod, fg=fg)
-        button_.grid(row=rowN, column=colN)
+        button_.grid(row=rowN, column=colN, sticky=sticky_)
 
     def createLabel(self, labelName, rowN, colN):
         """
