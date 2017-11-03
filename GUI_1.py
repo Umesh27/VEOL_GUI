@@ -82,10 +82,10 @@ class App:
         # self.matTypeList = set(sorted({'MAT_54', 'MAT_55', 'MAT_20', 'MAT_24'}))
         self.matTypeList = set(sorted(self.matTypeList1))
         self.matType.set('MAT_54')
-        self.mat55_template = os.path.join(self.template_path, "mat55.k")
-        self.mat24_template = os.path.join(self.template_path, "mat24.k")
-        self.rigid_template = os.path.join(self.template_path, "rigid.k")
-        self.mapMat = {'MAT_54':self.mat55_template, 'MAT_55':self.mat55_template, 'MAT_20':self.rigid_template, 'MAT_24':self.mat24_template}
+        # self.mat55_template = os.path.join(self.template_path, "mat55.k")
+        # self.mat24_template = os.path.join(self.template_path, "mat24.k")
+        # self.rigid_template = os.path.join(self.template_path, "rigid.k")
+        # self.mapMat = {'MAT_54':self.mat55_template, 'MAT_55':self.mat55_template, 'MAT_20':self.rigid_template, 'MAT_24':self.mat24_template}
         popupMenu = OptionMenu(self.frame, self.matType, *self.matTypeList, command=self.getMatType)
         popupMenu.grid(row = self.rowN, column=1)
         self.matType.trace('w', self.change_dropdown)
@@ -179,16 +179,19 @@ class App:
                 card_titles.append(card_title)
                 count = 1
                 if card_title == "*MAT_ENHANCED_COMPOSITE_DAMAGE":
-                    self.materialPara_tmp = []
+                    if not self.materialPara_tmp == []:
+                        self.materialPara.update({tmp_line:self.materialPara_tmp})
+                        self.materialPara_tmp = []
                 else:
                     if not self.materialPara_tmp == []:
-                        self.materialPara.update({self.mapMatInfo[card_title]:self.materialPara_tmp})
+                        self.materialPara.update({tmp_line:self.materialPara_tmp})
                         self.materialPara_tmp = []
                 continue
 
             if count == 1:
                 mat_id = int(line[:10].strip())
                 if not card_title == "*MAT_ENHANCED_COMPOSITE_DAMAGE":
+                    matType = str(self.mapMatInfo[card_title])
                     tmp_line = ",".join([str(self.mapMatInfo[card_title]), str(mat_id)])
                     self.matReadList.append(tmp_line)
 
@@ -198,13 +201,15 @@ class App:
                 print(crit_fail)
                 # count = 0
                 if crit_fail == 54:
-                    tmp_line = ",".join(["MAT_54", str(mat_id)])
+                    matType = "MAT_54"
+                    tmp_line = ",".join([matType, str(mat_id)])
                     self.matReadList.append(tmp_line)
-                    self.materialPara.update({"MAT_54":self.materialPara_tmp})
+                    # self.materialPara.update({"MAT_54":self.materialPara_tmp})
                 else:
-                    tmp_line = ",".join(["MAT_55", str(mat_id)])
+                    matType = "MAT_55"
+                    tmp_line = ",".join([matType, str(mat_id)])
                     self.matReadList.append(tmp_line)
-                    self.materialPara.update({"MAT_55":self.materialPara_tmp})
+                    # self.materialPara.update({"MAT_55":self.materialPara_tmp})
 
             # print(len(line))
             list1 = re.findall('.{%d}'%10, line)
@@ -221,11 +226,12 @@ class App:
         print(self.matReadList)
         self.rowN += 3
         self.matReadType = self.matReadList[0]
-        popupMenu = OptionMenu(self.frame, self.matType, *self.matReadList, command=self.getMatReadType)
+        self.matReadType_set = StringVar(self.frame)
+        popupMenu = OptionMenu(self.frame, self.matReadType_set, *self.matReadList, command=self.getMatReadType)
         popupMenu.grid(row = self.rowN, column=1)
-        self.matType.set(self.matReadList[0])
+        self.matReadType_set.set(self.matReadList[0])
         self.matReadList = set(sorted(self.matReadList))
-        self.matType.trace('w', self.matRead_dropdown)
+        self.matReadType_set.trace('w', self.matRead_dropdown)
         self.editMatData = self.createButton("Update", self.edit_mat, self.rowN, 2, sticky_=W)
 
     def edit_mat(self):
@@ -247,7 +253,7 @@ class App:
         index = 0
         print("###############################################################")
         print(len(self.materialProp_curr), self.materialProp_curr)
-        print(len(self.materialPara[matReadType]), (self.materialPara[matReadType]))
+        print(len(self.materialPara[self.matReadType]), (self.materialPara[self.matReadType]))
         for j in range(len(self.materialProp_curr)):
             # print("{%d} {%d}"%(index,j))
             if count == 8:
@@ -264,7 +270,7 @@ class App:
                 # index += 1
                 continue
 
-            if materialPara_curr_freq[j].strip() == "y":
+            if materialPara_curr_freq[j].strip().upper() == "Y":
                 self.label_list.append(Label(self.window2, text=self.materialProp_curr[j].upper(), width=10, fg="blue"))
                 self.entry_list.append(Entry(self.window2, width=10, fg="blue"))
             else:
@@ -278,7 +284,7 @@ class App:
                 self.entry_list[j].insert(0,str(crit_fail))
             else:
                 try:
-                    self.entry_list[j].insert(0,self.materialPara[matReadType][index])
+                    self.entry_list[j].insert(0,self.materialPara[self.matReadType][index])
                 except Exception as Ex:
                     print(Ex)
                     self.entry_list[j].insert(0,"")
