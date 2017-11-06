@@ -1,0 +1,2 @@
+cd /d %~dp0
+start cmd.exe /k C:\LSDYNA\program\ls-dyna_smp_d_R800_winx64_ifort131.exe i=input.k NCPU=$NCPU$ MEMORY=$MEMORY$M

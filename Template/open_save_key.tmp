@@ -1,0 +1,24 @@
+/*
+	Open d3plot
+*/
+define:
+void main(void){
+    char *saveKey;
+	char *openKey; 
+
+	openKey = "open keyword $keyPath$";
+	saveKey = "save keyword $outPath$";
+
+	//ExecuteCommand("f11");
+	ExecuteCommand(openKey);
+	openKey = "import keyword $keyPath1$";
+	ExecuteCommand(openKey);
+	openKey = "import keyword $keyPath2$";
+	ExecuteCommand(openKey);
+	openKey = "import keyword $keyPath3$";
+	ExecuteCommand(openKey);
+	//ExecuteCommand("selectpart all on");
+	ExecuteCommand(saveKey);
+}
+main();
+

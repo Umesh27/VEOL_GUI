@@ -1,0 +1,14 @@
+{"ENERGY": 
+	{
+		"Control_Parameters": [	"HGEN,RWEN,SLNTEN,RYLEN", 
+								"1,2,1,1", 
+								"y,y,y,y"
+							  ], 
+		"Card_Title": ["*CONTROL_ENERGY", "y"]
+	},
+ "HOURGLASS":
+	{
+		"Control_Parameters": [ "IHQ,QH", "1,0.1", "y,y"],
+		"Card_Title": ["*CONTROL_HOURGLASS", "y"]
+	}
+}

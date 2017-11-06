@@ -1,0 +1,18 @@
+{
+ "SHELL":
+	{
+		"Section_Parameters":["SECID,ELFORM,SHRF,NIPM,PROPT,QR/IRID,ICOMP,SETYP,T1,T2,T3,T4,NLOC,MAREA,IDOF,EDGSET", 
+							"1,2,1.0,2,1,0,0,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0", 
+							"Y,Y,Y,Y,Y,N,N,Y,Y,N,N,N,N,N,N,N"],
+		"Card_Title":["*SECTION_SHELL","Y"],
+		"Part_Title":["Part_Title","N"]
+	},
+ "SOLID":
+	{
+		"Section_Parameters":["SECID,ELFORM,AET", 
+							"1,1,0", 
+							"Y,Y,Y"],
+		"Card_Title":["*SECTION_SOLID","Y"],
+		"Part_Title":["Part_Title","N"]
+	}
+}

@@ -23,12 +23,35 @@ class VIEWER:
         self.master = master
         self.frame = Frame(self.master)
         self.frame.pack()
+        self.baseDir = os.path.dirname(sys.argv[0])
+        self.template_path = os.path.join(self.baseDir, "Template")
 
         self.rowN = 0
-        self.project_path_button = self.createButton(self.frame, "ProjectPath", self.open_projectPath, self.rowN, 1)
+        self.project_path_button = self.createButton(self.frame, "ProjectPath", self.open_projectPath, self.rowN, 1, sticky_=EW, bg_='lightyellow')
         self.project_path = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1"
         self.project_path_entry = self.createEntry(self.frame, self.project_path, self.rowN, 2, widthV=50)
-        self.createButton(self.frame, "Create_Input", self.create_input, self.rowN, 3, fg_='brown')
+        self.createButton(self.frame, "Create_Input", self.create_input, self.rowN, 3, sticky_=EW, bg_='lightyellow')
+
+        # Input Info
+        self.rowN += 1
+        self.input_path_button = self.createButton(self.frame, "Input_Path", self.open_inputPath, self.rowN, 1, sticky_=EW, bg_='lightyellow')
+        self.meshFile = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\mesh.k"
+        self.input_path_entry = self.createEntry(self.frame,self.meshFile, self.rowN, 2, widthV=50)
+        self.createButton(self.frame, "Get_Info", self.get_info, self.rowN, 3, sticky_=EW, bg_='lightyellow')
+        self.input_parts = []
+        self.partInfo = {"":""}
+        self.partRowNo = self.rowN
+        self.map_part_material = {}
+        self.map_part_section = {}
+        self.map_part_thickness = {}
+
+        self.parts_info = StringVar(self.frame)
+        self.parts_info.set("")
+        self.partInfo_list = set(sorted(self.partInfo.keys()))
+        self.part_option = OptionMenu(self.frame, self.parts_info, *self.partInfo_list, command=self.get_part_ID)
+        self.part_option.config(bg='lightyellow')
+        self.part_option.grid(row = self.partRowNo+1, column=2, sticky="N")
+        self.parts_info.trace('w', self.part_dropdown)
 
         self.rowN += 1
         # Material Cards Info
@@ -39,27 +62,35 @@ class VIEWER:
         self.material_cards_type.set(self.material_card)
 
         popupMenu = OptionMenu(self.frame, self.material_cards_type, *self.material_cards_type_list, command=self.get_material_type)
-        popupMenu.grid(row = self.rowN, column=1)
+        popupMenu.config(bg='lightyellow')
+        popupMenu.grid(row = self.rowN, column=2, sticky="W", ipadx_=5)
         self.material_cards_type.trace('w', self.material_dropdown)
 
-        self.add_new_material_card_button = Button(self.frame, text="AddNewMaterial", command=self.add_new_material_card)
-        self.add_new_material_card_button.grid(row=self.rowN, column=2, sticky=W)
+        self.add_new_material_card_button = Button(self.frame, text="AddNewMaterial", command=self.add_new_material_card, bg='peachpuff')
+        self.add_new_material_card_button.grid(row=self.rowN, column=1, sticky=EW)
 
-        self.read_material_button = Button(self.frame, text="ReadMaterial", command=self.read_material)
-        self.read_material_button.grid(row=self.rowN, column=2)#, sticky=W)
+        self.read_material_button = Button(self.frame, text="ReadMaterial", command=self.read_material, bg='lightblue')
+        self.read_material_button.grid(row=self.rowN, column=2, ipadx=15, sticky=E)
 
-        self.add_material_info_button = Button(self.frame, text="AddMaterialPara", command=self.add_material_info)
-        self.add_material_info_button.grid(row=self.rowN, column=3, sticky=W)
+        self.add_material_info_button = Button(self.frame, text="AddMaterialPara", command=self.add_material_info, bg='lightyellow')
+        self.add_material_info_button.grid(row=self.rowN, column=3, sticky=EW)
 
         self.rowN += 1
         self.section_cards_type = StringVar(self.frame)
         self.section_type = self.MaterialCards.section_cards_type[0]
         self.section_cards_type.set(self.section_type)
         popupMenu = OptionMenu(self.frame, self.section_cards_type, *self.MaterialCards.section_cards_type, command=self.get_section_type)
-        popupMenu.grid(row = self.rowN, column=1)
+        popupMenu.config(bg='lightyellow')
+        popupMenu.grid(row = self.rowN, column=2, ipadx=25, sticky=E)
         self.section_cards_type.trace('w', self.section_dropdown)
-        self.add_section_button = Button(self.frame, text="Add_Section", command=self.add_section)
-        self.add_section_button.grid(row=self.rowN, column=2, sticky=W)
+
+        self.add_section_button = Button(self.frame, text="Add_Section", command=self.add_section, bg='lightyellow')
+        self.add_section_button.grid(row=self.rowN, column=3, sticky=EW)
+
+        # Update Part Info ( partId = MaterialId = SectionId)
+        self.rowN += 1
+        self.updatePart_button = Button(self.frame, text="UpdatePartInfo", command=self.update_part_info, bg='lightyellow')
+        self.updatePart_button.grid(row=self.rowN, column=3, sticky=EW)
 
         # Control Cards Info
         self.rowN += 1
@@ -70,25 +101,304 @@ class VIEWER:
         self.control_cards_type.set(self.control_card)
 
         popupMenu = OptionMenu(self.frame, self.control_cards_type, *self.control_cards_type_list, command=self.get_control_type)
-        popupMenu.grid(row = self.rowN, column=1)
+        popupMenu.grid(row = self.rowN, column=2, sticky=W)
+        popupMenu.config(bg='lightyellow')
         self.control_cards_type.trace('w', self.control_dropdown)
 
-        self.add_new_control_card_button = Button(self.frame, text="AddNewControlCards", command=self.add_new_control_card)
-        self.add_new_control_card_button.grid(row=self.rowN, column=2, sticky=W)
+        self.add_new_control_card_button = Button(self.frame, text="AddNewControlCards", command=self.add_new_control_card, bg='peachpuff')
+        self.add_new_control_card_button.grid(row=self.rowN, column=1, sticky=W)
 
-        self.read_control_button = Button(self.frame, text="ReadControlCards", command=self.read_control_card)
-        self.read_control_button.grid(row=self.rowN, column=2, sticky=E)
+        self.read_control_button = Button(self.frame, text="ReadControlCards", command=self.read_control_card, bg='lightblue')
+        self.read_control_button.grid(row=self.rowN, column=2, ipadx=15, sticky=E)
 
-        self.add_control_cards_info_button = Button(self.frame, text="AddControlCardsPara", command=self.add_control_cards_info)
+        self.add_control_cards_info_button = Button(self.frame, text="AddControlCardsPara", command=self.add_control_cards_info, bg='lightyellow')
         self.add_control_cards_info_button.grid(row=self.rowN, column=3, sticky=W)
 
         self.rowN += 1
         # Open Input
-        self.createButton(self.frame, "Open Input", self.open_input, self.rowN, 1, fg_='red')
+        self.createButton(self.frame, "Open Input", self.open_input, self.rowN, 1, sticky_=EW, bg_='lightgreen')
+        # Review Input
+        self.createButton(self.frame, "Review Input", self.review_input, self.rowN, 2, sticky_=W, ipadx_=35, bg_='lightgreen')
         # Run Input
-        self.createButton(self.frame, "Run", self.run_info, self.rowN, 2, fg_='red')
+        self.createButton(self.frame, "Run", self.run_info, self.rowN, 2, sticky_=E, ipadx_=55, bg_='lightgreen')
         # Exit
-        self.createButton(self.frame, "Exit", self.frame.quit, self.rowN, 3, fg_='red')
+        self.createButton(self.frame, "Exit", self.frame.quit, self.rowN, 3, sticky_=EW, bg_='lightgreen')
+
+    def review_input(self):
+        """
+        :return:
+        """
+        row_ = 0
+
+        parameter_label1 = StringVar()
+        parameter_label_entry1 = Entry(self.frame, textvariable=parameter_label1, state='readonly', justify=CENTER)
+        parameter_label1.set('PartID')
+        parameter_label_entry1.grid(row=row_, column=5, sticky=N)
+
+        parameter_label2 = StringVar()
+        parameter_label_entry2 = Entry(self.frame, textvariable=parameter_label2, state='readonly', justify=CENTER)
+        parameter_label2.set('PartName')
+        parameter_label_entry2.grid(row=row_, column=6, sticky=N)
+
+        parameter_label3 = StringVar()
+        parameter_label_entry3 = Entry(self.frame, textvariable=parameter_label3, state='readonly', justify=CENTER)
+        parameter_label3.set('ID, MaterialType')
+        parameter_label_entry3.grid(row=row_, column=7, sticky=N)
+
+        parameter_label4 = StringVar()
+        parameter_label_entry4 = Entry(self.frame, textvariable=parameter_label4, state='readonly', justify=CENTER)
+        parameter_label4.set('ID, ShellType')
+        parameter_label_entry4.grid(row=row_, column=8, sticky=N)
+
+        parameter_label5 = StringVar()
+        parameter_label_entry5 = Entry(self.frame, textvariable=parameter_label5, state='readonly', justify=CENTER)
+        parameter_label5.set('Thickness')
+        parameter_label_entry5.grid(row=row_, column=9, sticky=N)
+
+        # self.createButton(self.frame, "EXIT", self.save_mat_info, row_, 10, fg_='red', sticky_='E')
+
+        print(self.map_part_material)
+        print(self.map_part_section)
+        self.partID_label = []
+        self.partName_label = []
+        self.partMat_label = []
+        self.partShell_label = []
+        self.partThk_label = []
+
+        index = 0
+        for key in sorted(self.map_part_material.keys()):
+            row_ += 1
+            print(index)
+
+            partID_label = StringVar()
+            print(key, self.map_part_id_name.get(key, ""), self.map_part_material.get(key, ""), self.map_part_section.get(key, ""), self.map_part_thickness.get(key, ""))
+            self.partID_label.append(Entry(self.frame, textvariable=partID_label, width=5, state='readonly'))
+            partID_label.set(key)
+            self.partID_label[index].grid(row = row_, column=5)
+            # self.partID_label[index].insert(0, key)
+
+            partName_label = StringVar()
+            self.partName_label.append(Entry(self.frame, textvariable=partName_label, width=15, state='readonly'))
+            partName_label.set(self.map_part_id_name.get(key, ""))
+            self.partName_label[index].grid(row = row_, column=6)
+            # self.partName_label[index].insert(0, self.map_part_id_name[key])
+
+            partMat_label = StringVar()
+            self.partMat_label.append(Entry(self.frame, textvariable=partMat_label, width=10, state='readonly'))
+            partMat_label.set(self.map_part_material.get(key, ""))
+            self.partMat_label[index].grid(row = row_, column=7)
+            # self.partMat_label[index].insert(0, self.map_part_material[key])
+
+            partShell_label = StringVar()
+            self.partShell_label.append(Entry(self.frame, textvariable=partShell_label, width=10, state='readonly'))
+            partShell_label.set(self.map_part_section.get(key, ""))
+            self.partShell_label[index].grid(row = row_, column=8)
+            # self.partShell_label[index].insert(0, self.map_part_section[key])
+
+            partThk_label = StringVar()
+            self.partThk_label.append(Entry(self.frame, textvariable=partThk_label, width=5, state='readonly'))
+            partThk_label.set(self.map_part_thickness.get(key, ""))
+            self.partThk_label[index].grid(row = row_, column=9)
+            # self.partThk_label[index].insert(0, self.map_part_thickness[key])
+            index += 1
+
+    def open_inputPath(self):
+        """
+        :return:
+        """
+        self.meshFile = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.input_path_entry.delete(0,'end')
+        self.input_path_entry.insert(0,self.meshFile)
+
+    def get_info(self):
+        """
+
+        :return:
+        """
+        self.partInfo = {}
+        self.map_part_id_name = {}
+        with open(self.meshFile) as readFile:
+            readlines = readFile.readlines()
+
+        inOtherBlock = False
+        inPartBlock = False
+        inTitleBlock = False
+        inPartIdBlock = False
+        for line in readlines:
+            count = 0
+            if line.startswith("*PART"):
+                inPartBlock = True
+                inTitleBlock = True
+                inOtherBlock = False
+                # print(line)
+                continue
+            if line.__contains__("*"):
+                inOtherBlock = True
+                inPartBlock = False
+                continue
+            if inPartBlock:
+                if line.startswith("$"):
+                    continue
+                if inTitleBlock:
+                    # print("In part title Block :")
+                    # print(line.strip())
+                    partName = line.strip()
+                    inTitleBlock = False
+                    inPartIdBlock = True
+                    continue
+                if inPartIdBlock:
+                    # print("In partId Block :")
+                    # print(line)
+                    partId = line[:10].strip()
+                    self.partInfo.update({partName:partId})
+                    self.map_part_id_name.update({partId:partName})
+                    inPartIdBlock = False
+                    inTitleBlock = True
+                    continue
+            if inOtherBlock:
+                continue
+        print(self.partInfo)
+
+        self.update_option_menu()
+
+    def update_option_menu(self):
+        """
+        :return:
+        """
+        self.partInfo_list = set(sorted(self.partInfo.keys()))
+        menu = self.part_option['menu']
+        menu.delete(0, 'end')
+        for string in self.partInfo_list:
+            menu.add_command(label=string,
+                             command=lambda value=string: self.parts_info.set(value))
+
+    def update_part_info(self):
+        """
+        :return:
+        """
+        print(self.partInfo)
+        self.window_partInfo = Toplevel(self.frame)
+        row_ = 0
+        # partId = self.partID
+        # partName = self.map_part_id_name[partId]
+        # materialId = self.map_part_material[partId].split(',')[0]
+        # sectionId = self.map_part_section[partId].split(',')[0]
+
+        self.createLabel(self.window_partInfo, "PartID", row_, 0, 10)
+        # self.partID_entry = self.createEntry(self.window_partInfo, partId, rowN+1, 0, 10)
+        self.createLabel(self.window_partInfo, "PartName", row_, 1, 10)
+        # self.partName_entry = self.createEntry(self.window_partInfo, partName, rowN+1, 1, 10)
+        self.createLabel(self.window_partInfo, "MaterialID", row_, 2, 10)
+        # self.materialID_entry = self.createEntry(self.window_partInfo, "", rowN+1, 2, 10)
+        self.createLabel(self.window_partInfo, "SectionID", row_, 3, 10)
+        # self.sectionID_entry = self.createEntry(self.window_partInfo, "", rowN+1, 3, 10)
+
+        self.partInfo_entry = []
+        self.partID_label = []
+        self.partName_label = []
+        self.partMat_label = []
+        self.partShell_label = []
+
+        index = 0
+        for key in sorted(self.map_part_id_name.keys()):
+            row_ += 1
+            print(index)
+
+            partID_label = StringVar()
+            # print(key, self.map_part_id_name[key], self.map_part_material[key], self.map_part_section[key], self.map_part_thickness[key])
+            self.partID_label.append(Entry(self.window_partInfo, textvariable=partID_label, width=5))#, state='readonly'))
+            partID_label.set(key)
+            self.partID_label[index].grid(row = row_, column=0)
+            # self.partID_label[index].insert(0, key)
+
+            partName_label = StringVar()
+            self.partName_label.append(Entry(self.window_partInfo, textvariable=partName_label, width=15))#, state='readonly'))
+            partName_label.set(self.map_part_id_name.get(key, ""))
+            self.partName_label[index].grid(row = row_, column=1)
+            # self.partName_label[index].insert(0, self.map_part_id_name[key])
+
+            partMat_label = StringVar()
+            self.partMat_label.append(Entry(self.window_partInfo, textvariable=partMat_label, width=10))#, state='readonly'))
+            partMat_label.set(self.map_part_material.get(key, "").split(',')[0])
+            self.partMat_label[index].grid(row = row_, column=2)
+            # self.partMat_label[index].insert(0, self.map_part_material[key])
+
+            partShell_label = StringVar()
+            self.partShell_label.append(Entry(self.window_partInfo, textvariable=partShell_label, width=10))#, state='readonly'))
+            partShell_label.set(self.map_part_section.get(key, "").split(',')[0])
+            self.partShell_label[index].grid(row = row_, column=3)
+            index += 1
+
+        row_ += 2
+        self.createButton(self.window_partInfo, "Save", self.update, row_, 2, sticky_=EW)
+        self.createButton(self.window_partInfo, "Exit", self.close_window_part_info, row_, 3, sticky_=EW)
+
+    def update(self):
+        """
+        :return:
+        """
+
+        with open(self.meshFile) as readFile:
+            readlines = readFile.readlines()
+
+        inOtherBlock = False
+        inPartBlock = False
+        inTitleBlock = False
+        inPartIdBlock = False
+        outlines = []
+        for line in readlines:
+            count = 0
+            if line.startswith("*PART"):
+                outlines.append(line)
+                inPartBlock = True
+                inTitleBlock = True
+                inOtherBlock = False
+                # print(line)
+                continue
+            if line.__contains__("*"):
+                outlines.append(line)
+                inOtherBlock = True
+                inPartBlock = False
+                continue
+            if inPartBlock:
+                if line.startswith("$"):
+                    outlines.append(line)
+                    continue
+                if inTitleBlock:
+                    outlines.append(line)
+                # print("In part title Block :")
+                    # print(line.strip())
+                    partName = line.strip()
+                    inTitleBlock = False
+                    inPartIdBlock = True
+                    continue
+                if inPartIdBlock:
+                    # print("In partId Block :")
+                    # print(line)
+                    partId = line[:10].strip()
+                    sectId = line[11:20].strip()
+                    matId = line[21:30].strip()
+                    line1 = line[:10] + self.sectionID_entry.get() + self.materialID_entry.get() + line[31:]
+                    self.partInfo.update({partName:partId})
+                    self.map_part_id_name.update({partId:partName})
+                    inPartIdBlock = False
+                    inTitleBlock = True
+                    outlines.append(line1)
+                    continue
+            if inOtherBlock:
+                outlines.append(line)
+                continue
+        print(self.partInfo)
+
+        self.meshFile_out = os.path.join(os.path.split(self.meshFile)[0], "mesh_edit.k")
+        with open(self.meshFile_out, 'w') as outFile:
+            outFile.writelines(outlines)
+
+    def close_window_part_info(self):
+        """
+        :return:
+        """
+        self.window_partInfo.destroy()
 
     def add_new_control_card(self):
         """
@@ -269,13 +579,30 @@ class VIEWER:
                 index += 1
                 continue
 
-            print("[{}] {}: {}".format(index, self.curr_section_parameters[j], self.entry_list_section[index].get()))
+            if self.curr_section_parameters[j].upper() == 'T1':
+                """ """
+                thickness = self.entry_list_section[index].get()
+                print(self.curr_section_parameters[j].upper(), thickness)
+            if self.curr_section_parameters[j].upper() == 'SECID':
+                """ """
+                mid = self.entry_list_section[index].get()
+                print(self.curr_section_parameters[j].upper(), mid)
+
+            # print("[{}] {}: {}".format(index, self.curr_section_parameters[j], self.entry_list_section[index].get()))
             tmp_prop = self.entry_list_section[index].get().strip()
             newline.append(tmp_prop.rjust(10))
 
             count += 1
             colN += 1
             index += 1
+        line = ",".join([mid, self.section_type])
+        self.map_part_section.update({self.partID:line})
+        if self.section_type == "SHELL":
+            self.map_part_thickness.update({self.partID:thickness})
+        else:
+            self.map_part_thickness.update({self.partID:""})
+
+        # print(self.map_part_section)
 
         with open(self.material_out_file, 'a') as outFile:
             outFile.writelines(outlines)
@@ -892,7 +1219,9 @@ class VIEWER:
                 index += 1
                 continue
 
-            print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
+            # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
+            if self.curr_material_parameters[j] == 'mid':
+                mid = self.entry_list[index].get().strip()
             tmp_prop = self.entry_list[index].get().strip()
             newline.append(tmp_prop.rjust(10))
             if j == (len(self.curr_material_parameters)-1):
@@ -902,6 +1231,9 @@ class VIEWER:
             count += 1
             colN += 1
             index += 1
+        line = ",".join([mid, self.material_card])
+        self.map_part_material.update({self.partID:line})
+        # print(self.map_part_material)
 
         with open(self.material_out_file, 'a') as outFile:
             outFile.writelines(outlines)
@@ -921,26 +1253,83 @@ class VIEWER:
         """
         self.material_card = self.material_cards_type.get()
 
+    def get_part_ID(self, partID):
+        self.partID = partID
+
+    def part_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.partID = self.partInfo[self.parts_info.get()]
+        # self.part_option
+
     def open_input(self):
         """
 
         :return:
         """
+        print("Opening Input file !")
+        import keywordSave
+        temp_path = os.path.join(self.template_path, "open_save_key.tmp")
+        input_path = os.path.abspath(self.input_keyword.Kfile)
+        self.Kfile_new = os.path.join(os.path.split(input_path)[0], "out_key.k")
+        print(self.Kfile_new)
+        keywordSave.createSCL(temp_path, keyIn=input_path, keyOut=self.Kfile_new)
 
     def run_info(self):
         """
-
         :return:
         """
+        print("Running Input file !")
+        rowN = 0
+        self.window_run = Toplevel(self.frame)
 
-    def createButton(self, frame_, buttonName, buttonMethod, rowN, colN, fg_='black', sticky_=N):
+        self.ncpu_label = Label(self.window_run, text="NCPU", width=20)
+        self.ncpu_label.grid(row=rowN, column=0)
+
+        self.ncpu_entry = Entry(self.window_run, width=50)
+        self.ncpu_entry.grid(row=rowN, column=1)
+        self.ncpu_entry.insert(0,"12")
+
+        rowN += 1
+        self.memory_label = Label(self.window_run, text="MEMORY", width=20)
+        self.memory_label.grid(row=rowN, column=0)
+
+        self.memory_entry = Entry(self.window_run, width=50)
+        self.memory_entry.grid(row=rowN, column=1)
+        self.memory_entry.insert(0,"400")
+
+        rowN += 1
+        self.shell_button = Button(self.window_run, text="Run", command=self.run_input, fg='red')
+        self.shell_button.grid(row=rowN, column=0)
+
+    def run_input(self):
+        """
+        :return:
+        """
+        tmpFile = os.path.join(self.template_path,"run_windows.tmp")
+        with open(tmpFile,"r") as f:
+            s = f.read()
+
+        s = s.replace("$INPUTFILEPATH$", self.input_keyword.Kfile)
+        s = s.replace("$NCPU$", self.ncpu_entry.get())
+        s = s.replace("$MEMORY$", self.memory_entry.get())
+        runFile = os.path.join(self.project_path,"run.bat")
+        with open(runFile,"w") as f:
+            f.write(s)
+
+        p = subprocess.Popen("run.bat", cwd=self.project_path, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        out,err = p.communicate()
+        p.terminate()
+
+    def createButton(self, frame_, buttonName, buttonMethod, rowN, colN, fg_='black', sticky_=N, bg_='lightgray', ipadx_=0):
         """
 
         :return:
         """
         # print(buttonName, sticky_)
-        button_ = Button(frame_, text=buttonName, command=buttonMethod, fg=fg_)
-        button_.grid(row=rowN, column=colN, sticky=sticky_)
+        button_ = Button(frame_, text=buttonName, command=buttonMethod, fg=fg_, bg=bg_)
+        button_.grid(row=rowN, column=colN, sticky=sticky_, ipadx=ipadx_)
 
     def createLabel(self, frame_, labelName, rowN, colN, width=10, fg_='black'):
         """
