@@ -44,6 +44,7 @@ class VIEWER:
         self.map_part_material = {}
         self.map_part_section = {}
         self.map_part_thickness = {}
+        self.partSetIdList = []
 
         self.parts_info = StringVar(self.frame)
         self.parts_info.set("")
@@ -235,7 +236,8 @@ class VIEWER:
 
     def get_info(self):
         """
-
+                *PART
+                *SET_PART_LIST
         :return:
         """
         self.partInfo = {}
@@ -245,6 +247,7 @@ class VIEWER:
 
         inOtherBlock = False
         inPartBlock = False
+        inSetPartListBlock = False
         inTitleBlock = False
         inPartIdBlock = False
         for line in readlines:
@@ -253,6 +256,14 @@ class VIEWER:
                 inPartBlock = True
                 inTitleBlock = True
                 inOtherBlock = False
+                inSetPartListBlock = False
+                # print(line)
+                continue
+            if line.startswith("*SET_PART_LIST"):
+                inPartBlock = False
+                inTitleBlock = False
+                inOtherBlock = False
+                inSetPartListBlock = True
                 # print(line)
                 continue
             if line.__contains__("*"):
@@ -278,9 +289,15 @@ class VIEWER:
                     inPartIdBlock = False
                     inTitleBlock = True
                     continue
+            if inSetPartListBlock:
+                if line.startswith("$"):
+                    continue
+                self.partSetIdList.append(line[:10].strip())
+                inSetPartListBlock = False
             if inOtherBlock:
                 continue
         print(self.partInfo)
+        print("part_set_id :", self.partSetIdList)
 
         self.update_option_menu()
 
@@ -541,7 +558,10 @@ class VIEWER:
         """
         self.curveValList_str = ""
         for i in range(len(self.curveInfoList)):
-            self.curveValList_str += self.curveInfoList[i][0].get().rjust(20) + self.curveInfoList[i][1].get().rjust(20) +'\n'
+            if i == len(self.curveInfoList)-1:
+                self.curveValList_str += self.curveInfoList[i][0].get().rjust(20) + self.curveInfoList[i][1].get().rjust(20)
+            else:
+                self.curveValList_str += self.curveInfoList[i][0].get().rjust(20) + self.curveInfoList[i][1].get().rjust(20) +'\n'
 
         print(self.curveValList_str)
         self.window_defineCurve.destroy()
@@ -563,13 +583,16 @@ class VIEWER:
         index = 0
         outlines.append("\n")
         outlines.append(self.ControlCards.define_cards[self.define_card]["Card_Title"][0])
+        header_line = "\n$$"
         for j in range(len(self.curr_define_card_parameters)):
             if count == 8:# or j == (len(self.curr_material_parameters)):
                 rowN += 2
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline)# + "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
 
             if self.curr_define_card_parameters[j] == "":
@@ -577,7 +600,9 @@ class VIEWER:
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline) #+ "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
                 index += 1
                 continue
@@ -585,13 +610,24 @@ class VIEWER:
                 lcid = self.entry_list_define_cards[index].get().strip()
 
             if self.curr_define_card_parameters[j] == "CURVE":
+                if header_line == "\n$$":
+                    header_line += self.curr_define_card_parameters[j].rjust(8)
+                else:
+                    header_line += self.curr_define_card_parameters[j].rjust(10)
                 newline.append(self.curveValList_str)
             else:
+                if header_line == "\n$$":
+                    header_line += self.curr_define_card_parameters[j].rjust(8)
+                else:
+                    header_line += self.curr_define_card_parameters[j].rjust(10)
                 tmp_prop = self.entry_list_define_cards[index].get().strip()
                 newline.append(tmp_prop.rjust(10))
+
             if j == (len(self.curr_define_card_parameters)-1):
                 line1 = "\n" + "".join(newline)# + "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
 
             count += 1
             colN += 1
@@ -657,7 +693,7 @@ class VIEWER:
                 count += 1
                 colN += 1
                 continue
-            if self.curr_control_card_parameters[j] == "LCID":
+            elif self.curr_control_card_parameters[j] == "LCID":
                 self.label_list_control_cards[j].grid(row=rowN, column=colN)
                 self.curve_info = StringVar(self.window_controlCardsInfo)
                 self.curve_info.set("")
@@ -665,6 +701,17 @@ class VIEWER:
                 self.curvePopup.config(bg='lightyellow')
                 self.curvePopup.grid(row = rowN+1, column=colN)
                 self.curve_info.trace('w', self.curve_dropdown)
+                count += 1
+                colN += 1
+                continue
+            elif self.curr_control_card_parameters[j] == "PSID":
+                self.label_list_control_cards[j].grid(row=rowN, column=colN)
+                self.partSetID_info = StringVar(self.window_controlCardsInfo)
+                self.partSetID_info.set("")
+                self.partSetPopup = OptionMenu(self.window_controlCardsInfo, self.partSetID_info, *self.partSetIdList, command=self.get_partSet_ID)
+                self.partSetPopup.config(bg='lightyellow')
+                self.partSetPopup.grid(row = rowN+1, column=colN)
+                self.partSetID_info.trace('w', self.partSet_dropdown)
                 count += 1
                 colN += 1
                 continue
@@ -681,6 +728,15 @@ class VIEWER:
         button_.grid(row=rowN, column=1)
         Exitbutton_ = Button(self.window_controlCardsInfo, text="Exit", command=self.close_window_CC)
         Exitbutton_.grid(row=rowN, column=2)
+
+    def get_partSet_ID(self, partSetID):
+        self.partSetID = partSetID
+
+    def partSet_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.partSetID = self.partSetID_info.get()
 
     def get_curve_ID(self, curveID):
         self.curveID = curveID
@@ -703,13 +759,16 @@ class VIEWER:
         index = 0
         outlines.append("\n")
         outlines.append(self.ControlCards.control_cards[self.control_card]["Card_Title"][0])
+        header_line = "\n$$"
         for j in range(len(self.curr_control_card_parameters)):
             if count == 8:# or j == (len(self.curr_material_parameters)):
                 rowN += 2
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline)# + "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
 
             if self.curr_control_card_parameters[j] == "":
@@ -717,7 +776,9 @@ class VIEWER:
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline) #+ "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
                 index += 1
                 continue
@@ -727,13 +788,20 @@ class VIEWER:
                 tmp_prop = self.partInfo[self.parts_info2.get()]
             elif self.curr_control_card_parameters[j] == "LCID":
                 tmp_prop = self.curve_info.get()
+            elif self.curr_control_card_parameters[j] == "PSID":
+                tmp_prop = self.partSetID_info.get()
             else:
                 tmp_prop = self.entry_list_control_cards[index].get().strip()
-
+            if header_line == "\n$$":
+                header_line += self.curr_control_card_parameters[j].rjust(8)
+            else:
+                header_line += self.curr_control_card_parameters[j].rjust(10)
             newline.append(tmp_prop.rjust(10))
             if j == (len(self.curr_control_card_parameters)-1):
                 line1 = "\n" + "".join(newline)# + "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
 
             count += 1
             colN += 1
@@ -824,13 +892,16 @@ class VIEWER:
         index = 0
         outlines.append("\n")
         outlines.append(self.MaterialCards.section_cards[self.section_type]["Card_Title"][0])
+        header_line = "\n$$"
         for j in range(len(self.curr_section_parameters)):
             if count == 8 or j == (len(self.curr_section_parameters)-1):
                 rowN += 2
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline)# + "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
 
             if self.curr_section_parameters[j] == "":
@@ -838,7 +909,9 @@ class VIEWER:
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline) #+ "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
                 index += 1
                 continue
@@ -853,8 +926,17 @@ class VIEWER:
                 print(self.curr_section_parameters[j].upper(), mid)
 
             # print("[{}] {}: {}".format(index, self.curr_section_parameters[j], self.entry_list_section[index].get()))
+            if header_line == "\n$$":
+                header_line += self.curr_section_parameters[j].rjust(8)
+            else:
+                header_line += self.curr_section_parameters[j].rjust(10)
             tmp_prop = self.entry_list_section[index].get().strip()
             newline.append(tmp_prop.rjust(10))
+            if j == (len(self.curr_section_parameters)-1):
+                line1 = "\n" + "".join(newline)# + "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
 
             count += 1
             colN += 1
@@ -898,13 +980,13 @@ class VIEWER:
 
         self.material_out_file_name = "mat.k"
         self.material_out_file = os.path.join(self.project_path, self.material_out_file_name)
-        # with open(self.material_out_file, 'w') as outFile:
-        #     outFile.write("")
+        with open(self.material_out_file, 'w') as outFile:
+            outFile.write("")
 
         self.control_card_out_file_name = "control_cards.k"
         self.control_card_out_file = os.path.join(self.project_path, self.control_card_out_file_name)
-        # with open(self.control_card_out_file, 'w') as outFile:
-        #     outFile.write("")
+        with open(self.control_card_out_file, 'w') as outFile:
+            outFile.write("*KEYWORD")
 
     def add_new_material_card(self):
         """
@@ -1465,13 +1547,16 @@ class VIEWER:
         index = 0
         outlines.append("\n")
         outlines.append(self.MaterialCards.material_cards[self.material_card]["Card_Title"][0])
+        header_line = "\n$$"
         for j in range(len(self.curr_material_parameters)):
             if count == 8:# or j == (len(self.curr_material_parameters)):
                 rowN += 2
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline)# + "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
 
             if self.curr_material_parameters[j] == "":
@@ -1479,7 +1564,9 @@ class VIEWER:
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline) #+ "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
                 index += 1
                 continue
@@ -1487,11 +1574,19 @@ class VIEWER:
             # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
             if self.curr_material_parameters[j] == 'mid':
                 mid = self.entry_list[index].get().strip()
+
+            if header_line == "\n$$":
+                header_line += self.curr_material_parameters[j].rjust(8)
+            else:
+                header_line += self.curr_material_parameters[j].rjust(10)
+
             tmp_prop = self.entry_list[index].get().strip()
             newline.append(tmp_prop.rjust(10))
             if j == (len(self.curr_material_parameters)-1):
                 line1 = "\n" + "".join(newline)# + "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
 
             count += 1
             colN += 1

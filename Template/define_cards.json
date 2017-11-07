@@ -1,0 +1,9 @@
+{ "CURVE": 
+	{
+		"Control_Parameters": [	"LCID,SIDR,SFA,SFO,OFFA,OFFO,DATTYP,LCINT,CURVE", 
+								"1,0,1.0,1.0,0.0,0.0,0,0,", 
+								"y,n,n,n,n,n,n,n,y"
+							  ], 
+		"Card_Title": ["*DEFINE_CURVE", "y"]
+	}
+}
