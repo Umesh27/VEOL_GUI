@@ -94,14 +94,37 @@ class VIEWER:
 
         # Control Cards Info
         self.rowN += 1
+        # Define Curve
+        self.curveTitleList = []
+        self.curveIdList = []
+        self.curveInfo = {}
+        self.curveValList = []
+        self.curveLines = []
+        self.curveList = []
         self.ControlCards = control_cards.ControlCards()
+        self.define_cards_type = StringVar(self.frame)
+        self.define_card = self.ControlCards.define_cards_type[0]
+        self.define_cards_type_list = set(sorted(self.ControlCards.define_cards_type))
+        self.define_cards_type.set(self.define_card)
+
+        self.define_popupMenu = OptionMenu(self.frame, self.define_cards_type, *self.define_cards_type_list, command=self.get_define_type)
+        self.define_popupMenu.grid(row = self.rowN, column=2, sticky=E, ipadx=30)
+        self.define_popupMenu.config(bg='lightyellow')
+        self.define_cards_type.trace('w', self.define_dropdown)
+
+        # self.createLabel(self.frame, "DefineCurve", self.rowN, 2, sticky_=E, bg_='yellow', ipadx_=15)
+        self.createButton(self.frame, "Import_Info", self.import_curve_info, self.rowN, 2, ipadx_=40, sticky_=W, bg_='lightblue')
+        self.createButton(self.frame, "Add_Info", self.add_define_cards_info, self.rowN, 3, sticky_=EW, bg_='lightyellow')
+
+        self.rowN += 1
+        # self.ControlCards = control_cards.ControlCards()
         self.control_cards_type = StringVar(self.frame)
         self.control_card = self.ControlCards.control_cards_type[0]
         self.control_cards_type_list = set(sorted(self.ControlCards.control_cards_type))
         self.control_cards_type.set(self.control_card)
 
         popupMenu = OptionMenu(self.frame, self.control_cards_type, *self.control_cards_type_list, command=self.get_control_type)
-        popupMenu.grid(row = self.rowN, column=2, sticky=W)
+        popupMenu.grid(row = self.rowN, column=2, sticky=E)
         popupMenu.config(bg='lightyellow')
         self.control_cards_type.trace('w', self.control_dropdown)
 
@@ -109,7 +132,7 @@ class VIEWER:
         self.add_new_control_card_button.grid(row=self.rowN, column=1, sticky=W)
 
         self.read_control_button = Button(self.frame, text="ReadControlCards", command=self.read_control_card, bg='lightblue')
-        self.read_control_button.grid(row=self.rowN, column=2, ipadx=15, sticky=E)
+        self.read_control_button.grid(row=self.rowN, column=2, sticky=W)
 
         self.add_control_cards_info_button = Button(self.frame, text="AddControlCardsPara", command=self.add_control_cards_info, bg='lightyellow')
         self.add_control_cards_info_button.grid(row=self.rowN, column=3, sticky=W)
@@ -279,19 +302,10 @@ class VIEWER:
         print(self.partInfo)
         self.window_partInfo = Toplevel(self.frame)
         row_ = 0
-        # partId = self.partID
-        # partName = self.map_part_id_name[partId]
-        # materialId = self.map_part_material[partId].split(',')[0]
-        # sectionId = self.map_part_section[partId].split(',')[0]
-
         self.createLabel(self.window_partInfo, "PartID", row_, 0, 10)
-        # self.partID_entry = self.createEntry(self.window_partInfo, partId, rowN+1, 0, 10)
         self.createLabel(self.window_partInfo, "PartName", row_, 1, 10)
-        # self.partName_entry = self.createEntry(self.window_partInfo, partName, rowN+1, 1, 10)
-        self.createLabel(self.window_partInfo, "MaterialID", row_, 2, 10)
-        # self.materialID_entry = self.createEntry(self.window_partInfo, "", rowN+1, 2, 10)
-        self.createLabel(self.window_partInfo, "SectionID", row_, 3, 10)
-        # self.sectionID_entry = self.createEntry(self.window_partInfo, "", rowN+1, 3, 10)
+        self.createLabel(self.window_partInfo, "SectionID", row_, 2, 10)
+        self.createLabel(self.window_partInfo, "MaterialID", row_, 3, 10)
 
         self.partInfo_entry = []
         self.partID_label = []
@@ -305,28 +319,25 @@ class VIEWER:
             print(index)
 
             partID_label = StringVar()
-            # print(key, self.map_part_id_name[key], self.map_part_material[key], self.map_part_section[key], self.map_part_thickness[key])
-            self.partID_label.append(Entry(self.window_partInfo, textvariable=partID_label, width=5))#, state='readonly'))
+            self.partID_label.append(Entry(self.window_partInfo, textvariable=partID_label, width=5, state='readonly'))
             partID_label.set(key)
             self.partID_label[index].grid(row = row_, column=0)
-            # self.partID_label[index].insert(0, key)
 
             partName_label = StringVar()
-            self.partName_label.append(Entry(self.window_partInfo, textvariable=partName_label, width=15))#, state='readonly'))
+            self.partName_label.append(Entry(self.window_partInfo, textvariable=partName_label, width=15, state='readonly'))
             partName_label.set(self.map_part_id_name.get(key, ""))
             self.partName_label[index].grid(row = row_, column=1)
-            # self.partName_label[index].insert(0, self.map_part_id_name[key])
-
-            partMat_label = StringVar()
-            self.partMat_label.append(Entry(self.window_partInfo, textvariable=partMat_label, width=10))#, state='readonly'))
-            partMat_label.set(self.map_part_material.get(key, "").split(',')[0])
-            self.partMat_label[index].grid(row = row_, column=2)
-            # self.partMat_label[index].insert(0, self.map_part_material[key])
 
             partShell_label = StringVar()
             self.partShell_label.append(Entry(self.window_partInfo, textvariable=partShell_label, width=10))#, state='readonly'))
             partShell_label.set(self.map_part_section.get(key, "").split(',')[0])
-            self.partShell_label[index].grid(row = row_, column=3)
+            self.partShell_label[index].grid(row = row_, column=2)
+
+            partMat_label = StringVar()
+            self.partMat_label.append(Entry(self.window_partInfo, textvariable=partMat_label, width=10))#, state='readonly'))
+            partMat_label.set(self.map_part_material.get(key, "").split(',')[0])
+            self.partMat_label[index].grid(row = row_, column=3)
+
             index += 1
 
         row_ += 2
@@ -337,6 +348,10 @@ class VIEWER:
         """
         :return:
         """
+
+        self.map_part_id_mid_sid = {}
+        for i in range(len(self.partID_label)):
+            self.map_part_id_mid_sid.update({self.partID_label[i].get():[self.partShell_label[i].get(), self.partMat_label[i].get()]})
 
         with open(self.meshFile) as readFile:
             readlines = readFile.readlines()
@@ -353,7 +368,6 @@ class VIEWER:
                 inPartBlock = True
                 inTitleBlock = True
                 inOtherBlock = False
-                # print(line)
                 continue
             if line.__contains__("*"):
                 outlines.append(line)
@@ -366,19 +380,15 @@ class VIEWER:
                     continue
                 if inTitleBlock:
                     outlines.append(line)
-                # print("In part title Block :")
-                    # print(line.strip())
                     partName = line.strip()
                     inTitleBlock = False
                     inPartIdBlock = True
                     continue
                 if inPartIdBlock:
-                    # print("In partId Block :")
-                    # print(line)
                     partId = line[:10].strip()
-                    sectId = line[11:20].strip()
-                    matId = line[21:30].strip()
-                    line1 = line[:10] + self.sectionID_entry.get() + self.materialID_entry.get() + line[31:]
+                    sectId = self.map_part_id_mid_sid[partId][0]
+                    matId = self.map_part_id_mid_sid[partId][1]
+                    line1 = line[:10] + sectId.rjust(10) + matId.rjust(10) + line[31:]
                     self.partInfo.update({partName:partId})
                     self.map_part_id_name.update({partId:partName})
                     inPartIdBlock = False
@@ -422,6 +432,183 @@ class VIEWER:
         """
         self.control_card = self.control_cards_type.get()
 
+    def define_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.define_card = self.define_cards_type.get()
+
+    def get_define_type(self, define_card):
+        """
+        :return:
+        """
+        self.define_card = define_card
+
+    def add_define_cards_info(self):
+        """
+
+        :return:
+        """
+        self.window_defineCardsInfo = Toplevel(self.frame)
+        self.entry_list_define_cards = []
+        self.label_list_define_cards = []
+        colN = 0
+        rowN = 0
+        count = 0
+
+        self.curr_define_card_parameters = self.ControlCards.define_cards[self.define_card]["Control_Parameters"][0].split(',')
+        self.curr_define_card_parameters_default = self.ControlCards.define_cards[self.define_card]["Control_Parameters"][1].split(',')
+        self.curr_define_card_parameters_freq = self.ControlCards.define_cards[self.define_card]["Control_Parameters"][2].split(',')
+
+        for j in range(len(self.curr_define_card_parameters)):
+            if count == 8:
+                rowN += 2
+                colN = 0
+                count = 0
+
+            if self.curr_define_card_parameters[j] == "":
+                self.label_list_define_cards.append(Label(self.window_defineCardsInfo, text=self.curr_define_card_parameters[j], width=10))
+                self.entry_list_define_cards.append(Entry(self.window_defineCardsInfo, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                continue
+
+            if self.curr_define_card_parameters_freq[j].strip().upper() == "Y":
+                self.label_list_define_cards.append(Label(self.window_defineCardsInfo, text=self.curr_define_card_parameters[j].upper(), width=10, fg="blue"))
+                self.entry_list_define_cards.append(Entry(self.window_defineCardsInfo, width=10, fg="blue"))
+            else:
+                self.label_list_define_cards.append(Label(self.window_defineCardsInfo, text=self.curr_define_card_parameters[j].upper(), width=10))
+                self.entry_list_define_cards.append(Entry(self.window_defineCardsInfo, width=10))
+
+            if self.curr_define_card_parameters[j] == "CURVE":
+                self.label_list_define_cards[j].grid(row=rowN, column=colN)
+                # self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
+                self.createButton(self.window_defineCardsInfo, "Add_Info", self.add_curve_info, rowN+1, colN, bg_='lightyellow')
+                self.createButton(self.window_defineCardsInfo, "Import_Info", self.import_curve_info, rowN+1, colN+1, bg_='lightblue')
+                continue
+
+            self.label_list_define_cards[j].grid(row=rowN, column=colN)
+            self.entry_list_define_cards[j].grid(row=rowN+1, column=colN)
+            self.entry_list_define_cards[j].insert(0,self.curr_define_card_parameters_default[j])
+
+            count += 1
+            colN += 1
+
+        rowN += 3
+        # print(rowN)
+        button_ = Button(self.window_defineCardsInfo, text="Save", command=self.save_define_cards_info)
+        button_.grid(row=rowN, column=1)
+        Exitbutton_ = Button(self.window_defineCardsInfo, text="Exit", command=self.close_window_define_cards)
+        Exitbutton_.grid(row=rowN, column=2)
+
+    def add_curve_info(self):
+        """
+        :return:
+        """
+        self.curveRowN = 0
+        self.curveInfoList = []
+        self.window_defineCurve = Toplevel(self.frame)
+
+        A1 = StringVar()
+        A1_entry = Entry(self.window_defineCurve, textvariable=A1, state='readonly')
+        A1.set('A1')
+        A1_entry.grid(row=self.curveRowN, column=0)
+
+        O1 = StringVar()
+        O1_entry = Entry(self.window_defineCurve, textvariable=O1, state='readonly')
+        O1.set('O1')
+        O1_entry.grid(row=self.curveRowN, column=1)
+
+        self.add_new_entry_button = Button(self.window_defineCurve, text="+", command=self.add_curve_entry, fg='blue')
+        self.add_new_entry_button.grid(row=self.curveRowN, column=2)
+        self.save_entry_button = Button(self.window_defineCurve, text="Save", command=self.save_curve_entry, fg='blue')
+        self.save_entry_button.grid(row=self.curveRowN, column=3)
+
+    def add_curve_entry(self):
+        """
+
+        :return:
+        """
+        self.curveRowN += 1
+        self.A1 = self.createEntry(self.window_defineCurve, "", self.curveRowN, 0, widthV=20)
+        self.O1 = self.createEntry(self.window_defineCurve, "", self.curveRowN, 1, widthV=20)
+        self.curveInfoList.append([self.A1, self.O1])
+
+    def save_curve_entry(self):
+        """
+        :return:
+        """
+        self.curveValList_str = ""
+        for i in range(len(self.curveInfoList)):
+            self.curveValList_str += self.curveInfoList[i][0].get().rjust(20) + self.curveInfoList[i][1].get().rjust(20) +'\n'
+
+        print(self.curveValList_str)
+        self.window_defineCurve.destroy()
+
+    def import_curve_info(self):
+        """
+        :return:
+        """
+
+    def save_define_cards_info(self):
+        """
+        :return:
+        """
+        outlines = []
+        colN = 0
+        rowN = 0
+        count = 0
+        newline = []
+        index = 0
+        outlines.append("\n")
+        outlines.append(self.ControlCards.define_cards[self.define_card]["Card_Title"][0])
+        for j in range(len(self.curr_define_card_parameters)):
+            if count == 8:# or j == (len(self.curr_material_parameters)):
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                outlines.append(line1)
+                newline = []
+
+            if self.curr_define_card_parameters[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                outlines.append(line1)
+                newline = []
+                index += 1
+                continue
+            if self.curr_define_card_parameters[j] == "LCID":
+                lcid = self.entry_list_define_cards[index].get().strip()
+
+            if self.curr_define_card_parameters[j] == "CURVE":
+                newline.append(self.curveValList_str)
+            else:
+                tmp_prop = self.entry_list_define_cards[index].get().strip()
+                newline.append(tmp_prop.rjust(10))
+            if j == (len(self.curr_define_card_parameters)-1):
+                line1 = "\n" + "".join(newline)# + "\n"
+                outlines.append(line1)
+
+            count += 1
+            colN += 1
+            index += 1
+        # line = ",".join([mid, self.material_card])
+        # self.map_part_material.update({self.partID:line})
+        # print(self.map_part_material)
+        self.curveList.append(lcid)
+        with open(self.control_card_out_file, 'a') as outFile:
+            outFile.writelines(outlines)
+
+    def close_window_define_cards(self):
+        """
+        :return:
+        """
+        self.window_defineCardsInfo.destroy()
+
     def add_control_cards_info(self):
         """
 
@@ -459,12 +646,34 @@ class VIEWER:
                 self.label_list_control_cards.append(Label(self.window_controlCardsInfo, text=self.curr_control_card_parameters[j].upper(), width=10))
                 self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo, width=10))
 
-            self.label_list_control_cards[j].grid(row=rowN, column=colN)
-            self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
-            self.entry_list_control_cards[j].insert(0,self.curr_control_card_parameters_default[j])
-
-            count += 1
-            colN += 1
+            if self.curr_control_card_parameters[j] == "PID":
+                self.label_list_control_cards[j].grid(row=rowN, column=colN)
+                self.parts_info2 = StringVar(self.window_controlCardsInfo)
+                self.parts_info2.set("")
+                self.part_option2 = OptionMenu(self.window_controlCardsInfo, self.parts_info2, *self.partInfo_list, command=self.get_part_ID2)
+                self.part_option2.config(bg='lightyellow')
+                self.part_option2.grid(row = rowN+1, column=colN)
+                self.parts_info2.trace('w', self.part_dropdown2)
+                count += 1
+                colN += 1
+                continue
+            if self.curr_control_card_parameters[j] == "LCID":
+                self.label_list_control_cards[j].grid(row=rowN, column=colN)
+                self.curve_info = StringVar(self.window_controlCardsInfo)
+                self.curve_info.set("")
+                self.curvePopup = OptionMenu(self.window_controlCardsInfo, self.curve_info, *self.curveList, command=self.get_curve_ID)
+                self.curvePopup.config(bg='lightyellow')
+                self.curvePopup.grid(row = rowN+1, column=colN)
+                self.curve_info.trace('w', self.curve_dropdown)
+                count += 1
+                colN += 1
+                continue
+            else:
+                self.label_list_control_cards[j].grid(row=rowN, column=colN)
+                self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
+                self.entry_list_control_cards[j].insert(0,self.curr_control_card_parameters_default[j])
+                count += 1
+                colN += 1
 
         rowN += 3
         # print(rowN)
@@ -473,10 +682,65 @@ class VIEWER:
         Exitbutton_ = Button(self.window_controlCardsInfo, text="Exit", command=self.close_window_CC)
         Exitbutton_.grid(row=rowN, column=2)
 
+    def get_curve_ID(self, curveID):
+        self.curveID = curveID
+
+    def curve_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.curveID = self.curve_info.get()
+
     def save_control_cards_info(self):
         """
         :return:
         """
+        outlines = []
+        colN = 0
+        rowN = 0
+        count = 0
+        newline = []
+        index = 0
+        outlines.append("\n")
+        outlines.append(self.ControlCards.control_cards[self.control_card]["Card_Title"][0])
+        for j in range(len(self.curr_control_card_parameters)):
+            if count == 8:# or j == (len(self.curr_material_parameters)):
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                outlines.append(line1)
+                newline = []
+
+            if self.curr_control_card_parameters[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                outlines.append(line1)
+                newline = []
+                index += 1
+                continue
+
+            # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
+            if self.curr_control_card_parameters[j] == "PID":
+                tmp_prop = self.partInfo[self.parts_info2.get()]
+            elif self.curr_control_card_parameters[j] == "LCID":
+                tmp_prop = self.curve_info.get()
+            else:
+                tmp_prop = self.entry_list_control_cards[index].get().strip()
+
+            newline.append(tmp_prop.rjust(10))
+            if j == (len(self.curr_control_card_parameters)-1):
+                line1 = "\n" + "".join(newline)# + "\n"
+                outlines.append(line1)
+
+            count += 1
+            colN += 1
+            index += 1
+
+        with open(self.control_card_out_file, 'a') as outFile:
+            outFile.writelines(outlines)
 
     def close_window_CC(self):
         """
@@ -632,10 +896,15 @@ class VIEWER:
         self.input_keyword.create_input_k(self.project_path)
         print(self.input_keyword.Kfile)
 
-        self.material_out_file_name = "Mat_out.k"
+        self.material_out_file_name = "mat.k"
         self.material_out_file = os.path.join(self.project_path, self.material_out_file_name)
-        with open(self.material_out_file, 'w') as outFile:
-            outFile.write("")
+        # with open(self.material_out_file, 'w') as outFile:
+        #     outFile.write("")
+
+        self.control_card_out_file_name = "control_cards.k"
+        self.control_card_out_file = os.path.join(self.project_path, self.control_card_out_file_name)
+        # with open(self.control_card_out_file, 'w') as outFile:
+        #     outFile.write("")
 
     def add_new_material_card(self):
         """
@@ -661,25 +930,21 @@ class VIEWER:
         self.createButton(self.window_newMat, "SAVE", self.save_new_mat_info, rowN, 2, fg_='red')
         rowN += 1
 
-        # v0 = StringVar()
-        # e0 = Entry(root, textvariable = v0, state = 'readonly')
-        # v0.set('Select')
-
         parameter_label = StringVar()
         parameter_label_entry = Entry(self.window_newMat, textvariable=parameter_label, state='readonly')
         parameter_label.set('PARAMETER_LABEL')
         parameter_label_entry.grid(row=rowN, column=0)
-        # self.createLabel(self.window_newMat, "PARAMETER_LABEL", rowN, 0, width=20)
+
         parameter_defaults = StringVar()
         parameter_defaults_entry = Entry(self.window_newMat, textvariable=parameter_defaults, state='readonly')
         parameter_defaults.set('DEFAULTS')
         parameter_defaults_entry.grid(row=rowN, column=1)
-        # self.createLabel(self.window_newMat, "DEFAULTS", rowN, 1, width=20)
+
         parameter_freq = StringVar()
         parameter_freq_entry = Entry(self.window_newMat, textvariable=parameter_freq, state='readonly')
         parameter_freq.set('FREQUENCY')
         parameter_freq_entry.grid(row=rowN, column=2)
-        # self.createLabel(self.window_newMat, "FREQUENCY", rowN, 2, width=20)
+
         select_ = StringVar()
         select_entry = Entry(self.window_newMat, textvariable=select_, state='readonly')
         select_.set('Select_To_Delete')
@@ -1263,6 +1528,16 @@ class VIEWER:
         self.partID = self.partInfo[self.parts_info.get()]
         # self.part_option
 
+    def get_part_ID2(self, partID):
+        self.partID2 = partID
+
+    def part_dropdown2(self, *args):
+        """
+        :return:
+        """
+        self.partID2 = self.partInfo[self.parts_info2.get()]
+        # self.part_option
+
     def open_input(self):
         """
 
@@ -1331,13 +1606,13 @@ class VIEWER:
         button_ = Button(frame_, text=buttonName, command=buttonMethod, fg=fg_, bg=bg_)
         button_.grid(row=rowN, column=colN, sticky=sticky_, ipadx=ipadx_)
 
-    def createLabel(self, frame_, labelName, rowN, colN, width=10, fg_='black'):
+    def createLabel(self, frame_, labelName, rowN, colN, width=10, fg_='black', sticky_=N, bg_="white", ipadx_=0):
         """
 
         :return:
         """
-        label_ = Label(frame_, text=labelName, width=width, fg=fg_)
-        label_.grid(row=rowN, column=colN)
+        label_ = Label(frame_, text=labelName, width=width, fg=fg_, bg=bg_)
+        label_.grid(row=rowN, column=colN, sticky=sticky_, ipadx=ipadx_)
 
     def createEntry(self, frame_, value_, rowN, colN, widthV, fg_='black'):
         """

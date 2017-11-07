@@ -1,4 +1,49 @@
-{"ENERGY": 
+{ "TERMINATION": 
+	{
+		"Control_Parameters": [	"ENDTIM,ENDCYC,DTMIN,ENDENG,ENDMAS,NOSOL", 
+								"0.0,0,0.0,0.0,,", 
+								"y,y,y,y,n,n"
+							  ], 
+		"Card_Title": ["*CONTROL_TERMINATION", "y"]
+	},
+ "HOURGLASS":
+	{
+		"Control_Parameters": [ "IHQ,QH", "1,0.1", "y,y"],
+		"Card_Title": ["*CONTROL_HOURGLASS", "y"]
+	},
+ "IMPLICIT_AUTO": 
+	{
+		"Control_Parameters": [	"IAUTO,ITEOPT,ITEWIN,DTMIN,DTMAX,DTEXP,KFAIL,KCYCLE", 
+								"0,11,5,,,,,", 
+								"y,y,y,y,n,n,n,n"
+							  ], 
+		"Card_Title": ["*CONTROL_IMPLICIT_AUTO", "y"]
+	},	
+ "IMPLICIT_GENERAL": 
+	{
+		"Control_Parameters": [	"IMFLAG,DT0,IMFORM,NSBS,IGS,CNSTN,FORM,ZERO V", 
+								"0,,2,1,2,0,0,0", 
+								"y,y,y,y,n,n,n,n"
+							  ], 
+		"Card_Title": ["*CONTROL_IMPLICIT_GENERAL", "y"]
+	},	
+ "IMPLICIT_SOLVER": 
+	{
+		"Control_Parameters": [	"LSOLVR,LPRINT,NEGEV,ORDER,DRCM,DRCPRM,AUTOSPC,AUTOTOL", 
+								"0,11,5,,,,,", 
+								"y,y,y,y,n,n,n,n"
+							  ], 
+		"Card_Title": ["*CONTROL_IMPLICIT_SOLVER", "y"]
+	},	
+ "IMPLICIT_SOLUTION": 
+	{
+		"Control_Parameters": [	"NSOLVR,ILIMIT,MAXREF,DCTOL,ECTOL,RCTOL,LSTOL,ABSTOL,DNORM,DIVERG,ISTIF,NLPRINT,NLNORM,D3ITCTL,CPCHK,,ARCCTL,ARCDIR,ARCLEN,ARCMTH,ARCDMP,ARCPSI,ARCALF,ARCTIM,LSMTD,LSDIR,IRAD,SRAD,AWGT,SRED",
+								"12,11,15,0.001,0.01,1.0E+10,0.9,1.0E-10,2,1,1,0,2,0,0,,0,0,0.0,1,2,0.0,0.0,0.0,4,2,0.0,0.0,0.0,0.0", 
+								"y,y,y,y,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n"
+							  ], 
+		"Card_Title": ["*CONTROL_IMPLICIT_SOLUTION", "y"]
+	},	
+ "ENERGY": 
 	{
 		"Control_Parameters": [	"HGEN,RWEN,SLNTEN,RYLEN", 
 								"1,2,1,1", 
@@ -6,9 +51,92 @@
 							  ], 
 		"Card_Title": ["*CONTROL_ENERGY", "y"]
 	},
- "HOURGLASS":
+ "ELOUT": 
 	{
-		"Control_Parameters": [ "IHQ,QH", "1,0.1", "y,y"],
-		"Card_Title": ["*CONTROL_HOURGLASS", "y"]
+		"Control_Parameters": [	"DT,BINARY,LCUR,IOPT", 
+								"0.0,0,0,1", 
+								"y,y,y,y"
+							  ], 
+		"Card_Title": ["*DATABASE_ELOUT", "y"]
+	},
+ "GLSTAT": 
+	{
+		"Control_Parameters": [	"DT,BINARY,LCUR,IOPT", 
+								"0.0,0,0,1", 
+								"y,y,y,y"
+							  ], 
+		"Card_Title": ["*DATABASE_GLSTAT", "y"]
+	},
+ "MATSUM": 
+	{
+		"Control_Parameters": [	"DT,BINARY,LCUR,IOPT", 
+								"0.0,0,0,1", 
+								"y,y,y,y"
+							  ], 
+		"Card_Title": ["*DATABASE_MATSUM", "y"]
+	},
+ "RCFORC": 
+	{
+		"Control_Parameters": [	"DT,BINARY,LCUR,IOPT", 
+								"0.0,0,0,1", 
+								"y,y,y,y"
+							  ], 
+		"Card_Title": ["*DATABASE_RCFORC", "y"]
+	},
+ "RWFORC": 
+	{
+		"Control_Parameters": [	"DT,BINARY,LCUR,IOPT", 
+								"0.0,0,0,1", 
+								"y,y,y,y"
+							  ], 
+		"Card_Title": ["*DATABASE_RWFORC", "y"]
+	},
+ "SSSTAT": 
+	{
+		"Control_Parameters": [	"DT,BINARY,LCUR,IOPT", 
+								"0.0,0,0,1", 
+								"y,y,y,y"
+							  ], 
+		"Card_Title": ["*DATABASE_SSSTAT", "y"]
+	},
+ "BINARY_D3PLOT": 
+	{
+		"Control_Parameters": [	"DT/CYCL,LCDT,BEAM,NPLTC,PSETID", 
+								",,0,,", 
+								"y,y,y,y,Y"
+							  ], 
+		"Card_Title": ["*DATABASE_BINARY_D3PLOT", "y"]
+	},
+ "EXTENT_BINARY": 
+	{
+		"Control_Parameters": [	"NEIPH,NEIPS,MAXINT,STRFLG,SIGFLG,EPSFLG,RLTFLG,ENGFLG,CMPFLG,IEVERP,BEAMIP,DCOMP,SHGE,STSSZ,N3THDT,IALEMAT,NINTSLD,PKP SEN,SCLP,HYDRO,MSSCL,THERM,INTOUT,NODOUT,DTDT,RESPLT,NEIPB", 
+								"0,0,3,0,1,1,1,1,0,0,0,1,1,1,2,1,0,0,1.0,0,0,0,,,0,0,", 
+								"n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n"
+							  ], 
+		"Card_Title": ["*DATABASE_EXTENT_BINARY", "y"]
+	},
+ "PRESCRIBED_MOTION_RIGID": 
+	{
+		"Control_Parameters": [	"PID,DOF,VAD,LCID,SF,VID,DEATH,BIRTH", 
+								",0,0,,1.0,,1.0E+28,0.0", 
+								"y,y,y,y,y,n,n,n"
+							  ], 
+		"Card_Title": ["*BOUNDARY_PRESCRIBED_MOTION_RIGID", "y"]
+	},
+ "BODY_Y": 
+	{
+		"Control_Parameters": [	"LCID,SF,LCIDDR,XC,YC,ZC,CID", 
+								",1.0,0,0.0,0.0,0.0,0", 
+								"y,y,y,y,y,n,n"
+							  ], 
+		"Card_Title": ["*LOAD_BODY_Y", "y"]
+	},
+ "BODY_PARTS": 
+	{
+		"Control_Parameters": [	"PSID", 
+								"", 
+								"y"
+							  ], 
+		"Card_Title": ["*LOAD_BODY_PARTS", "y"]
 	}
 }
