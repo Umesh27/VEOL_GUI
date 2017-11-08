@@ -42,12 +42,14 @@ class VIEWER:
         self.partInfo = {"":""}
         self.partRowNo = self.rowN
         self.map_part_material = {}
+        self.map_materialID_type = {}
         self.map_part_section = {}
         self.map_part_thickness = {}
-        self.partSetIdList = []
+        self.map_sectionID_thickness = {}
+        self.partSetIdList = [""]
 
         self.parts_info = StringVar(self.frame)
-        self.parts_info.set("")
+        self.parts_info.set("PARTS")
         self.partInfo_list = set(sorted(self.partInfo.keys()))
         self.part_option = OptionMenu(self.frame, self.parts_info, *self.partInfo_list, command=self.get_part_ID)
         self.part_option.config(bg='lightyellow')
@@ -101,7 +103,7 @@ class VIEWER:
         self.curveInfo = {}
         self.curveValList = []
         self.curveLines = []
-        self.curveList = []
+        self.curveList = [""]
         self.ControlCards = control_cards.ControlCards()
         self.define_cards_type = StringVar(self.frame)
         self.define_card = self.ControlCards.define_cards_type[0]
@@ -114,7 +116,7 @@ class VIEWER:
         self.define_cards_type.trace('w', self.define_dropdown)
 
         # self.createLabel(self.frame, "DefineCurve", self.rowN, 2, sticky_=E, bg_='yellow', ipadx_=15)
-        self.createButton(self.frame, "Import_Info", self.import_curve_info, self.rowN, 2, ipadx_=40, sticky_=W, bg_='lightblue')
+        # self.createButton(self.frame, "Import_Info", self.import_curve_info, self.rowN, 2, ipadx_=40, sticky_=W, bg_='lightblue')
         self.createButton(self.frame, "Add_Info", self.add_define_cards_info, self.rowN, 3, sticky_=EW, bg_='lightyellow')
 
         self.rowN += 1
@@ -188,14 +190,24 @@ class VIEWER:
         self.partMat_label = []
         self.partShell_label = []
         self.partThk_label = []
+        self.get_info()
+        print(self.map_partId_Info)
+        # self.get_material_info()
 
         index = 0
-        for key in sorted(self.map_part_material.keys()):
+        for key in sorted(self.map_partId_Info.keys()):
             row_ += 1
             print(index)
 
             partID_label = StringVar()
-            print(key, self.map_part_id_name.get(key, ""), self.map_part_material.get(key, ""), self.map_part_section.get(key, ""), self.map_part_thickness.get(key, ""))
+            partName = self.map_partId_Info.get(key, "")[0]
+            sectionID = self.map_partId_Info.get(key, "")[1]
+            materialID = self.map_partId_Info.get(key, "")[2]
+            materialCard = self.map_materialID_type[materialID]
+            sectionID_Type = ", ".join([sectionID, self.map_sectionID_thickness[sectionID][0]])
+            sectionThickness = self.map_sectionID_thickness[sectionID][1]
+            materialID_Card = ", ".join([materialID, materialCard])
+            # print(key, self.map_part_id_name.get(key, ""), self.map_partId_Info.get(key, "")[0], self.map_partId_Info.get(key, "")[1], self.map_partId_Info.get(key, "")[2])
             self.partID_label.append(Entry(self.frame, textvariable=partID_label, width=5, state='readonly'))
             partID_label.set(key)
             self.partID_label[index].grid(row = row_, column=5)
@@ -209,22 +221,60 @@ class VIEWER:
 
             partMat_label = StringVar()
             self.partMat_label.append(Entry(self.frame, textvariable=partMat_label, width=10, state='readonly'))
-            partMat_label.set(self.map_part_material.get(key, ""))
+            partMat_label.set(materialID_Card)#self.map_part_material.get(key, ""))
             self.partMat_label[index].grid(row = row_, column=7)
             # self.partMat_label[index].insert(0, self.map_part_material[key])
 
             partShell_label = StringVar()
             self.partShell_label.append(Entry(self.frame, textvariable=partShell_label, width=10, state='readonly'))
-            partShell_label.set(self.map_part_section.get(key, ""))
+            partShell_label.set(sectionID_Type)#self.map_part_section.get(key, ""))
             self.partShell_label[index].grid(row = row_, column=8)
             # self.partShell_label[index].insert(0, self.map_part_section[key])
 
             partThk_label = StringVar()
             self.partThk_label.append(Entry(self.frame, textvariable=partThk_label, width=5, state='readonly'))
-            partThk_label.set(self.map_part_thickness.get(key, ""))
+            partThk_label.set(sectionThickness)#self.map_part_thickness.get(key, ""))
             self.partThk_label[index].grid(row = row_, column=9)
             # self.partThk_label[index].insert(0, self.map_part_thickness[key])
             index += 1
+
+    def get_material_info(self):
+        """
+        :return:
+        """
+        with open(self.material_out_file) as readFile:
+            lines = readFile.readlines()
+
+        inMatBlock = False
+        inSectionBlock = False
+        count = 0
+        for line in lines:
+            if line.startswith("*MAT"):
+                inMatBlock = True
+                inSectionBlock = False
+                count = 1
+                continue
+            if line.startswith("*SECTION"):
+                inMatBlock = False
+                inSectionBlock = True
+                count = 1
+                continue
+            if line.startswith("$$"):
+                continue
+            if inMatBlock:
+                if count == 1:
+                    print(line)
+                    count = 0
+                    continue
+                else:
+                    continue
+            if inSectionBlock:
+                if count == 1:
+                    print(line)
+                    count = 0
+                    continue
+                else:
+                    continue
 
     def open_inputPath(self):
         """
@@ -242,6 +292,7 @@ class VIEWER:
         """
         self.partInfo = {}
         self.map_part_id_name = {}
+        self.map_partId_Info = {}
         with open(self.meshFile) as readFile:
             readlines = readFile.readlines()
 
@@ -284,8 +335,11 @@ class VIEWER:
                     # print("In partId Block :")
                     # print(line)
                     partId = line[:10].strip()
+                    sectionId = line[11:20].strip()
+                    materialId = line[21:30].strip()
                     self.partInfo.update({partName:partId})
                     self.map_part_id_name.update({partId:partName})
+                    self.map_partId_Info.update({partId:[partName, sectionId, materialId]})
                     inPartIdBlock = False
                     inTitleBlock = True
                     continue
@@ -417,8 +471,9 @@ class VIEWER:
                 continue
         print(self.partInfo)
 
-        self.meshFile_out = os.path.join(os.path.split(self.meshFile)[0], "mesh_edit.k")
-        with open(self.meshFile_out, 'w') as outFile:
+        # self.meshFile_out = os.path.join(os.path.split(self.meshFile)[0], "mesh_edit.k")
+        # with open(self.meshFile_out, 'w') as outFile:
+        with open(self.meshFile, 'w') as outFile:
             outFile.writelines(outlines)
 
     def close_window_part_info(self):
@@ -501,8 +556,8 @@ class VIEWER:
             if self.curr_define_card_parameters[j] == "CURVE":
                 self.label_list_define_cards[j].grid(row=rowN, column=colN)
                 # self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
-                self.createButton(self.window_defineCardsInfo, "Add_Info", self.add_curve_info, rowN+1, colN, bg_='lightyellow')
-                self.createButton(self.window_defineCardsInfo, "Import_Info", self.import_curve_info, rowN+1, colN+1, bg_='lightblue')
+                self.createButton(self.window_defineCardsInfo, "Add_Table", self.add_curve_info, rowN+1, colN, bg_='lightyellow')
+                self.createButton(self.window_defineCardsInfo, "Import_Table", self.import_curve_info, rowN+1, colN+1, bg_='lightblue')
                 continue
 
             self.label_list_define_cards[j].grid(row=rowN, column=colN)
@@ -570,6 +625,50 @@ class VIEWER:
         """
         :return:
         """
+        import csv
+        fName = filedialog.askopenfilename()
+
+        col1 = []
+        col2 = []
+        with open(fName, 'r') as csvFile:
+            csv_reader = csv.reader(csvFile)
+            print(csv_reader)
+            for row in csv_reader:
+                col1.append(row[0])
+                col2.append(row[1])
+                print(row[0], row[1])
+
+        self.curveRowN = 0
+        self.curveInfoList = []
+        self.window_defineCurve = Toplevel(self.frame)
+
+        A1 = StringVar()
+        A1_entry = Entry(self.window_defineCurve, textvariable=A1, state='readonly')
+        A1.set('A1')
+        A1_entry.grid(row=self.curveRowN, column=0)
+
+        O1 = StringVar()
+        O1_entry = Entry(self.window_defineCurve, textvariable=O1, state='readonly')
+        O1.set('O1')
+        O1_entry.grid(row=self.curveRowN, column=1)
+
+        self.curveLength = len(col1)
+        self.entry_list_CC21 = []
+        self.entry_list_CC22 = []
+        self.curveRowN = 1
+        for i in range(self.curveLength):
+            self.curveRowN += 1
+            # print(rowN)
+            self.entry_list_CC21.append(Entry(self.window_defineCurve, width=10))
+            self.entry_list_CC21[i].grid(row=self.curveRowN, column=0)
+            self.entry_list_CC21[i].insert(0,col1[i])
+
+            self.entry_list_CC22.append(Entry(self.window_defineCurve, width=10))
+            self.entry_list_CC22[i].grid(row=self.curveRowN, column=1)
+            self.entry_list_CC22[i].insert(0,col2[i])
+            self.curveInfoList.append([self.entry_list_CC21[i], self.entry_list_CC22[i]])
+        self.save_entry_button = Button(self.window_defineCurve, text="Save", command=self.save_curve_entry, fg='blue')
+        self.save_entry_button.grid(row=self.curveRowN, column=3)
 
     def save_define_cards_info(self):
         """
@@ -894,7 +993,7 @@ class VIEWER:
         outlines.append(self.MaterialCards.section_cards[self.section_type]["Card_Title"][0])
         header_line = "\n$$"
         for j in range(len(self.curr_section_parameters)):
-            if count == 8 or j == (len(self.curr_section_parameters)-1):
+            if count == 8:# or j == (len(self.curr_section_parameters)-1):
                 rowN += 2
                 colN = 0
                 count = 0
@@ -922,8 +1021,8 @@ class VIEWER:
                 print(self.curr_section_parameters[j].upper(), thickness)
             if self.curr_section_parameters[j].upper() == 'SECID':
                 """ """
-                mid = self.entry_list_section[index].get()
-                print(self.curr_section_parameters[j].upper(), mid)
+                secid = self.entry_list_section[index].get()
+                print(self.curr_section_parameters[j].upper(), secid)
 
             # print("[{}] {}: {}".format(index, self.curr_section_parameters[j], self.entry_list_section[index].get()))
             if header_line == "\n$$":
@@ -941,12 +1040,14 @@ class VIEWER:
             count += 1
             colN += 1
             index += 1
-        line = ",".join([mid, self.section_type])
+        line = ",".join([secid, self.section_type])
         self.map_part_section.update({self.partID:line})
         if self.section_type == "SHELL":
             self.map_part_thickness.update({self.partID:thickness})
+            self.map_sectionID_thickness.update({secid:[self.section_type,thickness]})
         else:
             self.map_part_thickness.update({self.partID:""})
+            self.map_sectionID_thickness.update({secid:[self.section_type,""]})
 
         # print(self.map_part_section)
 
@@ -1100,6 +1201,9 @@ class VIEWER:
         :return:
         """
         self.read_mat_file = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.read_mat_file_out = os.path.join(os.path.split(self.read_mat_file)[0], "mat_edit.k")
+        with open(self.read_mat_file_out, 'w') as outFile:
+            outFile.write("")
         with open(self.read_mat_file, 'r') as readFile:
             inlines = readFile.readlines()
 
@@ -1292,13 +1396,16 @@ class VIEWER:
         outlines.append("\n")
         section_card_type = self.read_section_card.split(',')[0]
         outlines.append(self.MaterialCards.section_cards[section_card_type]["Card_Title"][0])
+        header_line = "\n$$"
         for j in range(len(self.curr_section_parameters)):
             if count == 8:# or
                 rowN += 2
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline)# + "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
 
             if self.curr_section_parameters[j] == "":
@@ -1306,29 +1413,38 @@ class VIEWER:
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline) #+ "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
                 index += 1
                 continue
 
-            print("[{}] {}: {}".format(index, self.curr_section_parameters[j], self.entry_list_section[index].get()))
+            # print("[{}] {}: {}".format(index, self.curr_section_parameters[j], self.entry_list_section[index].get()))
+            if header_line == "\n$$":
+                header_line += self.curr_section_parameters[j].rjust(8)
+            else:
+                header_line += self.curr_section_parameters[j].rjust(10)
+
             tmp_prop = self.entry_list_section[index].get().strip()
             newline.append(tmp_prop.rjust(10))
 
             if j == (len(self.curr_section_parameters)-1):
                 line1 = "\n" + "".join(newline) #+ "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
 
             count += 1
             colN += 1
             index += 1
 
         # self.mat_out = filedialog.asksaveasfilename()
-        self.presentMatFile_out = os.path.join(os.path.split(self.read_mat_file)[0], "mat_edit.k")
-        if not os.path.exists(self.presentMatFile_out):
-            open(self.presentMatFile_out, 'w').close()
+        # self.presentMatFile_out = os.path.join(os.path.split(self.read_mat_file)[0], "mat_edit.k")
+        if not os.path.exists(self.read_mat_file_out):
+            open(self.read_mat_file_out, 'w').close()
 
-        with open(self.presentMatFile_out, 'a') as outFile:
+        with open(self.read_mat_file_out, 'a') as outFile:
             outFile.writelines(outlines)
 
     def close_section_window_read(self):
@@ -1421,13 +1537,16 @@ class VIEWER:
         outlines.append("\n")
         material_card_type = self.read_material_card.split(',')[0]
         outlines.append(self.MaterialCards.material_cards[material_card_type]["Card_Title"][0])
+        header_line = "\n$$"
         for j in range(len(self.curr_material_parameters)):
             if count == 8:# or
                 rowN += 2
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline)# + "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
 
             if self.curr_material_parameters[j] == "":
@@ -1435,29 +1554,37 @@ class VIEWER:
                 colN = 0
                 count = 0
                 line1 = "\n" + "".join(newline) #+ "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
                 newline = []
                 index += 1
                 continue
 
-            print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
+            # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
+            if header_line == "\n$$":
+                header_line += self.curr_material_parameters[j].rjust(8)
+            else:
+                header_line += self.curr_material_parameters[j].rjust(10)
             tmp_prop = self.entry_list[index].get().strip()
             newline.append(tmp_prop.rjust(10))
 
             if j == (len(self.curr_material_parameters)-1):
                 line1 = "\n" + "".join(newline) #+ "\n"
-                outlines.append(line1)
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
 
             count += 1
             colN += 1
             index += 1
 
         # self.mat_out = filedialog.asksaveasfilename()
-        self.presentMatFile_out = os.path.join(os.path.split(self.read_mat_file)[0], "mat_edit.k")
-        if not os.path.exists(self.presentMatFile_out):
-            open(self.presentMatFile_out, 'w').close()
+        # self.presentMatFile_out = os.path.join(os.path.split(self.read_mat_file)[0], "mat_edit.k")
+        # if not os.path.exists(self.presentMatFile_out):
+        #     open(self.presentMatFile_out, 'w').close()
 
-        with open(self.presentMatFile_out, 'a') as outFile:
+        with open(self.read_mat_file_out, 'a') as outFile:
             outFile.writelines(outlines)
 
     def add_material_info(self):
@@ -1593,6 +1720,7 @@ class VIEWER:
             index += 1
         line = ",".join([mid, self.material_card])
         self.map_part_material.update({self.partID:line})
+        self.map_materialID_type.update({mid:self.material_card})
         # print(self.map_part_material)
 
         with open(self.material_out_file, 'a') as outFile:

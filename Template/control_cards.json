@@ -29,9 +29,9 @@
 	},	
  "IMPLICIT_SOLVER": 
 	{
-		"Control_Parameters": [	"LSOLVR,LPRINT,NEGEV,ORDER,DRCM,DRCPRM,AUTOSPC,AUTOTOL", 
-								"0,11,5,,,,,", 
-								"y,y,y,y,n,n,n,n"
+		"Control_Parameters": [	"LSOLVR,LPRINT,NEGEV,ORDER,DRCM,DRCPRM,AUTOSPC,AUTOTOL,LCPACK,MTXDMP", 
+								"0,11,5,,,,,,2,0", 
+								"y,y,y,y,n,n,n,n,n,n"
 							  ], 
 		"Card_Title": ["*CONTROL_IMPLICIT_SOLVER", "y"]
 	},	
