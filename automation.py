@@ -134,7 +134,7 @@ class VIEWER:
         self.add_new_control_card_button = Button(self.frame, text="AddNewControlCards", command=self.add_new_control_card, bg='peachpuff')
         self.add_new_control_card_button.grid(row=self.rowN, column=1, sticky=W)
 
-        self.read_control_button = Button(self.frame, text="ReadControlCards", command=self.read_control_card, bg='lightblue')
+        self.read_control_button = Button(self.frame, text="ReadControlCards", command=self.read_control_card_info, bg='lightblue')
         self.read_control_button.grid(row=self.rowN, column=2, sticky=W)
 
         self.add_control_cards_info_button = Button(self.frame, text="AddControlCardsPara", command=self.add_control_cards_info, bg='lightyellow')
@@ -487,10 +487,459 @@ class VIEWER:
         :return:
         """
 
-    def read_control_card(self):
+    def read_control_card_info(self):
         """
         :return:
         """
+        self.read_control_cards_file = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.read_control_cards_file_out = os.path.join(os.path.split(self.read_control_cards_file)[0], "control_cards_edit.k")
+        with open(self.read_control_cards_file_out, 'w') as outFile:
+            outFile.write("")
+        with open(self.read_control_cards_file, 'r') as readFile:
+            inlines = readFile.readlines()
+
+        control_card_title_list = []
+        define_card_title_list = []
+        count = 0
+        self.read_control_cards_type_list = []
+        self.read_control_cards_parameters = {}
+        self.read_control_cards_parameters_tmp = []
+
+        self.read_define_cards_type_list = []
+        self.read_define_parameters = {}
+        self.read_define_parameters_tmp = []
+        self.map_curveID_ValList_str = {}
+        self.curveValList = []
+
+        inDefineBlock = False
+        inControlCardBlock = False
+        print(self.ControlCards.map_control_cards_type_title)
+        print(self.ControlCards.map_define_cards_type_title)
+        for line in inlines:
+            # if line.startswith("*"):
+            if line.startswith("*DEFINE"):
+                inDefineBlock = True
+                inControlCardBlock = False
+                define_card_title = line.strip()
+                define_card_title_list.append(define_card_title)
+                count = 1
+                if not self.read_define_parameters_tmp == []:
+                    self.read_define_parameters.update({define_tmp_line:self.read_define_parameters_tmp})
+                    self.read_define_parameters_tmp = []
+                if not self.curveValList == []:
+                    self.map_curveID_ValList_str.update({define_id:self.curveValList})
+                    self.curveValList = []
+                continue
+
+            if line.startswith(("*CONTROL", "*DATABASE", "*BOUNDARY", "*LOAD")):
+                inDefineBlock = False
+                inControlCardBlock = True
+                control_card_title = line.strip()
+                control_card_title_list.append(control_card_title)
+                count = 1
+                if not self.read_control_cards_parameters_tmp == []:
+                    self.read_control_cards_parameters.update({control_cards_tmp_line:self.read_control_cards_parameters_tmp})
+                    self.read_control_cards_parameters_tmp = []
+                continue
+
+            if inDefineBlock:
+                print(line)
+                if line.startswith("$"):
+                    continue
+                if count == 1:
+                    define_id = line[:10].strip()
+                    print(define_card_title, str(self.ControlCards.map_define_cards_type_title[define_card_title]))
+                    define_tmp_line = ",".join([str(self.ControlCards.map_define_cards_type_title[define_card_title]), str(define_id)])
+                    self.read_define_cards_type_list.append(define_tmp_line)
+
+                if count > 1:
+                    list1 = re.findall('.{%d}'%20, line)
+                    self.curveValList.append([list1[0].strip(), list1[1].strip()])
+                    # self.read_define_parameters_tmp.extend(list1)
+                else:
+                    list1 = re.findall('.{%d}'%10, line)
+                    if len(list1) < 9:
+                        self.read_define_parameters_tmp.extend(list1)
+                    else:
+                        list1.pop()
+                        self.read_define_parameters_tmp.extend(list1)
+                count += 1
+                continue
+            if not self.curveValList == []:
+                    self.map_curveID_ValList_str.update({define_id:self.curveValList})
+            if inControlCardBlock:
+                if line.startswith("$"):
+                    continue
+                if count == 1:
+                    # control_card_id = int(line[:10].strip())
+                    controlCardType = str(self.ControlCards.map_control_cards_type_title[control_card_title])
+                    control_cards_tmp_line = ",".join([str(self.ControlCards.map_control_cards_type_title[control_card_title]), ""])
+                    self.read_control_cards_type_list.append(control_cards_tmp_line)
+
+                list1 = re.findall('.{%d}'%10, line)
+                if len(list1) < 9:
+                    self.read_control_cards_parameters_tmp.extend(list1)
+                else:
+                    list1.pop()
+                    self.read_control_cards_parameters_tmp.extend(list1)
+                count += 1
+
+        self.read_control_cards_parameters.update({self.read_control_cards_type_list[-1]:self.read_control_cards_parameters_tmp})
+        self.read_define_parameters.update({self.read_define_cards_type_list[-1]:self.read_define_parameters_tmp})
+        # print(self.read_material_cards_type_list)
+        self.rowN += 3
+        self.read_control_card = self.read_control_cards_type_list[0]
+        self.read_control_card_set = StringVar(self.frame)
+        self.control_card_popup = OptionMenu(self.frame, self.read_control_card_set, *self.read_control_cards_type_list, command=self.get_read_control_card_type)
+        self.control_card_popup.grid(row = self.rowN, column=1)
+        self.read_control_card_set.set(self.read_control_cards_type_list[0])
+        self.read_control_card_set.trace('w', self.read_control_card_dropdown)
+        self.editControlCardData = self.createButton(self.frame, "Show", self.show_control_card, self.rowN, 2, sticky_=W)
+
+        self.rowN += 3
+        self.read_define_card = self.read_define_cards_type_list[0]
+        self.read_define_card_set = StringVar(self.frame)
+        popupMenu = OptionMenu(self.frame, self.read_define_card_set, *self.read_define_cards_type_list, command=self.get_read_define_type)
+        popupMenu.grid(row = self.rowN, column=1)
+        self.read_define_card_set.set(self.read_define_card)
+        self.read_define_card_set.trace('w', self.read_define_dropdown)
+        self.editDefineData = self.createButton(self.frame, "Show", self.show_define, self.rowN, 2, sticky_=W)
+
+    def get_read_control_card_type(self, read_control_card):
+        """
+        :return:
+        """
+        self.read_control_card = read_control_card
+
+    def read_control_card_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.read_control_card = self.read_control_card_set.get()
+
+    def show_control_card(self):
+        """
+        :return:
+        """
+        # print("In edit button !")
+        rowN = 1
+        self.window_controlCardsInfo_read = Toplevel(self.frame)
+        control_card_type = self.read_control_card.split(',')[0]
+        self.curr_control_card_parameters = self.ControlCards.control_cards[control_card_type]["Control_Parameters"][0].split(',')
+        curr_control_card_parameters_freq = self.ControlCards.control_cards[control_card_type]["Control_Parameters"][2].split(',')
+        count = 0
+        colN = 0
+        self.label_list_control_cards = []
+        self.entry_list_control_cards = []
+        index = 0
+        for j in range(len(self.curr_control_card_parameters)):
+            if count == 8:
+                rowN += 2
+                colN = 0
+                count = 0
+
+            if self.curr_control_card_parameters[j] == "":
+                self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j], width=10))
+                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                continue
+
+            if curr_control_card_parameters_freq[j].strip().upper() == "Y":
+                self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j].upper(), width=10, fg="blue"))
+                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10, fg="blue"))
+            else:
+                self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j].upper(), width=10))
+                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10))
+            self.label_list_control_cards[j].grid(row=rowN, column=colN)
+
+            self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
+
+            try:
+                self.entry_list_control_cards[j].insert(0,self.read_control_cards_parameters[self.read_control_card][index])
+            except Exception as Ex:
+                print(Ex, index)
+                self.entry_list_control_cards[j].insert(0,"")
+
+            count += 1
+            colN += 1
+            index += 1
+
+        rowN += 3
+        button_ = Button(self.window_controlCardsInfo_read, text="Save", command=self.update_control_card)
+        button_.grid(row=rowN, column=1)
+        Exitbutton_ = Button(self.window_controlCardsInfo_read, text="Exit", command=self.close_window_controlCardsInfo_read)
+        Exitbutton_.grid(row=rowN, column=2)
+
+    def update_control_card(self):
+        """
+        :return:
+        """
+        outlines = []
+        colN = 0
+        rowN = 0
+        count = 0
+        newline = []
+        index = 0
+        outlines.append("\n")
+        control_card_type = self.read_control_card.split(',')[0]
+        outlines.append(self.ControlCards.control_cards[control_card_type]["Card_Title"][0])
+        header_line = "\n$$"
+        for j in range(len(self.curr_control_card_parameters)):
+            if count == 8:# or
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+
+            if self.curr_control_card_parameters[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+                index += 1
+                continue
+
+            # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
+            if header_line == "\n$$":
+                header_line += self.curr_control_card_parameters[j].rjust(8)
+            else:
+                header_line += self.curr_control_card_parameters[j].rjust(10)
+            tmp_prop = self.entry_list[index].get().strip()
+            newline.append(tmp_prop.rjust(10))
+
+            if j == (len(self.curr_control_card_parameters)-1):
+                line1 = "\n" + "".join(newline) #+ "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+
+            count += 1
+            colN += 1
+            index += 1
+
+        with open(self.read_control_cards_file_out, 'a') as outFile:
+            outFile.writelines(outlines)
+
+    def close_window_controlCardsInfo_read(self):
+        """
+        :return:
+        """
+        self.window_controlCardsInfo_read.destroy()
+
+    def get_read_define_type(self, read_define_card):
+        """
+        :return:
+        """
+        self.read_define_card = read_define_card
+
+    def read_define_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.read_define_card = self.read_define_card_set.get()
+
+    def show_define(self):
+        """
+        :return:
+        """
+        # print("In edit button !")
+        rowN = 1
+        self.window_defineCardsInfo_read = Toplevel(self.frame)
+        define_card_type = self.read_define_card.split(',')[0]
+        self.curr_define_card_parameters = self.ControlCards.define_cards[define_card_type]["Control_Parameters"][0].split(',')
+        curr_define_card_parameters_freq = self.ControlCards.define_cards[define_card_type]["Control_Parameters"][2].split(',')
+        count = 0
+        colN = 0
+        self.label_list_define_cards = []
+        self.entry_list_define_cards = []
+        index = 0
+        for j in range(len(self.curr_define_card_parameters)):
+            if count == 8:
+                rowN += 2
+                colN = 0
+                count = 0
+
+            if self.curr_define_card_parameters[j] == "":
+                self.label_list_define_cards.append(Label(self.window_defineCardsInfo_read, text=self.curr_define_card_parameters[j], width=10))
+                self.entry_list_define_cards.append(Entry(self.window_defineCardsInfo_read, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                continue
+
+            if self.curr_define_card_parameters[j] == "CURVE":
+                self.show_curve_button = self.createButton(self.window_defineCardsInfo_read, "ShowCurve", self.show_curve, rowN+1, colN)
+                continue
+
+            if curr_define_card_parameters_freq[j].strip().upper() == "Y":
+                self.label_list_define_cards.append(Label(self.window_defineCardsInfo_read, text=self.curr_define_card_parameters[j].upper(), width=10, fg="blue"))
+                self.entry_list_define_cards.append(Entry(self.window_defineCardsInfo_read, width=10, fg="blue"))
+            else:
+                self.label_list_define_cards.append(Label(self.window_defineCardsInfo_read, text=self.curr_define_card_parameters[j].upper(), width=10))
+                self.entry_list_define_cards.append(Entry(self.window_defineCardsInfo_read, width=10))
+            self.label_list_define_cards[j].grid(row=rowN, column=colN)
+
+            self.entry_list_define_cards[j].grid(row=rowN+1, column=colN)
+
+            try:
+                self.entry_list_define_cards[j].insert(0,self.read_define_parameters[self.read_define_card][index])
+            except Exception as Ex:
+                print(Ex, index)
+                self.entry_list_define_cards[j].insert(0,"")
+
+            count += 1
+            colN += 1
+            index += 1
+
+        rowN += 3
+        button_ = Button(self.window_defineCardsInfo_read, text="Save", command=self.update_define_card)
+        button_.grid(row=rowN, column=1)
+        Exitbutton_ = Button(self.window_defineCardsInfo_read, text="Exit", command=self.close_window_defineCardsInfo_read)
+        Exitbutton_.grid(row=rowN, column=2)
+
+    def show_curve(self):
+        """
+        :return:
+        """
+        self.window_defineCurve_read = Toplevel(self.frame)
+        self.entry_list_define_cards1 = []
+        self.entry_list_define_cards2 = []
+        for j in range(len(self.curr_define_card_parameters)):
+            if self.curr_define_card_parameters[j].upper() == "LCID":
+                self.curveId = self.entry_list_define_cards[0].get().strip()
+                break
+        curveValList = self.map_curveID_ValList_str[self.curveId]
+        # for i in range(len(self.curveValList)):
+        self.curveRowN = 0
+        A1 = StringVar()
+        A1_entry = Entry(self.window_defineCurve_read, textvariable=A1, state='readonly')
+        A1.set('A1')
+        A1_entry.grid(row=self.curveRowN, column=0)
+
+        O1 = StringVar()
+        O1_entry = Entry(self.window_defineCurve_read, textvariable=O1, state='readonly')
+        O1.set('O1')
+        O1_entry.grid(row=self.curveRowN, column=1)
+
+        self.curveLength = len(curveValList)
+        self.entry_list_CC21 = []
+        self.entry_list_CC22 = []
+        self.curveRowN = 1
+        for i in range(self.curveLength):
+            self.curveRowN += 1
+            # print(rowN)
+            self.entry_list_CC21.append(Entry(self.window_defineCurve_read, width=10))
+            self.entry_list_CC21[i].grid(row=self.curveRowN, column=0)
+            self.entry_list_CC21[i].insert(0,curveValList[i][0])
+
+            self.entry_list_CC22.append(Entry(self.window_defineCurve_read, width=10))
+            self.entry_list_CC22[i].grid(row=self.curveRowN, column=1)
+            self.entry_list_CC22[i].insert(0,curveValList[i][1])
+            # self.curveInfoList.append([self.entry_list_CC21[i], self.entry_list_CC22[i]])
+        self.save_entry_button = Button(self.window_defineCurve_read, text="Save", command=self.update_curve, fg='blue')
+        self.save_entry_button.grid(row=self.curveRowN, column=3)
+
+    def update_curve(self):
+        """
+        :return:
+        """
+        self.curveValList_str = ""
+        for i in range(len(self.curveInfoList)):
+            if i == len(self.curveInfoList)-1:
+                self.curveValList_str += self.curveInfoList[i][0].get().rjust(20) + self.curveInfoList[i][1].get().rjust(20)
+            else:
+                self.curveValList_str += self.curveInfoList[i][0].get().rjust(20) + self.curveInfoList[i][1].get().rjust(20) +'\n'
+
+        print(self.curveValList_str)
+
+    def update_define_card(self):
+        """
+        :return:
+        """
+        outlines = []
+        colN = 0
+        rowN = 0
+        count = 0
+        newline = []
+        index = 0
+        outlines.append("\n")
+        define_card_type = self.read_define_card.split(',')[0]
+        outlines.append(self.ControlCards.define_cards[define_card_type]["Card_Title"][0])
+        header_line = "\n$$"
+        for j in range(len(self.curr_define_card_parameters)):
+            if count == 8:# or
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+
+            if self.curr_define_card_parameters[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+                index += 1
+                continue
+
+            if self.curr_define_card_parameters[j] == "CURVE":
+                if header_line == "\n$$":
+                    header_line += self.curr_define_card_parameters[j].rjust(8)
+                else:
+                    header_line += self.curr_define_card_parameters[j].rjust(10)
+                newline.append(self.curveValList_str)
+            else:
+                if header_line == "\n$$":
+                    header_line += self.curr_define_card_parameters[j].rjust(8)
+                else:
+                    header_line += self.curr_define_card_parameters[j].rjust(10)
+                tmp_prop = self.entry_list_define_cards[index].get().strip()
+                newline.append(tmp_prop.rjust(10))
+
+
+            # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
+            # if header_line == "\n$$":
+            #     header_line += self.curr_define_card_parameters[j].rjust(8)
+            # else:
+            #     header_line += self.curr_define_card_parameters[j].rjust(10)
+            # tmp_prop = self.entry_list[index].get().strip()
+            # newline.append(tmp_prop.rjust(10))
+
+            if j == (len(self.curr_define_card_parameters)-1):
+                line1 = "\n" + "".join(newline) #+ "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+
+            count += 1
+            colN += 1
+            index += 1
+
+        with open(self.read_control_cards_file_out, 'a') as outFile:
+            outFile.writelines(outlines)
+
+    def close_window_defineCardsInfo_read(self):
+        """
+        :return:
+        """
+        self.window_defineCardsInfo_read.destroy()
 
     def get_control_type(self, control_card):
         """
@@ -558,6 +1007,7 @@ class VIEWER:
                 # self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
                 self.createButton(self.window_defineCardsInfo, "Add_Table", self.add_curve_info, rowN+1, colN, bg_='lightyellow')
                 self.createButton(self.window_defineCardsInfo, "Import_Table", self.import_curve_info, rowN+1, colN+1, bg_='lightblue')
+                self.createButton(self.window_defineCardsInfo, "Paste_Table", self.paste_curve_info, rowN+1, colN+2, bg_='lightblue')
                 continue
 
             self.label_list_define_cards[j].grid(row=rowN, column=colN)
@@ -620,6 +1070,52 @@ class VIEWER:
 
         print(self.curveValList_str)
         self.window_defineCurve.destroy()
+
+    def paste_curve_info(self):
+        """
+        :return:
+        """
+        self.curveRowN = 0
+        self.curveInfoList = []
+        self.window_defineCurve = Toplevel(self.frame)
+
+        A1 = StringVar()
+        A1_entry = Entry(self.window_defineCurve, textvariable=A1, state='readonly')
+        A1.set('A1')
+        A1_entry.grid(row=self.curveRowN, column=0)
+
+        O1 = StringVar()
+        O1_entry = Entry(self.window_defineCurve, textvariable=O1, state='readonly')
+        O1.set('O1')
+        O1_entry.grid(row=self.curveRowN, column=1)
+
+        clipboard = Tk.clipboard_get(self.master)
+        clipboard_list = clipboard.split('\n')
+        print(clipboard_list)
+
+        self.curveLength = len(clipboard_list)
+        self.entry_list_CC21 = []
+        self.entry_list_CC22 = []
+        self.curveRowN = 1
+        for i in range(self.curveLength):
+            self.curveRowN += 1
+            # print(rowN)
+            clipboard_list1 = clipboard_list[i].split("\t")
+            if len(clipboard_list1) > 1:
+                self.entry_list_CC21.append(Entry(self.window_defineCurve, width=10))
+                self.entry_list_CC21[i].grid(row=self.curveRowN, column=0)
+                self.entry_list_CC21[i].insert(0,float(clipboard_list1[0]))
+
+                self.entry_list_CC22.append(Entry(self.window_defineCurve, width=10))
+                self.entry_list_CC22[i].grid(row=self.curveRowN, column=1)
+                self.entry_list_CC22[i].insert(0,float(clipboard_list1[1]))
+                self.curveInfoList.append([self.entry_list_CC21[i], self.entry_list_CC22[i]])
+            else:
+                messagebox.showwarning("WARNING", "please select two columns !!!")
+                break
+                # continue
+        self.save_entry_button = Button(self.window_defineCurve, text="Save", command=self.save_curve_entry, fg='blue')
+        self.save_entry_button.grid(row=self.curveRowN, column=3)
 
     def import_curve_info(self):
         """
