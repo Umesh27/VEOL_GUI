@@ -25,6 +25,9 @@ class VIEWER:
         self.frame.pack()
         self.baseDir = os.path.dirname(sys.argv[0])
         self.template_path = os.path.join(self.baseDir, "Template")
+        self.material_ids = []
+        self.section_ids = []
+        self.load_curve_ids = [""]
 
         self.rowN = 0
         self.project_path_button = self.createButton(self.frame, "ProjectPath", self.open_projectPath, self.rowN, 1, sticky_=EW, bg_='lightyellow')
@@ -41,10 +44,7 @@ class VIEWER:
         self.input_parts = []
         self.partInfo = {"":""}
         self.partRowNo = self.rowN
-        self.map_part_material = {}
         self.map_materialID_type = {}
-        self.map_part_section = {}
-        self.map_part_thickness = {}
         self.map_sectionID_thickness = {}
         self.partSetIdList = [""]
 
@@ -103,7 +103,6 @@ class VIEWER:
         self.curveInfo = {}
         self.curveValList = []
         self.curveLines = []
-        self.curveList = [""]
         self.ControlCards = control_cards.ControlCards()
         self.define_cards_type = StringVar(self.frame)
         self.define_card = self.ControlCards.define_cards_type[0]
@@ -156,35 +155,12 @@ class VIEWER:
         """
         row_ = 0
 
-        parameter_label1 = StringVar()
-        parameter_label_entry1 = Entry(self.frame, textvariable=parameter_label1, state='readonly', justify=CENTER)
-        parameter_label1.set('PartID')
-        parameter_label_entry1.grid(row=row_, column=5, sticky=N)
+        self.createLabel(self.frame, "PartID", row_, 5, bg_="lightyellow", relief_="ridge")
+        self.createLabel(self.frame, "PartName", row_, 6, bg_="lightyellow", relief_="ridge")
+        self.createLabel(self.frame, "ID, MaterialType", row_, 7, width_=20, bg_="lightyellow", relief_="ridge")
+        self.createLabel(self.frame, "ID, ShellType", row_, 8, bg_="lightyellow", relief_="ridge")
+        self.createLabel(self.frame, "Thickness", row_, 9, bg_="lightyellow", relief_="ridge")
 
-        parameter_label2 = StringVar()
-        parameter_label_entry2 = Entry(self.frame, textvariable=parameter_label2, state='readonly', justify=CENTER)
-        parameter_label2.set('PartName')
-        parameter_label_entry2.grid(row=row_, column=6, sticky=N)
-
-        parameter_label3 = StringVar()
-        parameter_label_entry3 = Entry(self.frame, textvariable=parameter_label3, state='readonly', justify=CENTER)
-        parameter_label3.set('ID, MaterialType')
-        parameter_label_entry3.grid(row=row_, column=7, sticky=N)
-
-        parameter_label4 = StringVar()
-        parameter_label_entry4 = Entry(self.frame, textvariable=parameter_label4, state='readonly', justify=CENTER)
-        parameter_label4.set('ID, ShellType')
-        parameter_label_entry4.grid(row=row_, column=8, sticky=N)
-
-        parameter_label5 = StringVar()
-        parameter_label_entry5 = Entry(self.frame, textvariable=parameter_label5, state='readonly', justify=CENTER)
-        parameter_label5.set('Thickness')
-        parameter_label_entry5.grid(row=row_, column=9, sticky=N)
-
-        # self.createButton(self.frame, "EXIT", self.save_mat_info, row_, 10, fg_='red', sticky_='E')
-
-        print(self.map_part_material)
-        print(self.map_part_section)
         self.partID_label = []
         self.partName_label = []
         self.partMat_label = []
@@ -198,44 +174,18 @@ class VIEWER:
         for key in sorted(self.map_partId_Info.keys()):
             row_ += 1
             print(index)
-
-            partID_label = StringVar()
-            partName = self.map_partId_Info.get(key, "")[0]
             sectionID = self.map_partId_Info.get(key, "")[1]
             materialID = self.map_partId_Info.get(key, "")[2]
-            materialCard = self.map_materialID_type[materialID]
-            sectionID_Type = ", ".join([sectionID, self.map_sectionID_thickness[sectionID][0]])
-            sectionThickness = self.map_sectionID_thickness[sectionID][1]
-            materialID_Card = ", ".join([materialID, materialCard])
-            # print(key, self.map_part_id_name.get(key, ""), self.map_partId_Info.get(key, "")[0], self.map_partId_Info.get(key, "")[1], self.map_partId_Info.get(key, "")[2])
-            self.partID_label.append(Entry(self.frame, textvariable=partID_label, width=5, state='readonly'))
-            partID_label.set(key)
-            self.partID_label[index].grid(row = row_, column=5)
-            # self.partID_label[index].insert(0, key)
+            materialCard = self.map_materialID_type.get(materialID)
+            sectionID_Type = "{}: {}".format(sectionID, self.map_sectionID_thickness.get(sectionID, "")[0])
+            sectionThickness = self.map_sectionID_thickness.get(sectionID, "")[1]
+            materialID_Card = "{}: {}".format(materialID, materialCard)
 
-            partName_label = StringVar()
-            self.partName_label.append(Entry(self.frame, textvariable=partName_label, width=15, state='readonly'))
-            partName_label.set(self.map_part_id_name.get(key, ""))
-            self.partName_label[index].grid(row = row_, column=6)
-            # self.partName_label[index].insert(0, self.map_part_id_name[key])
-
-            partMat_label = StringVar()
-            self.partMat_label.append(Entry(self.frame, textvariable=partMat_label, width=10, state='readonly'))
-            partMat_label.set(materialID_Card)#self.map_part_material.get(key, ""))
-            self.partMat_label[index].grid(row = row_, column=7)
-            # self.partMat_label[index].insert(0, self.map_part_material[key])
-
-            partShell_label = StringVar()
-            self.partShell_label.append(Entry(self.frame, textvariable=partShell_label, width=10, state='readonly'))
-            partShell_label.set(sectionID_Type)#self.map_part_section.get(key, ""))
-            self.partShell_label[index].grid(row = row_, column=8)
-            # self.partShell_label[index].insert(0, self.map_part_section[key])
-
-            partThk_label = StringVar()
-            self.partThk_label.append(Entry(self.frame, textvariable=partThk_label, width=5, state='readonly'))
-            partThk_label.set(sectionThickness)#self.map_part_thickness.get(key, ""))
-            self.partThk_label[index].grid(row = row_, column=9)
-            # self.partThk_label[index].insert(0, self.map_part_thickness[key])
+            self.createLabel(self.frame, key, row_, 5, bg_="lightblue", relief_="ridge")
+            self.createLabel(self.frame, self.map_part_id_name.get(key, ""), row_, 6, bg_="lightblue", relief_="ridge")
+            self.createLabel(self.frame, materialID_Card, row_, 7, width_=20, bg_="lightblue", relief_="ridge")
+            self.createLabel(self.frame, sectionID_Type, row_, 8, bg_="lightblue", relief_="ridge")
+            self.createLabel(self.frame, sectionThickness, row_, 9, bg_="lightblue", relief_="ridge")
             index += 1
 
     def get_material_info(self):
@@ -378,6 +328,20 @@ class VIEWER:
         self.createLabel(self.window_partInfo, "SectionID", row_, 2, 10)
         self.createLabel(self.window_partInfo, "MaterialID", row_, 3, 10)
 
+        self.createLabel(self.window_partInfo, "ID, MaterialType", row_, 5, width_=20, bg_="lightyellow", relief_="ridge")
+        self.createLabel(self.window_partInfo, "ID, ShellType", row_, 6, bg_="lightyellow", relief_="ridge")
+        self.createLabel(self.window_partInfo, "Thickness", row_, 7, bg_="lightyellow", relief_="ridge")
+
+        for i in range(len(self.material_ids)):
+            row_ += 1
+            self.createLabel(self.window_partInfo, "{} : {}".format(self.material_ids[i], self.map_materialID_type[self.material_ids[i]]), row_, 5, width_=20, bg_="lightblue", relief_="groove")
+
+        row_ = 0
+        for i in range(len(self.section_ids)):
+            row_ += 1
+            self.createLabel(self.window_partInfo, "{} : {}".format(self.section_ids[i], self.map_sectionID_thickness[self.section_ids[i]][0]), row_, 6, width_=20, bg_="lightblue", relief_="groove")
+            self.createLabel(self.window_partInfo, "{}".format(self.map_sectionID_thickness[self.section_ids[i]][1]), row_, 7, width_=20, bg_="lightblue", relief_="groove")
+
         self.partInfo_entry = []
         self.partID_label = []
         self.partName_label = []
@@ -385,6 +349,7 @@ class VIEWER:
         self.partShell_label = []
 
         index = 0
+        row_ = 0
         for key in sorted(self.map_part_id_name.keys()):
             row_ += 1
             print(index)
@@ -401,12 +366,12 @@ class VIEWER:
 
             partShell_label = StringVar()
             self.partShell_label.append(Entry(self.window_partInfo, textvariable=partShell_label, width=10))#, state='readonly'))
-            partShell_label.set(self.map_part_section.get(key, "").split(',')[0])
+            partShell_label.set("")
             self.partShell_label[index].grid(row = row_, column=2)
 
             partMat_label = StringVar()
             self.partMat_label.append(Entry(self.window_partInfo, textvariable=partMat_label, width=10))#, state='readonly'))
-            partMat_label.set(self.map_part_material.get(key, "").split(',')[0])
+            partMat_label.set("")
             self.partMat_label[index].grid(row = row_, column=3)
 
             index += 1
@@ -913,15 +878,6 @@ class VIEWER:
                 tmp_prop = self.entry_list_define_cards[index].get().strip()
                 newline.append(tmp_prop.rjust(10))
 
-
-            # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
-            # if header_line == "\n$$":
-            #     header_line += self.curr_define_card_parameters[j].rjust(8)
-            # else:
-            #     header_line += self.curr_define_card_parameters[j].rjust(10)
-            # tmp_prop = self.entry_list[index].get().strip()
-            # newline.append(tmp_prop.rjust(10))
-
             if j == (len(self.curr_define_card_parameters)-1):
                 line1 = "\n" + "".join(newline) #+ "\n"
                 value_line = header_line + line1
@@ -981,6 +937,11 @@ class VIEWER:
         self.curr_define_card_parameters_default = self.ControlCards.define_cards[self.define_card]["Control_Parameters"][1].split(',')
         self.curr_define_card_parameters_freq = self.ControlCards.define_cards[self.define_card]["Control_Parameters"][2].split(',')
 
+        if self.load_curve_ids == [""]:
+            lcid = 1
+        else:
+            lcid = int(self.load_curve_ids[-1]) + 1
+
         for j in range(len(self.curr_define_card_parameters)):
             if count == 8:
                 rowN += 2
@@ -1002,17 +963,21 @@ class VIEWER:
                 self.label_list_define_cards.append(Label(self.window_defineCardsInfo, text=self.curr_define_card_parameters[j].upper(), width=10))
                 self.entry_list_define_cards.append(Entry(self.window_defineCardsInfo, width=10))
 
-            if self.curr_define_card_parameters[j] == "CURVE":
+            if self.curr_define_card_parameters[j].upper() == "CURVE":
                 self.label_list_define_cards[j].grid(row=rowN, column=colN)
                 # self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
                 self.createButton(self.window_defineCardsInfo, "Add_Table", self.add_curve_info, rowN+1, colN, bg_='lightyellow')
                 self.createButton(self.window_defineCardsInfo, "Import_Table", self.import_curve_info, rowN+1, colN+1, bg_='lightblue')
                 self.createButton(self.window_defineCardsInfo, "Paste_Table", self.paste_curve_info, rowN+1, colN+2, bg_='lightblue')
+                self.curveValList_str = ""
                 continue
 
             self.label_list_define_cards[j].grid(row=rowN, column=colN)
             self.entry_list_define_cards[j].grid(row=rowN+1, column=colN)
-            self.entry_list_define_cards[j].insert(0,self.curr_define_card_parameters_default[j])
+            if self.curr_define_card_parameters[j].upper() == "LCID":
+                self.entry_list_define_cards[j].insert(0,lcid)
+            else:
+                self.entry_list_define_cards[j].insert(0,self.curr_define_card_parameters_default[j])
 
             count += 1
             colN += 1
@@ -1061,7 +1026,6 @@ class VIEWER:
         """
         :return:
         """
-        self.curveValList_str = ""
         for i in range(len(self.curveInfoList)):
             if i == len(self.curveInfoList)-1:
                 self.curveValList_str += self.curveInfoList[i][0].get().rjust(20) + self.curveInfoList[i][1].get().rjust(20)
@@ -1110,6 +1074,8 @@ class VIEWER:
                 self.entry_list_CC22[i].grid(row=self.curveRowN, column=1)
                 self.entry_list_CC22[i].insert(0,float(clipboard_list1[1]))
                 self.curveInfoList.append([self.entry_list_CC21[i], self.entry_list_CC22[i]])
+            elif clipboard_list1[-1] == "":
+                continue
             else:
                 messagebox.showwarning("WARNING", "please select two columns !!!")
                 break
@@ -1227,10 +1193,7 @@ class VIEWER:
             count += 1
             colN += 1
             index += 1
-        # line = ",".join([mid, self.material_card])
-        # self.map_part_material.update({self.partID:line})
-        # print(self.map_part_material)
-        self.curveList.append(lcid)
+        self.load_curve_ids.append(lcid)
         with open(self.control_card_out_file, 'a') as outFile:
             outFile.writelines(outlines)
 
@@ -1292,7 +1255,7 @@ class VIEWER:
                 self.label_list_control_cards[j].grid(row=rowN, column=colN)
                 self.curve_info = StringVar(self.window_controlCardsInfo)
                 self.curve_info.set("")
-                self.curvePopup = OptionMenu(self.window_controlCardsInfo, self.curve_info, *self.curveList, command=self.get_curve_ID)
+                self.curvePopup = OptionMenu(self.window_controlCardsInfo, self.curve_info, *self.load_curve_ids, command=self.get_curve_ID)
                 self.curvePopup.config(bg='lightyellow')
                 self.curvePopup.grid(row = rowN+1, column=colN)
                 self.curve_info.trace('w', self.curve_dropdown)
@@ -1439,6 +1402,11 @@ class VIEWER:
         self.curr_section_parameters_default = self.MaterialCards.section_cards[self.section_type]["Section_Parameters"][1].split(',')
         self.curr_section_parameters_freq = self.MaterialCards.section_cards[self.section_type]["Section_Parameters"][2].split(',')
 
+        if self.section_ids == []:
+            secid = 1
+        else:
+            secid = int(self.section_ids[-1]) + 1
+
         for j in range(len(self.curr_section_parameters)):
             if count == 8:
                 rowN += 2
@@ -1461,8 +1429,12 @@ class VIEWER:
                 self.entry_list_section.append(Entry(self.window_sectionInfo, width=10))
             self.label_list_section[j].grid(row=rowN, column=colN)
 
+            self.label_list_section[j].grid(row=rowN, column=colN)
             self.entry_list_section[j].grid(row=rowN+1, column=colN)
-            self.entry_list_section[j].insert(0,self.curr_section_parameters_default[j])
+            if self.curr_section_parameters[j].upper() == "SECID":
+                self.entry_list_section[j].insert(0,secid)
+            else:
+                self.entry_list_section[j].insert(0,self.curr_section_parameters_default[j])
 
             count += 1
             colN += 1
@@ -1537,15 +1509,11 @@ class VIEWER:
             colN += 1
             index += 1
         line = ",".join([secid, self.section_type])
-        self.map_part_section.update({self.partID:line})
+        self.section_ids.append(secid)
         if self.section_type == "SHELL":
-            self.map_part_thickness.update({self.partID:thickness})
             self.map_sectionID_thickness.update({secid:[self.section_type,thickness]})
         else:
-            self.map_part_thickness.update({self.partID:""})
             self.map_sectionID_thickness.update({secid:[self.section_type,""]})
-
-        # print(self.map_part_section)
 
         with open(self.material_out_file, 'a') as outFile:
             outFile.writelines(outlines)
@@ -1594,18 +1562,18 @@ class VIEWER:
 
         rowN = 0
         self.materialTitle = ""
-        self.createLabel(self.window_newMat, "MAT_TITLE", rowN, 0, width=20)
+        self.createLabel(self.window_newMat, "MAT_TITLE", rowN, 0, width_=20)
         self.mat_title_entry = self.createEntry(self.window_newMat, "MAT_TITLE", rowN, 1, widthV=20)
         rowN += 1
-        self.createLabel(self.window_newMat, "PART_TITLE", rowN, 0, width=20, fg_='blue')
+        self.createLabel(self.window_newMat, "PART_TITLE", rowN, 0, width_=20, fg_='blue')
         self.part_title_entry = self.createEntry(self.window_newMat, "PART_TITLE", rowN, 1, widthV=20, fg_='blue')
         self.part_title_freq = self.createEntry(self.window_newMat, "Y", rowN, 2, widthV=5, fg_='blue')
         rowN += 1
-        self.createLabel(self.window_newMat, "CARD_TITLE", rowN, 0, width=20, fg_='blue')
+        self.createLabel(self.window_newMat, "CARD_TITLE", rowN, 0, width_=20, fg_='blue')
         self.card_title_entry = self.createEntry(self.window_newMat, "CARD_TITLE", rowN, 1, widthV=20, fg_='blue')
         self.card_title_freq = self.createEntry(self.window_newMat, "Y", rowN, 2, widthV=5, fg_='blue')
         rowN += 1
-        self.createLabel(self.window_newMat, "CARD_INFO", rowN, 0, width=20, fg_='blue')
+        self.createLabel(self.window_newMat, "CARD_INFO", rowN, 0, width_=20, fg_='blue')
         self.createButton(self.window_newMat, "SAVE", self.save_new_mat_info, rowN, 2, fg_='red')
         rowN += 1
 
@@ -2075,11 +2043,6 @@ class VIEWER:
             colN += 1
             index += 1
 
-        # self.mat_out = filedialog.asksaveasfilename()
-        # self.presentMatFile_out = os.path.join(os.path.split(self.read_mat_file)[0], "mat_edit.k")
-        # if not os.path.exists(self.presentMatFile_out):
-        #     open(self.presentMatFile_out, 'w').close()
-
         with open(self.read_mat_file_out, 'a') as outFile:
             outFile.writelines(outlines)
 
@@ -2103,6 +2066,10 @@ class VIEWER:
         self.curr_material_parameters = self.MaterialCards.material_cards[self.material_card]["Mat_Parameters"][0].split(',')
         self.curr_material_parameters_default = self.MaterialCards.material_cards[self.material_card]["Mat_Parameters"][1].split(',')
         self.curr_material_parameters_freq = self.MaterialCards.material_cards[self.material_card]["Mat_Parameters"][2].split(',')
+        if self.material_ids == []:
+            mid = 1
+        else:
+            mid = int(self.material_ids[-1]) + 1
 
         for j in range(len(self.curr_material_parameters)):
             if count == 8:
@@ -2130,6 +2097,8 @@ class VIEWER:
             # self.entry_list[j].insert(0,self.material1.material_prop.get(self.materialProp_curr[j].strip(), 0.0))
             if self.curr_material_parameters[j] == "crit":
                 self.entry_list[j].insert(0,str(crit_fail))
+            elif self.curr_material_parameters[j].upper() == 'MID':
+                self.entry_list[j].insert(0,str(mid))
             else:
                 self.entry_list[j].insert(0,self.curr_material_parameters_default[j])
 
@@ -2215,9 +2184,8 @@ class VIEWER:
             colN += 1
             index += 1
         line = ",".join([mid, self.material_card])
-        self.map_part_material.update({self.partID:line})
+        self.material_ids.append(mid)
         self.map_materialID_type.update({mid:self.material_card})
-        # print(self.map_part_material)
 
         with open(self.material_out_file, 'a') as outFile:
             outFile.writelines(outlines)
@@ -2325,12 +2293,12 @@ class VIEWER:
         button_ = Button(frame_, text=buttonName, command=buttonMethod, fg=fg_, bg=bg_)
         button_.grid(row=rowN, column=colN, sticky=sticky_, ipadx=ipadx_)
 
-    def createLabel(self, frame_, labelName, rowN, colN, width=10, fg_='black', sticky_=N, bg_="white", ipadx_=0):
+    def createLabel(self, frame_, labelName, rowN, colN, width_=10, fg_='black', sticky_=N, bg_="white", ipadx_=0, bd_=2, relief_="flat"):
         """
 
         :return:
         """
-        label_ = Label(frame_, text=labelName, width=width, fg=fg_, bg=bg_)
+        label_ = Label(frame_, text=labelName, width=width_, fg=fg_, bg=bg_, bd=bd_, relief=relief_)
         label_.grid(row=rowN, column=colN, sticky=sticky_, ipadx=ipadx_)
 
     def createEntry(self, frame_, value_, rowN, colN, widthV, fg_='black'):
@@ -2344,6 +2312,12 @@ class VIEWER:
         entry_.insert(0, value_)
 
         return entry_
+
+    def createDropdown(self):
+        """
+        :return:
+        """
+
 
 if __name__ == '__main__':
 
