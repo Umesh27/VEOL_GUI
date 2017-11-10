@@ -189,44 +189,6 @@ class VIEWER:
             self.createLabel(self.frame, sectionThickness, row_, 9, bg_="lightblue", relief_="ridge")
             index += 1
 
-    def get_material_info(self):
-        """
-        :return:
-        """
-        with open(self.material_out_file) as readFile:
-            lines = readFile.readlines()
-
-        inMatBlock = False
-        inSectionBlock = False
-        count = 0
-        for line in lines:
-            if line.startswith("*MAT"):
-                inMatBlock = True
-                inSectionBlock = False
-                count = 1
-                continue
-            if line.startswith("*SECTION"):
-                inMatBlock = False
-                inSectionBlock = True
-                count = 1
-                continue
-            if line.startswith("$$"):
-                continue
-            if inMatBlock:
-                if count == 1:
-                    print(line)
-                    count = 0
-                    continue
-                else:
-                    continue
-            if inSectionBlock:
-                if count == 1:
-                    print(line)
-                    count = 0
-                    continue
-                else:
-                    continue
-
     def open_inputPath(self):
         """
         :return:
@@ -447,6 +409,8 @@ class VIEWER:
         :return:
         """
         self.window_partInfo.destroy()
+
+    # Control Cards Block
 
     def add_new_control_card(self):
         """
@@ -702,6 +666,110 @@ class VIEWER:
         """
         self.window_controlCardsInfo_read.destroy()
 
+    def get_control_type(self, control_card):
+        """
+        :return:
+        """
+        self.control_card = control_card
+
+    def control_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.control_card = self.control_cards_type.get()
+
+    def add_control_cards_info(self):
+        """
+
+        :return:
+        """
+        self.window_controlCardsInfo = Toplevel(self.frame)
+        self.entry_list_control_cards = []
+        self.label_list_control_cards = []
+        colN = 0
+        rowN = 0
+        count = 0
+
+        self.curr_control_card_parameters = self.ControlCards.control_cards[self.control_card]["Control_Parameters"][0].split(',')
+        self.curr_control_card_parameters_default = self.ControlCards.control_cards[self.control_card]["Control_Parameters"][1].split(',')
+        self.curr_control_card_parameters_freq = self.ControlCards.control_cards[self.control_card]["Control_Parameters"][2].split(',')
+
+        for j in range(len(self.curr_control_card_parameters)):
+            if count == 8:
+                rowN += 2
+                colN = 0
+                count = 0
+
+            if self.curr_control_card_parameters[j] == "":
+                self.label_list_control_cards.append(Label(self.window_controlCardsInfo, text=self.curr_control_card_parameters[j], width=10))
+                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                continue
+
+            if self.curr_control_card_parameters_freq[j].strip().upper() == "Y":
+                self.label_list_control_cards.append(Label(self.window_controlCardsInfo, text=self.curr_control_card_parameters[j].upper(), width=10, fg="blue"))
+                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo, width=10, fg="blue"))
+            else:
+                self.label_list_control_cards.append(Label(self.window_controlCardsInfo, text=self.curr_control_card_parameters[j].upper(), width=10))
+                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo, width=10))
+
+            if self.curr_control_card_parameters[j] == "PID":
+                self.label_list_control_cards[j].grid(row=rowN, column=colN)
+                self.parts_info2 = StringVar(self.window_controlCardsInfo)
+                self.parts_info2.set("")
+                self.part_option2 = OptionMenu(self.window_controlCardsInfo, self.parts_info2, *self.partInfo_list, command=self.get_part_ID2)
+                self.part_option2.config(bg='lightyellow')
+                self.part_option2.grid(row = rowN+1, column=colN)
+                self.parts_info2.trace('w', self.part_dropdown2)
+                count += 1
+                colN += 1
+                continue
+            elif self.curr_control_card_parameters[j] == "LCID":
+                self.label_list_control_cards[j].grid(row=rowN, column=colN)
+                self.curve_info = StringVar(self.window_controlCardsInfo)
+                self.curve_info.set("")
+                self.curvePopup = OptionMenu(self.window_controlCardsInfo, self.curve_info, *self.load_curve_ids_title, command=self.get_curve_ID)
+                self.curvePopup.config(bg='lightyellow')
+                self.curvePopup.grid(row = rowN+1, column=colN)
+                self.curve_info.trace('w', self.curve_dropdown)
+                count += 1
+                colN += 1
+                continue
+            elif self.curr_control_card_parameters[j] == "PSID":
+                self.label_list_control_cards[j].grid(row=rowN, column=colN)
+                self.partSetID_info = StringVar(self.window_controlCardsInfo)
+                self.partSetID_info.set("")
+                self.partSetPopup = OptionMenu(self.window_controlCardsInfo, self.partSetID_info, *self.partSetIdList, command=self.get_partSet_ID)
+                self.partSetPopup.config(bg='lightyellow')
+                self.partSetPopup.grid(row = rowN+1, column=colN)
+                self.partSetID_info.trace('w', self.partSet_dropdown)
+                count += 1
+                colN += 1
+                continue
+            else:
+                self.label_list_control_cards[j].grid(row=rowN, column=colN)
+                self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
+                self.entry_list_control_cards[j].insert(0,self.curr_control_card_parameters_default[j])
+                count += 1
+                colN += 1
+
+        rowN += 3
+        # print(rowN)
+        button_ = Button(self.window_controlCardsInfo, text="Save", command=self.save_control_cards_info)
+        button_.grid(row=rowN, column=1)
+        Exitbutton_ = Button(self.window_controlCardsInfo, text="Exit", command=self.close_window_controlCardsInfo)
+        Exitbutton_.grid(row=rowN, column=2)
+
+    def close_window_controlCardsInfo(self):
+        """
+        :return:
+        """
+        self.window_controlCardsInfo.destroy()
+
+    # Define Curve Block
+
     def get_read_define_type(self, read_define_card):
         """
         :return:
@@ -897,18 +965,6 @@ class VIEWER:
         :return:
         """
         self.window_defineCardsInfo_read.destroy()
-
-    def get_control_type(self, control_card):
-        """
-        :return:
-        """
-        self.control_card = control_card
-
-    def control_dropdown(self, *args):
-        """
-        :return:
-        """
-        self.control_card = self.control_cards_type.get()
 
     def define_dropdown(self, *args):
         """
@@ -1212,99 +1268,6 @@ class VIEWER:
         """
         self.window_defineCardsInfo.destroy()
 
-    def add_control_cards_info(self):
-        """
-
-        :return:
-        """
-        self.window_controlCardsInfo = Toplevel(self.frame)
-        self.entry_list_control_cards = []
-        self.label_list_control_cards = []
-        colN = 0
-        rowN = 0
-        count = 0
-
-        self.curr_control_card_parameters = self.ControlCards.control_cards[self.control_card]["Control_Parameters"][0].split(',')
-        self.curr_control_card_parameters_default = self.ControlCards.control_cards[self.control_card]["Control_Parameters"][1].split(',')
-        self.curr_control_card_parameters_freq = self.ControlCards.control_cards[self.control_card]["Control_Parameters"][2].split(',')
-
-        for j in range(len(self.curr_control_card_parameters)):
-            if count == 8:
-                rowN += 2
-                colN = 0
-                count = 0
-
-            if self.curr_control_card_parameters[j] == "":
-                self.label_list_control_cards.append(Label(self.window_controlCardsInfo, text=self.curr_control_card_parameters[j], width=10))
-                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo, width=10))
-                rowN += 2
-                colN = 0
-                count = 0
-                continue
-
-            if self.curr_control_card_parameters_freq[j].strip().upper() == "Y":
-                self.label_list_control_cards.append(Label(self.window_controlCardsInfo, text=self.curr_control_card_parameters[j].upper(), width=10, fg="blue"))
-                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo, width=10, fg="blue"))
-            else:
-                self.label_list_control_cards.append(Label(self.window_controlCardsInfo, text=self.curr_control_card_parameters[j].upper(), width=10))
-                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo, width=10))
-
-            if self.curr_control_card_parameters[j] == "PID":
-                self.label_list_control_cards[j].grid(row=rowN, column=colN)
-                self.parts_info2 = StringVar(self.window_controlCardsInfo)
-                self.parts_info2.set("")
-                self.part_option2 = OptionMenu(self.window_controlCardsInfo, self.parts_info2, *self.partInfo_list, command=self.get_part_ID2)
-                self.part_option2.config(bg='lightyellow')
-                self.part_option2.grid(row = rowN+1, column=colN)
-                self.parts_info2.trace('w', self.part_dropdown2)
-                count += 1
-                colN += 1
-                continue
-            elif self.curr_control_card_parameters[j] == "LCID":
-                self.label_list_control_cards[j].grid(row=rowN, column=colN)
-                self.curve_info = StringVar(self.window_controlCardsInfo)
-                self.curve_info.set("")
-                self.curvePopup = OptionMenu(self.window_controlCardsInfo, self.curve_info, *self.load_curve_ids_title, command=self.get_curve_ID)
-                self.curvePopup.config(bg='lightyellow')
-                self.curvePopup.grid(row = rowN+1, column=colN)
-                self.curve_info.trace('w', self.curve_dropdown)
-                count += 1
-                colN += 1
-                continue
-            elif self.curr_control_card_parameters[j] == "PSID":
-                self.label_list_control_cards[j].grid(row=rowN, column=colN)
-                self.partSetID_info = StringVar(self.window_controlCardsInfo)
-                self.partSetID_info.set("")
-                self.partSetPopup = OptionMenu(self.window_controlCardsInfo, self.partSetID_info, *self.partSetIdList, command=self.get_partSet_ID)
-                self.partSetPopup.config(bg='lightyellow')
-                self.partSetPopup.grid(row = rowN+1, column=colN)
-                self.partSetID_info.trace('w', self.partSet_dropdown)
-                count += 1
-                colN += 1
-                continue
-            else:
-                self.label_list_control_cards[j].grid(row=rowN, column=colN)
-                self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
-                self.entry_list_control_cards[j].insert(0,self.curr_control_card_parameters_default[j])
-                count += 1
-                colN += 1
-
-        rowN += 3
-        # print(rowN)
-        button_ = Button(self.window_controlCardsInfo, text="Save", command=self.save_control_cards_info)
-        button_.grid(row=rowN, column=1)
-        Exitbutton_ = Button(self.window_controlCardsInfo, text="Exit", command=self.close_window_CC)
-        Exitbutton_.grid(row=rowN, column=2)
-
-    def get_partSet_ID(self, partSetID):
-        self.partSetID = partSetID
-
-    def partSet_dropdown(self, *args):
-        """
-        :return:
-        """
-        self.partSetID = self.partSetID_info.get()
-
     def get_curve_ID(self, curveID):
         self.curveID = curveID
 
@@ -1377,11 +1340,7 @@ class VIEWER:
         with open(self.control_card_out_file, 'a') as outFile:
             outFile.writelines(outlines)
 
-    def close_window_CC(self):
-        """
-        :return:
-        """
-        self.window_controlCardsInfo.destroy()
+    # Section Block
 
     def get_section_type(self, section_type):
         """
@@ -1540,34 +1499,436 @@ class VIEWER:
         """
         self.window_sectionInfo.destroy()
 
-    def open_projectPath(self):
+    def get_read_section_type(self, section_card_type):
+        """
+        :return:
+        """
+        self.read_section_card = section_card_type
+
+    def read_section_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.read_section_card = self.read_section_card_set.get()
+
+    def show_section(self):
+        """
+        :return:
+        """
+        # print("In edit button !")
+        rowN = 1
+        self.window_sectionInfo_read = Toplevel(self.frame)
+        section_card_type = self.read_section_card.split(',')[0]
+        self.curr_section_parameters = self.MaterialCards.section_cards[section_card_type]["Section_Parameters"][0].split(',')
+        sectionPara_curr_freq = self.MaterialCards.section_cards[section_card_type]["Section_Parameters"][2].split(',')
+        count = 0
+        colN = 0
+        self.label_list_section = []
+        self.entry_list_section = []
+        index = 0
+        for j in range(len(self.curr_section_parameters)):
+            if count == 8:
+                rowN += 2
+                colN = 0
+                count = 0
+
+            if self.curr_section_parameters[j] == "":
+                self.label_list_section.append(Label(self.window_sectionInfo_read, text=self.curr_section_parameters[j], width=10))
+                self.entry_list_section.append(Entry(self.window_sectionInfo_read, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                continue
+
+            if sectionPara_curr_freq[j].strip().upper() == "Y":
+                self.label_list_section.append(Label(self.window_sectionInfo_read, text=self.curr_section_parameters[j].upper(), width=10, fg="blue"))
+                self.entry_list_section.append(Entry(self.window_sectionInfo_read, width=10, fg="blue"))
+            else:
+                self.label_list_section.append(Label(self.window_sectionInfo_read, text=self.curr_section_parameters[j].upper(), width=10))
+                self.entry_list_section.append(Entry(self.window_sectionInfo_read, width=10))
+            self.label_list_section[j].grid(row=rowN, column=colN)
+
+            self.entry_list_section[j].grid(row=rowN+1, column=colN)
+
+            try:
+                self.entry_list_section[j].insert(0,self.read_section_parameters[self.read_section_card][index])
+            except Exception as Ex:
+                print(Ex, index)
+                self.entry_list_section[j].insert(0,"")
+
+            count += 1
+            colN += 1
+            index += 1
+
+        rowN += 3
+        button_ = Button(self.window_sectionInfo_read, text="Save", command=self.update_section)
+        button_.grid(row=rowN, column=1)
+        Exitbutton_ = Button(self.window_sectionInfo_read, text="Exit", command=self.close_section_window_read)
+        Exitbutton_.grid(row=rowN, column=2)
+
+    def close_section_window_read(self):
+        """
+        :return:
+        """
+        self.window_sectionInfo_read.destroy()
+
+    def update_section(self):
+        """
+        :return:
+        """
+        outlines = []
+        colN = 0; rowN = 0; count = 0; index = 0
+        newline = []
+        outlines.append("\n")
+        section_card_type = self.read_section_card.split(',')[0]
+        outlines.append(self.MaterialCards.section_cards[section_card_type]["Card_Title"][0])
+        header_line = "\n$$"
+        for j in range(len(self.curr_section_parameters)):
+            if count == 8:# or
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+
+            if self.curr_section_parameters[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+                index += 1
+                continue
+
+            # print("[{}] {}: {}".format(index, self.curr_section_parameters[j], self.entry_list_section[index].get()))
+            if header_line == "\n$$":
+                header_line += self.curr_section_parameters[j].rjust(8)
+            else:
+                header_line += self.curr_section_parameters[j].rjust(10)
+
+            tmp_prop = self.entry_list_section[index].get().strip()
+            newline.append(tmp_prop.rjust(10))
+
+            if j == (len(self.curr_section_parameters)-1):
+                line1 = "\n" + "".join(newline) #+ "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+
+            count += 1
+            colN += 1
+            index += 1
+
+        # self.mat_out = filedialog.asksaveasfilename()
+        # self.presentMatFile_out = os.path.join(os.path.split(self.read_mat_file)[0], "mat_edit.k")
+        if not os.path.exists(self.read_mat_file_out):
+            open(self.read_mat_file_out, 'w').close()
+
+        with open(self.read_mat_file_out, 'a') as outFile:
+            outFile.writelines(outlines)
+
+    # Material Block
+
+    def add_material_info(self):
         """
 
         :return:
         """
-        project_path = filedialog.askdirectory(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
-        self.project_path_entry.delete(0,'end')
-        self.project_path_entry.insert(0,project_path)
+        self.window_matInfo = Toplevel(self.frame)
+        self.entry_list = []
+        self.label_list = []
+        colN = 0
+        rowN = 0
+        count = 0
+        try:
+            crit_fail = float(self.material_card.split("_")[-1])
+        except Exception as Ex:
+            crit_fail = 0.0
+            print(Ex)
+            pass
+        self.curr_material_parameters = self.MaterialCards.material_cards[self.material_card]["Mat_Parameters"][0].split(',')
+        self.curr_material_parameters_default = self.MaterialCards.material_cards[self.material_card]["Mat_Parameters"][1].split(',')
+        self.curr_material_parameters_freq = self.MaterialCards.material_cards[self.material_card]["Mat_Parameters"][2].split(',')
+        if self.material_ids == []:
+            mid = 1
+        else:
+            mid = int(self.material_ids[-1]) + 1
 
-    def create_input(self):
+        self.material_title_label = self.createLabel(self.window_matInfo, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
+        self.material_title_entry = self.createEntry(self.window_matInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
+        rowN += 2
+
+        for j in range(len(self.curr_material_parameters)):
+            if count == 8:
+                rowN += 2
+                colN = 0
+                count = 0
+
+            if self.curr_material_parameters[j] == "":
+                self.label_list.append(Label(self.window_matInfo, text=self.curr_material_parameters[j], width=10))
+                self.entry_list.append(Entry(self.window_matInfo, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                continue
+
+            if self.curr_material_parameters_freq[j].strip().upper() == "Y":
+                self.label_list.append(Label(self.window_matInfo, text=self.curr_material_parameters[j].upper(), width=10, fg="blue"))
+                self.entry_list.append(Entry(self.window_matInfo, width=10, fg="blue"))
+            else:
+                self.label_list.append(Label(self.window_matInfo, text=self.curr_material_parameters[j].upper(), width=10))
+                self.entry_list.append(Entry(self.window_matInfo, width=10))
+            self.label_list[j].grid(row=rowN, column=colN)
+
+            self.entry_list[j].grid(row=rowN+1, column=colN)
+            # self.entry_list[j].insert(0,self.material1.material_prop.get(self.materialProp_curr[j].strip(), 0.0))
+            if self.curr_material_parameters[j] == "crit":
+                self.entry_list[j].insert(0,str(crit_fail))
+            elif self.curr_material_parameters[j].upper() == 'MID':
+                self.entry_list[j].insert(0,str(mid))
+            else:
+                self.entry_list[j].insert(0,self.curr_material_parameters_default[j])
+
+            count += 1
+            colN += 1
+
+        rowN += 3
+        # print(rowN)
+        button_ = Button(self.window_matInfo, text="Save", command=self.save_mat_info)
+        button_.grid(row=rowN, column=1)
+        Exitbutton_ = Button(self.window_matInfo, text="Exit", command=self.close_window_matInfo)
+        Exitbutton_.grid(row=rowN, column=2)
+
+    def save_mat_info(self):
+        """
+        :return:
+        """
+        # print("##############################################################")
+        outlines = []
+        colN = 0
+        rowN = 0
+        count = 0
+        newline = []
+        index = 0
+        outlines.append("\n")
+        outlines.append(self.MaterialCards.material_cards[self.material_card]["Card_Title"][0])
+        header_line = "\n$$"
+        outlines.append("\n")
+        outlines.append(self.material_title_entry.get())
+        materialCard_partTitle = "{}, {}".format(self.material_card, self.material_title_entry.get())
+        for j in range(len(self.curr_material_parameters)):
+            if count == 8:# or j == (len(self.curr_material_parameters)):
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+
+            if self.curr_material_parameters[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+                index += 1
+                continue
+
+            # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
+            if self.curr_material_parameters[j] == 'mid':
+                mid = self.entry_list[index].get().strip()
+
+            if header_line == "\n$$":
+                header_line += self.curr_material_parameters[j].rjust(8)
+            else:
+                header_line += self.curr_material_parameters[j].rjust(10)
+
+            tmp_prop = self.entry_list[index].get().strip()
+            newline.append(tmp_prop.rjust(10))
+            if j == (len(self.curr_material_parameters)-1):
+                line1 = "\n" + "".join(newline)# + "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+
+            count += 1
+            colN += 1
+            index += 1
+        line = ",".join([mid, self.material_card])
+        self.material_ids.append(mid)
+        self.map_materialID_type.update({mid:materialCard_partTitle})
+
+        with open(self.material_out_file, 'a') as outFile:
+            outFile.writelines(outlines)
+
+    def close_window_matInfo(self):
         """
 
         :return:
         """
-        self.project_path = self.project_path_entry.get()
-        self.input_keyword = create_input.CreateInput()
-        self.input_keyword.create_input_k(self.project_path)
-        print(self.input_keyword.Kfile)
+        self.window_matInfo.destroy()
 
-        self.material_out_file_name = "mat.k"
-        self.material_out_file = os.path.join(self.project_path, self.material_out_file_name)
-        with open(self.material_out_file, 'w') as outFile:
-            outFile.write("")
+    def get_material_type(self, material_type):
+        """
 
-        self.control_card_out_file_name = "control_cards.k"
-        self.control_card_out_file = os.path.join(self.project_path, self.control_card_out_file_name)
-        with open(self.control_card_out_file, 'w') as outFile:
-            outFile.write("*KEYWORD")
+        :return:
+        """
+        self.material_card = material_type
+        print(self.material_card)
+
+    def material_dropdown(self, *args):
+        """
+
+        :return:
+        """
+        self.material_card = self.material_cards_type.get()
+
+    def get_read_material_type(self, material_card_type):
+        """
+        :return:
+        """
+        self.read_material_card = material_card_type
+
+    def read_material_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.read_material_card = self.read_material_card_set.get()
+
+    def show_material(self):
+        """
+        :return:
+        """
+
+        # print("In edit button !")
+        rowN = 1
+        self.window_matInfo_read = Toplevel(self.frame)
+        material_card_type = self.read_material_card.split(',')[0]
+        self.curr_material_parameters = self.MaterialCards.material_cards[material_card_type]["Mat_Parameters"][0].split(',')
+        materialPara_curr_freq = self.MaterialCards.material_cards[material_card_type]["Mat_Parameters"][2].split(',')
+        count = 0
+        colN = 0
+        crit_fail = str(float(material_card_type.split('_')[-1]))
+        self.entry_list = []
+        self.label_list = []
+        index = 0
+        for j in range(len(self.curr_material_parameters)):
+            if count == 8:
+                rowN += 2
+                colN = 0
+                count = 0
+
+            if self.curr_material_parameters[j] == "":
+                self.label_list.append(Label(self.window_matInfo_read, text=self.curr_material_parameters[j], width=10))
+                self.entry_list.append(Entry(self.window_matInfo_read, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                continue
+
+            if materialPara_curr_freq[j].strip().upper() == "Y":
+                self.label_list.append(Label(self.window_matInfo_read, text=self.curr_material_parameters[j].upper(), width=10, fg="blue"))
+                self.entry_list.append(Entry(self.window_matInfo_read, width=10, fg="blue"))
+            else:
+                self.label_list.append(Label(self.window_matInfo_read, text=self.curr_material_parameters[j].upper(), width=10))
+                self.entry_list.append(Entry(self.window_matInfo_read, width=10))
+            self.label_list[j].grid(row=rowN, column=colN)
+
+            self.entry_list[j].grid(row=rowN+1, column=colN)
+            if self.curr_material_parameters[j] == "crit":
+                self.entry_list[j].insert(0,str(crit_fail))
+            else:
+                try:
+                    self.entry_list[j].insert(0,self.read_material_parameters[self.read_material_card][index])
+                except Exception as Ex:
+                    print(Ex, index)
+                    self.entry_list[j].insert(0,"")
+
+            count += 1
+            colN += 1
+            index += 1
+
+        rowN += 3
+        button_ = Button(self.window_matInfo_read, text="Save", command=self.update_material)
+        button_.grid(row=rowN, column=1)
+        Exitbutton_ = Button(self.window_matInfo_read, text="Exit", command=self.close_window_matInfo_read)
+        Exitbutton_.grid(row=rowN, column=2)
+
+    def update_material(self):
+        """
+        :return:
+        """
+        outlines = []
+        colN = 0
+        rowN = 0
+        count = 0
+        newline = []
+        index = 0
+        outlines.append("\n")
+        material_card_type = self.read_material_card.split(',')[0]
+        outlines.append(self.MaterialCards.material_cards[material_card_type]["Card_Title"][0])
+        header_line = "\n$$"
+        for j in range(len(self.curr_material_parameters)):
+            if count == 8:# or
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+
+            if self.curr_material_parameters[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+                index += 1
+                continue
+
+            # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
+            if header_line == "\n$$":
+                header_line += self.curr_material_parameters[j].rjust(8)
+            else:
+                header_line += self.curr_material_parameters[j].rjust(10)
+            tmp_prop = self.entry_list[index].get().strip()
+            newline.append(tmp_prop.rjust(10))
+
+            if j == (len(self.curr_material_parameters)-1):
+                line1 = "\n" + "".join(newline) #+ "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+
+            count += 1
+            colN += 1
+            index += 1
+
+        with open(self.read_mat_file_out, 'a') as outFile:
+            outFile.writelines(outlines)
+
+    def close_window_matInfo_read(self):
+        """
+
+        :return:
+        """
+        self.window_matInfo_read.destroy()
 
     def add_new_material_card(self):
         """
@@ -1799,434 +2160,44 @@ class VIEWER:
         self.read_section_card_set.trace('w', self.read_section_dropdown)
         self.editSectionData = self.createButton(self.frame, "Show", self.show_section, self.rowN, 2, sticky_=W)
 
-    def get_read_section_type(self, section_card_type):
+
+    def get_partSet_ID(self, partSetID):
+        self.partSetID = partSetID
+
+    def partSet_dropdown(self, *args):
         """
         :return:
         """
-        self.read_section_card = section_card_type
+        self.partSetID = self.partSetID_info.get()
 
-    def read_section_dropdown(self, *args):
-        """
-        :return:
-        """
-        self.read_section_card = self.read_section_card_set.get()
-
-    def show_section(self):
-        """
-        :return:
-        """
-        # print("In edit button !")
-        rowN = 1
-        self.window_sectionInfo_read = Toplevel(self.frame)
-        section_card_type = self.read_section_card.split(',')[0]
-        self.curr_section_parameters = self.MaterialCards.section_cards[section_card_type]["Section_Parameters"][0].split(',')
-        sectionPara_curr_freq = self.MaterialCards.section_cards[section_card_type]["Section_Parameters"][2].split(',')
-        count = 0
-        colN = 0
-        self.label_list_section = []
-        self.entry_list_section = []
-        index = 0
-        for j in range(len(self.curr_section_parameters)):
-            if count == 8:
-                rowN += 2
-                colN = 0
-                count = 0
-
-            if self.curr_section_parameters[j] == "":
-                self.label_list_section.append(Label(self.window_sectionInfo_read, text=self.curr_section_parameters[j], width=10))
-                self.entry_list_section.append(Entry(self.window_sectionInfo_read, width=10))
-                rowN += 2
-                colN = 0
-                count = 0
-                continue
-
-            if sectionPara_curr_freq[j].strip().upper() == "Y":
-                self.label_list_section.append(Label(self.window_sectionInfo_read, text=self.curr_section_parameters[j].upper(), width=10, fg="blue"))
-                self.entry_list_section.append(Entry(self.window_sectionInfo_read, width=10, fg="blue"))
-            else:
-                self.label_list_section.append(Label(self.window_sectionInfo_read, text=self.curr_section_parameters[j].upper(), width=10))
-                self.entry_list_section.append(Entry(self.window_sectionInfo_read, width=10))
-            self.label_list_section[j].grid(row=rowN, column=colN)
-
-            self.entry_list_section[j].grid(row=rowN+1, column=colN)
-
-            try:
-                self.entry_list_section[j].insert(0,self.read_section_parameters[self.read_section_card][index])
-            except Exception as Ex:
-                print(Ex, index)
-                self.entry_list_section[j].insert(0,"")
-
-            count += 1
-            colN += 1
-            index += 1
-
-        rowN += 3
-        button_ = Button(self.window_sectionInfo_read, text="Save", command=self.update_section)
-        button_.grid(row=rowN, column=1)
-        Exitbutton_ = Button(self.window_sectionInfo_read, text="Exit", command=self.close_section_window_read)
-        Exitbutton_.grid(row=rowN, column=2)
-
-    def update_section(self):
-        """
-        :return:
-        """
-        outlines = []
-        colN = 0; rowN = 0; count = 0; index = 0
-        newline = []
-        outlines.append("\n")
-        section_card_type = self.read_section_card.split(',')[0]
-        outlines.append(self.MaterialCards.section_cards[section_card_type]["Card_Title"][0])
-        header_line = "\n$$"
-        for j in range(len(self.curr_section_parameters)):
-            if count == 8:# or
-                rowN += 2
-                colN = 0
-                count = 0
-                line1 = "\n" + "".join(newline)# + "\n"
-                value_line = header_line + line1
-                outlines.append(value_line)
-                header_line = "\n$$"
-                newline = []
-
-            if self.curr_section_parameters[j] == "":
-                rowN += 2
-                colN = 0
-                count = 0
-                line1 = "\n" + "".join(newline) #+ "\n"
-                value_line = header_line + line1
-                outlines.append(value_line)
-                header_line = "\n$$"
-                newline = []
-                index += 1
-                continue
-
-            # print("[{}] {}: {}".format(index, self.curr_section_parameters[j], self.entry_list_section[index].get()))
-            if header_line == "\n$$":
-                header_line += self.curr_section_parameters[j].rjust(8)
-            else:
-                header_line += self.curr_section_parameters[j].rjust(10)
-
-            tmp_prop = self.entry_list_section[index].get().strip()
-            newline.append(tmp_prop.rjust(10))
-
-            if j == (len(self.curr_section_parameters)-1):
-                line1 = "\n" + "".join(newline) #+ "\n"
-                value_line = header_line + line1
-                outlines.append(value_line)
-                header_line = "\n$$"
-
-            count += 1
-            colN += 1
-            index += 1
-
-        # self.mat_out = filedialog.asksaveasfilename()
-        # self.presentMatFile_out = os.path.join(os.path.split(self.read_mat_file)[0], "mat_edit.k")
-        if not os.path.exists(self.read_mat_file_out):
-            open(self.read_mat_file_out, 'w').close()
-
-        with open(self.read_mat_file_out, 'a') as outFile:
-            outFile.writelines(outlines)
-
-    def close_section_window_read(self):
-        """
-        :return:
-        """
-        self.window_sectionInfo_read.destroy()
-
-    def get_read_material_type(self, material_card_type):
-        """
-        :return:
-        """
-        self.read_material_card = material_card_type
-
-    def read_material_dropdown(self, *args):
-        """
-        :return:
-        """
-        self.read_material_card = self.read_material_card_set.get()
-
-    def show_material(self):
-        """
-        :return:
-        """
-
-        # print("In edit button !")
-        rowN = 1
-        self.window_matInfo_read = Toplevel(self.frame)
-        material_card_type = self.read_material_card.split(',')[0]
-        self.curr_material_parameters = self.MaterialCards.material_cards[material_card_type]["Mat_Parameters"][0].split(',')
-        materialPara_curr_freq = self.MaterialCards.material_cards[material_card_type]["Mat_Parameters"][2].split(',')
-        count = 0
-        colN = 0
-        crit_fail = str(float(material_card_type.split('_')[-1]))
-        self.entry_list = []
-        self.label_list = []
-        index = 0
-        for j in range(len(self.curr_material_parameters)):
-            if count == 8:
-                rowN += 2
-                colN = 0
-                count = 0
-
-            if self.curr_material_parameters[j] == "":
-                self.label_list.append(Label(self.window_matInfo_read, text=self.curr_material_parameters[j], width=10))
-                self.entry_list.append(Entry(self.window_matInfo_read, width=10))
-                rowN += 2
-                colN = 0
-                count = 0
-                continue
-
-            if materialPara_curr_freq[j].strip().upper() == "Y":
-                self.label_list.append(Label(self.window_matInfo_read, text=self.curr_material_parameters[j].upper(), width=10, fg="blue"))
-                self.entry_list.append(Entry(self.window_matInfo_read, width=10, fg="blue"))
-            else:
-                self.label_list.append(Label(self.window_matInfo_read, text=self.curr_material_parameters[j].upper(), width=10))
-                self.entry_list.append(Entry(self.window_matInfo_read, width=10))
-            self.label_list[j].grid(row=rowN, column=colN)
-
-            self.entry_list[j].grid(row=rowN+1, column=colN)
-            if self.curr_material_parameters[j] == "crit":
-                self.entry_list[j].insert(0,str(crit_fail))
-            else:
-                try:
-                    self.entry_list[j].insert(0,self.read_material_parameters[self.read_material_card][index])
-                except Exception as Ex:
-                    print(Ex, index)
-                    self.entry_list[j].insert(0,"")
-
-            count += 1
-            colN += 1
-            index += 1
-
-        rowN += 3
-        button_ = Button(self.window_matInfo_read, text="Save", command=self.update_material)
-        button_.grid(row=rowN, column=1)
-        Exitbutton_ = Button(self.window_matInfo_read, text="Exit", command=self.close_window_read)
-        Exitbutton_.grid(row=rowN, column=2)
-
-    def update_material(self):
-        """
-        :return:
-        """
-        outlines = []
-        colN = 0
-        rowN = 0
-        count = 0
-        newline = []
-        index = 0
-        outlines.append("\n")
-        material_card_type = self.read_material_card.split(',')[0]
-        outlines.append(self.MaterialCards.material_cards[material_card_type]["Card_Title"][0])
-        header_line = "\n$$"
-        for j in range(len(self.curr_material_parameters)):
-            if count == 8:# or
-                rowN += 2
-                colN = 0
-                count = 0
-                line1 = "\n" + "".join(newline)# + "\n"
-                value_line = header_line + line1
-                outlines.append(value_line)
-                header_line = "\n$$"
-                newline = []
-
-            if self.curr_material_parameters[j] == "":
-                rowN += 2
-                colN = 0
-                count = 0
-                line1 = "\n" + "".join(newline) #+ "\n"
-                value_line = header_line + line1
-                outlines.append(value_line)
-                header_line = "\n$$"
-                newline = []
-                index += 1
-                continue
-
-            # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
-            if header_line == "\n$$":
-                header_line += self.curr_material_parameters[j].rjust(8)
-            else:
-                header_line += self.curr_material_parameters[j].rjust(10)
-            tmp_prop = self.entry_list[index].get().strip()
-            newline.append(tmp_prop.rjust(10))
-
-            if j == (len(self.curr_material_parameters)-1):
-                line1 = "\n" + "".join(newline) #+ "\n"
-                value_line = header_line + line1
-                outlines.append(value_line)
-                header_line = "\n$$"
-
-            count += 1
-            colN += 1
-            index += 1
-
-        with open(self.read_mat_file_out, 'a') as outFile:
-            outFile.writelines(outlines)
-
-    def add_material_info(self):
+    def open_projectPath(self):
         """
 
         :return:
         """
-        self.window_matInfo = Toplevel(self.frame)
-        self.entry_list = []
-        self.label_list = []
-        colN = 0
-        rowN = 0
-        count = 0
-        try:
-            crit_fail = float(self.material_card.split("_")[-1])
-        except Exception as Ex:
-            crit_fail = 0.0
-            print(Ex)
-            pass
-        self.curr_material_parameters = self.MaterialCards.material_cards[self.material_card]["Mat_Parameters"][0].split(',')
-        self.curr_material_parameters_default = self.MaterialCards.material_cards[self.material_card]["Mat_Parameters"][1].split(',')
-        self.curr_material_parameters_freq = self.MaterialCards.material_cards[self.material_card]["Mat_Parameters"][2].split(',')
-        if self.material_ids == []:
-            mid = 1
-        else:
-            mid = int(self.material_ids[-1]) + 1
+        project_path = filedialog.askdirectory(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.project_path_entry.delete(0,'end')
+        self.project_path_entry.insert(0,project_path)
 
-        self.material_title_label = self.createLabel(self.window_matInfo, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
-        self.material_title_entry = self.createEntry(self.window_matInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
-        rowN += 2
-
-        for j in range(len(self.curr_material_parameters)):
-            if count == 8:
-                rowN += 2
-                colN = 0
-                count = 0
-
-            if self.curr_material_parameters[j] == "":
-                self.label_list.append(Label(self.window_matInfo, text=self.curr_material_parameters[j], width=10))
-                self.entry_list.append(Entry(self.window_matInfo, width=10))
-                rowN += 2
-                colN = 0
-                count = 0
-                continue
-
-            if self.curr_material_parameters_freq[j].strip().upper() == "Y":
-                self.label_list.append(Label(self.window_matInfo, text=self.curr_material_parameters[j].upper(), width=10, fg="blue"))
-                self.entry_list.append(Entry(self.window_matInfo, width=10, fg="blue"))
-            else:
-                self.label_list.append(Label(self.window_matInfo, text=self.curr_material_parameters[j].upper(), width=10))
-                self.entry_list.append(Entry(self.window_matInfo, width=10))
-            self.label_list[j].grid(row=rowN, column=colN)
-
-            self.entry_list[j].grid(row=rowN+1, column=colN)
-            # self.entry_list[j].insert(0,self.material1.material_prop.get(self.materialProp_curr[j].strip(), 0.0))
-            if self.curr_material_parameters[j] == "crit":
-                self.entry_list[j].insert(0,str(crit_fail))
-            elif self.curr_material_parameters[j].upper() == 'MID':
-                self.entry_list[j].insert(0,str(mid))
-            else:
-                self.entry_list[j].insert(0,self.curr_material_parameters_default[j])
-
-            count += 1
-            colN += 1
-
-        rowN += 3
-        # print(rowN)
-        button_ = Button(self.window_matInfo, text="Save", command=self.save_mat_info)
-        button_.grid(row=rowN, column=1)
-        Exitbutton_ = Button(self.window_matInfo, text="Exit", command=self.close_window)
-        Exitbutton_.grid(row=rowN, column=2)
-
-    def close_window(self):
+    def create_input(self):
         """
 
         :return:
         """
-        self.window_matInfo.destroy()
+        self.project_path = self.project_path_entry.get()
+        self.input_keyword = create_input.CreateInput()
+        self.input_keyword.create_input_k(self.project_path)
+        print(self.input_keyword.Kfile)
 
-    def close_window_read(self):
-        """
+        self.material_out_file_name = "mat.k"
+        self.material_out_file = os.path.join(self.project_path, self.material_out_file_name)
+        with open(self.material_out_file, 'w') as outFile:
+            outFile.write("")
 
-        :return:
-        """
-        self.window_matInfo_read.destroy()
-
-    def save_mat_info(self):
-        """
-        :return:
-        """
-        # print("##############################################################")
-        outlines = []
-        colN = 0
-        rowN = 0
-        count = 0
-        newline = []
-        index = 0
-        outlines.append("\n")
-        outlines.append(self.MaterialCards.material_cards[self.material_card]["Card_Title"][0])
-        header_line = "\n$$"
-        outlines.append("\n")
-        outlines.append(self.material_title_entry.get())
-        materialCard_partTitle = "{}, {}".format(self.material_card, self.material_title_entry.get())
-        for j in range(len(self.curr_material_parameters)):
-            if count == 8:# or j == (len(self.curr_material_parameters)):
-                rowN += 2
-                colN = 0
-                count = 0
-                line1 = "\n" + "".join(newline)# + "\n"
-                value_line = header_line + line1
-                outlines.append(value_line)
-                header_line = "\n$$"
-                newline = []
-
-            if self.curr_material_parameters[j] == "":
-                rowN += 2
-                colN = 0
-                count = 0
-                line1 = "\n" + "".join(newline) #+ "\n"
-                value_line = header_line + line1
-                outlines.append(value_line)
-                header_line = "\n$$"
-                newline = []
-                index += 1
-                continue
-
-            # print("[{}] {}: {}".format(index, self.curr_material_parameters[j], self.entry_list[index].get()))
-            if self.curr_material_parameters[j] == 'mid':
-                mid = self.entry_list[index].get().strip()
-
-            if header_line == "\n$$":
-                header_line += self.curr_material_parameters[j].rjust(8)
-            else:
-                header_line += self.curr_material_parameters[j].rjust(10)
-
-            tmp_prop = self.entry_list[index].get().strip()
-            newline.append(tmp_prop.rjust(10))
-            if j == (len(self.curr_material_parameters)-1):
-                line1 = "\n" + "".join(newline)# + "\n"
-                value_line = header_line + line1
-                outlines.append(value_line)
-                header_line = "\n$$"
-
-            count += 1
-            colN += 1
-            index += 1
-        line = ",".join([mid, self.material_card])
-        self.material_ids.append(mid)
-        self.map_materialID_type.update({mid:materialCard_partTitle})
-
-        with open(self.material_out_file, 'a') as outFile:
-            outFile.writelines(outlines)
-
-    def get_material_type(self, material_type):
-        """
-
-        :return:
-        """
-        self.material_card = material_type
-        print(self.material_card)
-
-    def material_dropdown(self, *args):
-        """
-
-        :return:
-        """
-        self.material_card = self.material_cards_type.get()
+        self.control_card_out_file_name = "control_cards.k"
+        self.control_card_out_file = os.path.join(self.project_path, self.control_card_out_file_name)
+        with open(self.control_card_out_file, 'w') as outFile:
+            outFile.write("*KEYWORD")
 
     def get_part_ID(self, partID):
         self.partID = partID
