@@ -4,6 +4,6 @@
 								"1,0,1.0,1.0,0.0,0.0,0,0,", 
 								"y,n,n,n,n,n,n,n,y"
 							  ], 
-		"Card_Title": ["*DEFINE_CURVE", "y"]
+		"Card_Title": ["*DEFINE_CURVE_TITLE", "y"]
 	}
 }
