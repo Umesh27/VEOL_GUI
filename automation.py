@@ -27,6 +27,7 @@ class VIEWER:
         self.template_path = os.path.join(self.baseDir, "Template")
         self.material_ids = []
         self.section_ids = []
+        self.eos_ids = []
         self.load_curve_ids = [""]
         self.load_curve_ids_title = [""]
 
@@ -47,6 +48,7 @@ class VIEWER:
         self.partRowNo = self.rowN
         self.map_materialID_type = {}
         self.map_sectionID_thickness = {}
+        self.map_eosID_type_title = {}
         self.partSetIdList = [""]
 
         self.parts_info = StringVar(self.frame)
@@ -79,6 +81,7 @@ class VIEWER:
         self.add_material_info_button = Button(self.frame, text="AddMaterialPara", command=self.add_material_info, bg='lightyellow')
         self.add_material_info_button.grid(row=self.rowN, column=3, sticky=EW)
 
+        # Section Block
         self.rowN += 1
         self.section_cards_type = StringVar(self.frame)
         self.section_type = self.MaterialCards.section_cards_type[0]
@@ -90,6 +93,19 @@ class VIEWER:
 
         self.add_section_button = Button(self.frame, text="Add_Section", command=self.add_section, bg='lightyellow')
         self.add_section_button.grid(row=self.rowN, column=3, sticky=EW)
+
+        # Equation Of State Block
+        self.rowN += 1
+        self.eos_cards_type = StringVar(self.frame)
+        self.eos_type = self.MaterialCards.eos_cards_type[0]
+        self.eos_cards_type.set(self.eos_type)
+        self.eos_popup = OptionMenu(self.frame, self.eos_cards_type, *self.MaterialCards.eos_cards_type, command=self.get_eos_type)
+        self.eos_popup.config(bg='lightyellow')
+        self.eos_popup.grid(row = self.rowN, column=2, ipadx=25, sticky=E)
+        self.eos_cards_type.trace('w', self.eos_dropdown)
+
+        self.add_eos_button = Button(self.frame, text="Add_EOS", command=self.add_eos, bg='lightyellow')
+        self.add_eos_button.grid(row=self.rowN, column=3, sticky=EW)
 
         # Update Part Info ( partId = MaterialId = SectionId)
         self.rowN += 1
@@ -161,12 +177,14 @@ class VIEWER:
         self.createLabel(self.frame, "ID, MaterialType", row_, 7, width_=20, bg_="lightyellow", relief_="ridge")
         self.createLabel(self.frame, "ID, ShellType", row_, 8, bg_="lightyellow", relief_="ridge")
         self.createLabel(self.frame, "Thickness", row_, 9, bg_="lightyellow", relief_="ridge")
+        self.createLabel(self.frame, "EOS", row_, 10, bg_="lightyellow", relief_="ridge")
 
         self.partID_label = []
         self.partName_label = []
         self.partMat_label = []
         self.partShell_label = []
         self.partThk_label = []
+        self.partEOS_label = []
         self.get_info()
         print(self.map_partId_Info)
         # self.get_material_info()
@@ -177,16 +195,20 @@ class VIEWER:
             print(index)
             sectionID = self.map_partId_Info.get(key, "")[1]
             materialID = self.map_partId_Info.get(key, "")[2]
+            eosID = self.map_partId_Info.get(key, "")[3]
             materialCard = self.map_materialID_type.get(materialID)
+            eosCard = self.map_eosID_type_title.get(materialID)
             sectionID_Type = "{}: {}".format(sectionID, self.map_sectionID_thickness.get(sectionID, "")[0])
             sectionThickness = self.map_sectionID_thickness.get(sectionID, "")[1]
             materialID_Card = "{}: {}".format(materialID, materialCard)
+            eosID_Card = "{}: {}".format(eosID, eosCard)
 
             self.createLabel(self.frame, key, row_, 5, bg_="lightblue", relief_="ridge")
             self.createLabel(self.frame, self.map_part_id_name.get(key, ""), row_, 6, bg_="lightblue", relief_="ridge")
             self.createLabel(self.frame, materialID_Card, row_, 7, width_=20, bg_="lightblue", relief_="ridge")
             self.createLabel(self.frame, sectionID_Type, row_, 8, bg_="lightblue", relief_="ridge")
             self.createLabel(self.frame, sectionThickness, row_, 9, bg_="lightblue", relief_="ridge")
+            self.createLabel(self.frame, eosID_Card, row_, 30, bg_="lightblue", relief_="ridge")
             index += 1
 
     def open_inputPath(self):
@@ -250,9 +272,10 @@ class VIEWER:
                     partId = line[:10].strip()
                     sectionId = line[11:20].strip()
                     materialId = line[21:30].strip()
+                    eosId = line[31:40].strip()
                     self.partInfo.update({partName:partId})
                     self.map_part_id_name.update({partId:partName})
-                    self.map_partId_Info.update({partId:[partName, sectionId, materialId]})
+                    self.map_partId_Info.update({partId:[partName, sectionId, materialId, eosId]})
                     inPartIdBlock = False
                     inTitleBlock = True
                     continue
@@ -290,10 +313,12 @@ class VIEWER:
         self.createLabel(self.window_partInfo, "PartName", row_, 1, 10)
         self.createLabel(self.window_partInfo, "SectionID", row_, 2, 10)
         self.createLabel(self.window_partInfo, "MaterialID", row_, 3, 10)
+        self.createLabel(self.window_partInfo, "EOSID", row_, 4, 10)
 
         self.createLabel(self.window_partInfo, "ID, MaterialType", row_, 5, width_=20, bg_="lightyellow", relief_="ridge")
         self.createLabel(self.window_partInfo, "ID, ShellType", row_, 6, bg_="lightyellow", relief_="ridge")
         self.createLabel(self.window_partInfo, "Thickness", row_, 7, bg_="lightyellow", relief_="ridge")
+        self.createLabel(self.window_partInfo, "EOS", row_, 8, bg_="lightyellow", relief_="ridge")
 
         for i in range(len(self.material_ids)):
             row_ += 1
@@ -305,11 +330,16 @@ class VIEWER:
             self.createLabel(self.window_partInfo, "{} : {}".format(self.section_ids[i], self.map_sectionID_thickness[self.section_ids[i]][0]), row_, 6, width_=20, bg_="lightblue", relief_="groove")
             self.createLabel(self.window_partInfo, "{}".format(self.map_sectionID_thickness[self.section_ids[i]][1]), row_, 7, width_=20, bg_="lightblue", relief_="groove")
 
+        for i in range(len(self.eos_ids)):
+            row_ += 1
+            self.createLabel(self.window_partInfo, "{} : {}".format(self.eos_ids[i], self.map_eosID_type_title[self.eos_ids[i]]), row_, 8, width_=20, bg_="lightblue", relief_="groove")
+
         self.partInfo_entry = []
         self.partID_label = []
         self.partName_label = []
         self.partMat_label = []
         self.partShell_label = []
+        self.partEOS_label = []
 
         index = 0
         row_ = 0
@@ -336,6 +366,11 @@ class VIEWER:
             self.partMat_label.append(Entry(self.window_partInfo, textvariable=partMat_label, width=10))#, state='readonly'))
             partMat_label.set("")
             self.partMat_label[index].grid(row = row_, column=3)
+
+            partEOS_label = StringVar()
+            self.partEOS_label.append(Entry(self.window_partInfo, textvariable=partEOS_label, width=10))#, state='readonly'))
+            partEOS_label.set("")
+            self.partEOS_label[index].grid(row = row_, column=4)
 
             index += 1
 
@@ -1632,6 +1667,157 @@ class VIEWER:
 
         with open(self.read_mat_file_out, 'a') as outFile:
             outFile.writelines(outlines)
+
+    # EOS Block
+    def eos_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.eos_type = self.eos_cards_type.get()
+
+    def get_eos_type(self, eos_type):
+        """
+        :return:
+        """
+        self.eos_type = eos_type
+
+    def add_eos(self):
+        """
+        :return:
+        """
+
+        self.window_eosInfo = Toplevel(self.frame)
+        self.entry_list_eos = []
+        self.label_list_eos = []
+        colN = 0
+        rowN = 0
+        count = 0
+
+        self.curr_eos_parameters = self.MaterialCards.eos_cards[self.eos_type]["Eos_Parameters"][0].split(',')
+        self.curr_eos_parameters_default = self.MaterialCards.eos_cards[self.eos_type]["Eos_Parameters"][1].split(',')
+        self.curr_eos_parameters_freq = self.MaterialCards.eos_cards[self.eos_type]["Eos_Parameters"][2].split(',')
+
+        if self.eos_ids == []:
+            eosid = 1
+        else:
+            eosid = int(self.eos_ids[-1]) + 1
+
+        self.eos_title_label = self.createLabel(self.window_eosInfo, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
+        self.eos_title_entry = self.createEntry(self.window_eosInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
+        rowN += 2
+
+        for j in range(len(self.curr_eos_parameters)):
+            if count == 8:
+                rowN += 2
+                colN = 0
+                count = 0
+
+            if self.curr_eos_parameters[j] == "":
+                self.label_list_eos.append(Label(self.window_eosInfo, text=self.curr_eos_parameters[j], width=10))
+                self.entry_list_eos.append(Entry(self.window_eosInfo, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                continue
+
+            if self.curr_eos_parameters_freq[j].strip().upper() == "Y":
+                self.label_list_eos.append(Label(self.window_eosInfo, text=self.curr_eos_parameters[j].upper(), width=10, fg="blue"))
+                self.entry_list_eos.append(Entry(self.window_eosInfo, width=10, fg="blue"))
+            else:
+                self.label_list_eos.append(Label(self.window_eosInfo, text=self.curr_eos_parameters[j].upper(), width=10))
+                self.entry_list_eos.append(Entry(self.window_eosInfo, width=10))
+            self.label_list_eos[j].grid(row=rowN, column=colN)
+
+            self.label_list_eos[j].grid(row=rowN, column=colN)
+            self.entry_list_eos[j].grid(row=rowN+1, column=colN)
+            if self.curr_eos_parameters[j].upper() == "EOSID":
+                self.entry_list_eos[j].insert(0,eosid)
+            else:
+                self.entry_list_eos[j].insert(0,self.curr_eos_parameters_default[j])
+
+            count += 1
+            colN += 1
+
+        rowN += 3
+        # print(rowN)
+        save_button_ = Button(self.window_eosInfo, text="Save", command=self.save_eos)
+        save_button_.grid(row=rowN, column=1)
+        exit_button_ = Button(self.window_eosInfo, text="Exit", command=self.close_window_eosInfo)
+        exit_button_.grid(row=rowN, column=2)
+
+    def save_eos(self):
+        """
+        :return:
+        """
+        # print("##############################################################")
+        outlines = []
+        colN = 0
+        rowN = 0
+        count = 0
+        newline = []
+        index = 0
+        outlines.append("\n")
+        outlines.append(self.MaterialCards.eos_cards[self.eos_type]["Card_Title"][0])
+        header_line = "\n$$"
+        outlines.append("\n")
+        outlines.append(self.eos_title_entry.get())
+        eosType_partTitle = "{}, {}".format(self.eos_type, self.eos_title_entry.get())
+        for j in range(len(self.curr_eos_parameters)):
+            if count == 8:# or j == (len(self.curr_section_parameters)-1):
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline)# + "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+
+            if self.curr_eos_parameters[j] == "":
+                rowN += 2
+                colN = 0
+                count = 0
+                line1 = "\n" + "".join(newline) #+ "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+                newline = []
+                index += 1
+                continue
+
+            if self.curr_eos_parameters[j].upper() == 'EOSID':
+                """ """
+                eosid = self.entry_list_eos[index].get()
+                print(self.curr_eos_parameters[j].upper(), eosid)
+
+            # print("[{}] {}: {}".format(index, self.curr_section_parameters[j], self.entry_list_section[index].get()))
+            if header_line == "\n$$":
+                header_line += self.curr_eos_parameters[j].rjust(8)
+            else:
+                header_line += self.curr_eos_parameters[j].rjust(10)
+            tmp_prop = self.entry_list_eos[index].get().strip()
+            newline.append(tmp_prop.rjust(10))
+            if j == (len(self.curr_eos_parameters)-1):
+                line1 = "\n" + "".join(newline)# + "\n"
+                value_line = header_line + line1
+                outlines.append(value_line)
+                header_line = "\n$$"
+
+            count += 1
+            colN += 1
+            index += 1
+        line = ",".join([eosid, self.eos_type])
+        self.eos_ids.append(eosid)
+        self.map_eosID_type_title.update({eosid:[eosType_partTitle]})
+
+        with open(self.material_out_file, 'a') as outFile:
+            outFile.writelines(outlines)
+
+    def close_window_eosInfo(self):
+        """
+        :return:
+        """
+        self.window_eosInfo.destroy()
 
     # Material Block
 

@@ -6,6 +6,22 @@
 							  ], 
 		"Card_Title": ["*CONTROL_TERMINATION", "y"]
 	},
+ "TIMESTEP": 
+	{
+		"Control_Parameters": [	"DTINIT,TSSFAC,ISDO,TSLIMT,DT2MS,LCTM,ERODE,MS1ST,DT2MSF,DT2MSLC,IMSCL,UNUSED,UNUSED,RMSCL", 
+								"0,0.9,0,0.0,0.0,0,0,0,,,,,,0.0", 
+								"y,y,y,y,y,y,y,y,y,y,y,y,y,y"
+							  ], 
+		"Card_Title": ["*CONTROL_TIMESTEP", "y"]
+	},
+ "GLOBAL": 
+	{
+		"Control_Parameters": [	"LCID,VALDMP,STX,STY,STZ,SRX,SRY,SRZ", 
+								"0,0.0,0.0,0.0,0.0,0.0,0.0,0.0", 
+								"y,y,y,y,y,y,y,y"
+							  ], 
+		"Card_Title": ["*DAMPING_GLOBAL", "y"]
+	},
  "HOURGLASS":
 	{
 		"Control_Parameters": [ "IHQ,QH", "1,0.1", "y,y"],
@@ -51,6 +67,22 @@
 							  ], 
 		"Card_Title": ["*CONTROL_ENERGY", "y"]
 	},
+ "DEFORC": 
+	{
+		"Control_Parameters": [	"DT,BINARY,LCUR,IOPT", 
+								"0.0,0,0,1", 
+								"y,y,y,y"
+							  ], 
+		"Card_Title": ["*DATABASE_DEFORC", "y"]
+	},
+ "NODOUT": 
+	{
+		"Control_Parameters": [	"DT,BINARY,LCUR,IOPT,OPTION1,OPTION2", 
+								"0.0,0,0,1,0,0", 
+								"y,y,y,y,N,N"
+							  ], 
+		"Card_Title": ["*DATABASE_NODOUT", "y"]
+	},
  "ELOUT": 
 	{
 		"Control_Parameters": [	"DT,BINARY,LCUR,IOPT", 
@@ -58,6 +90,14 @@
 								"y,y,y,y"
 							  ], 
 		"Card_Title": ["*DATABASE_ELOUT", "y"]
+	},
+ "SWFORC": 
+	{
+		"Control_Parameters": [	"DT,BINARY,LCUR,IOPT", 
+								"0.0,0,0,1", 
+								"y,y,y,y"
+							  ], 
+		"Card_Title": ["*DATABASE_SWFORC", "y"]
 	},
  "GLSTAT": 
 	{
@@ -101,9 +141,9 @@
 	},
  "BINARY_D3PLOT": 
 	{
-		"Control_Parameters": [	"DT/CYCL,LCDT,BEAM,NPLTC,PSETID", 
-								",,0,,", 
-								"y,y,y,y,Y"
+		"Control_Parameters": [	"DT/CYCL,LCDT,BEAM,NPLTC,PSETID,,IOOPT", 
+								",,0,,,,0", 
+								"y,y,y,y,Y,Y,N"
 							  ], 
 		"Card_Title": ["*DATABASE_BINARY_D3PLOT", "y"]
 	},
