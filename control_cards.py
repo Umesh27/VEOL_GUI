@@ -28,18 +28,18 @@ class ControlCards:
         """
 
         with open(self.control_cards_json_file) as readIn:
-            self.control_cards = json.load(readIn)
+            self.control_cards_jsonObj = json.load(readIn)
 
-        for key in self.control_cards.keys():
+        for key in self.control_cards_jsonObj.keys():
             self.control_cards_type.append(key)
-            self.map_control_cards_type_title.update({self.control_cards[key]["Card_Title"][0]:key})
+            self.map_control_cards_type_title.update({self.control_cards_jsonObj[key]["Card_Title"][0]:key})
 
         with open(self.define_json_file) as readIn_define:
-            self.define_cards = json.load(readIn_define)
+            self.define_cards_jsonObj = json.load(readIn_define)
 
-        for key in self.define_cards.keys():
+        for key in self.define_cards_jsonObj.keys():
             self.define_cards_type.append(key)
-            self.map_define_cards_type_title.update({self.define_cards[key]["Card_Title"][0]:key})
+            self.map_define_cards_type_title.update({self.define_cards_jsonObj[key]["Card_Title"][0]:key})
 
 
 if __name__ == '__main__':
