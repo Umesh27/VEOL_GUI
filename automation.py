@@ -32,17 +32,17 @@ class VIEWER:
         self.load_curve_ids_title = [""]
 
         self.rowN = 0
-        self.project_path_button = self.createButton(self.frame, "ProjectPath", self.open_projectPath, self.rowN, 1, sticky_=EW, bg_='lightyellow')
+        self.project_path_button = self.create_button(self.frame, "ProjectPath", self.open_projectPath, self.rowN, 1, sticky_=EW, bg_='lightyellow')
         self.project_path = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1"
-        self.project_path_entry = self.createEntry(self.frame, self.project_path, self.rowN, 2, width_=50)
-        self.createButton(self.frame, "Create_Input", self.create_input, self.rowN, 3, sticky_=EW, bg_='lightyellow')
+        self.project_path_entry = self.create_entry(self.frame, self.project_path, self.rowN, 2, width_=50)
+        self.create_button(self.frame, "Create_Input", self.create_input, self.rowN, 3, sticky_=EW, bg_='lightyellow')
 
         # Input Info
         self.rowN += 1
-        self.input_path_button = self.createButton(self.frame, "Input_Path", self.open_inputPath, self.rowN, 1, sticky_=EW, bg_='lightyellow')
+        self.input_path_button = self.create_button(self.frame, "Input_Path", self.open_inputPath, self.rowN, 1, sticky_=EW, bg_='lightyellow')
         self.meshFile = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\mesh.k"
-        self.input_path_entry = self.createEntry(self.frame,self.meshFile, self.rowN, 2, width_=50)
-        self.createButton(self.frame, "Get_Info", self.get_info, self.rowN, 3, sticky_=EW, bg_='lightyellow')
+        self.input_path_entry = self.create_entry(self.frame,self.meshFile, self.rowN, 2, width_=50)
+        self.create_button(self.frame, "Get_Info", self.get_info, self.rowN, 3, sticky_=EW, bg_='lightyellow')
         self.input_parts = []
         self.partInfo = {"":""}
         self.partRowNo = self.rowN
@@ -131,9 +131,9 @@ class VIEWER:
         self.define_popupMenu.config(bg='lightyellow')
         self.define_cards_type.trace('w', self.define_dropdown)
 
-        # self.createLabel(self.frame, "DefineCurve", self.rowN, 2, sticky_=E, bg_='yellow', ipadx_=15)
-        # self.createButton(self.frame, "Import_Info", self.import_curve_info, self.rowN, 2, ipadx_=40, sticky_=W, bg_='lightblue')
-        self.createButton(self.frame, "Add_Info", self.add_define_cards_info, self.rowN, 3, sticky_=EW, bg_='lightyellow')
+        # self.create_label(self.frame, "DefineCurve", self.rowN, 2, sticky_=E, bg_='yellow', ipadx_=15)
+        # self.create_button(self.frame, "Import_Info", self.import_curve_info, self.rowN, 2, ipadx_=40, sticky_=W, bg_='lightblue')
+        self.create_button(self.frame, "Add_Info", self.add_define_cards_info, self.rowN, 3, sticky_=EW, bg_='lightyellow')
 
         self.rowN += 1
         # self.ControlCards = control_cards.ControlCards()
@@ -158,13 +158,13 @@ class VIEWER:
 
         self.rowN += 1
         # Open Input
-        self.createButton(self.frame, "Open Input", self.open_input, self.rowN, 1, sticky_=EW, bg_='lightgreen')
+        self.create_button(self.frame, "Open Input", self.open_input, self.rowN, 1, sticky_=EW, bg_='lightgreen')
         # Review Input
-        self.createButton(self.frame, "Review Input", self.review_input, self.rowN, 2, sticky_=W, ipadx_=35, bg_='lightgreen')
+        self.create_button(self.frame, "Review Input", self.review_input, self.rowN, 2, sticky_=W, ipadx_=35, bg_='lightgreen')
         # Run Input
-        self.createButton(self.frame, "Run", self.run_info, self.rowN, 2, sticky_=E, ipadx_=55, bg_='lightgreen')
+        self.create_button(self.frame, "Run", self.run_info, self.rowN, 2, sticky_=E, ipadx_=55, bg_='lightgreen')
         # Exit
-        self.createButton(self.frame, "Exit", self.frame.quit, self.rowN, 3, sticky_=EW, bg_='lightgreen')
+        self.create_button(self.frame, "Exit", self.frame.quit, self.rowN, 3, sticky_=EW, bg_='lightgreen')
 
     def review_input(self):
         """
@@ -172,12 +172,12 @@ class VIEWER:
         """
         row_ = 0
 
-        self.createLabel(self.frame, "PartID", row_, 5, bg_="lightyellow", relief_="ridge")
-        self.createLabel(self.frame, "PartName", row_, 6, width_=25, bg_="lightyellow", relief_="ridge")
-        self.createLabel(self.frame, "ID, MaterialType", row_, 7, width_=25, bg_="lightyellow", relief_="ridge")
-        self.createLabel(self.frame, "ID, ShellType", row_, 8, width_=25, bg_="lightyellow", relief_="ridge")
-        self.createLabel(self.frame, "Thickness", row_, 9, width_=10, bg_="lightyellow", relief_="ridge")
-        self.createLabel(self.frame, "EOS", row_, 10, width_=40, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.frame, "PartID", row_, 5, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.frame, "PartName", row_, 6, width_=25, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.frame, "ID, MaterialType", row_, 7, width_=25, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.frame, "ID, ShellType", row_, 8, width_=25, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.frame, "Thickness", row_, 9, width_=10, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.frame, "EOS", row_, 10, width_=40, bg_="lightyellow", relief_="ridge")
 
         self.partID_label = []
         self.partName_label = []
@@ -203,12 +203,12 @@ class VIEWER:
             materialID_Card = "{}: {}".format(materialID, materialCard)
             eosID_Card = "{}: {}".format(eosID, eosCard)
 
-            self.createLabel(self.frame, key, row_, 5, bg_="lightblue", relief_="ridge")
-            self.createLabel(self.frame, self.map_part_id_name.get(key, ""), row_, 6, width_=25, bg_="lightblue", relief_="ridge")
-            self.createLabel(self.frame, materialID_Card, row_, 7, width_=25, bg_="lightblue", relief_="ridge")
-            self.createLabel(self.frame, sectionID_Type, row_, 8, width_=25, bg_="lightblue", relief_="ridge")
-            self.createLabel(self.frame, sectionThickness, row_, 9, width_=10, bg_="lightblue", relief_="ridge")
-            self.createLabel(self.frame, eosID_Card, row_, 10, width_=40, bg_="lightblue", relief_="ridge")
+            self.create_label(self.frame, key, row_, 5, bg_="lightblue", relief_="ridge")
+            self.create_label(self.frame, self.map_part_id_name.get(key, ""), row_, 6, width_=25, bg_="lightblue", relief_="ridge")
+            self.create_label(self.frame, materialID_Card, row_, 7, width_=25, bg_="lightblue", relief_="ridge")
+            self.create_label(self.frame, sectionID_Type, row_, 8, width_=25, bg_="lightblue", relief_="ridge")
+            self.create_label(self.frame, sectionThickness, row_, 9, width_=10, bg_="lightblue", relief_="ridge")
+            self.create_label(self.frame, eosID_Card, row_, 10, width_=40, bg_="lightblue", relief_="ridge")
             index += 1
 
     def open_inputPath(self):
@@ -309,31 +309,31 @@ class VIEWER:
         print(self.partInfo)
         self.window_partInfo = Toplevel(self.frame)
         row_ = 0
-        self.createLabel(self.window_partInfo, "PartID", row_, 0, width_= 10)
-        self.createLabel(self.window_partInfo, "PartName", row_, 1, width_= 40)
-        self.createLabel(self.window_partInfo, "SectionID", row_, 2, width_= 10)
-        self.createLabel(self.window_partInfo, "MaterialID", row_, 3, width_= 10)
-        self.createLabel(self.window_partInfo, "EOSID", row_, 4, width_= 10)
+        self.create_label(self.window_partInfo, "PartID", row_, 0, width_= 10)
+        self.create_label(self.window_partInfo, "PartName", row_, 1, width_= 40)
+        self.create_label(self.window_partInfo, "SectionID", row_, 2, width_= 10)
+        self.create_label(self.window_partInfo, "MaterialID", row_, 3, width_= 10)
+        self.create_label(self.window_partInfo, "EOSID", row_, 4, width_= 10)
 
-        self.createLabel(self.window_partInfo, "ID, MaterialType", row_, 5, width_=25, bg_="lightyellow", relief_="ridge")
-        self.createLabel(self.window_partInfo, "ID, ShellType", row_, 6, bg_="lightyellow", relief_="ridge", width_=25)
-        self.createLabel(self.window_partInfo, "Thickness", row_, 7, bg_="lightyellow", relief_="ridge", width_=10)
-        self.createLabel(self.window_partInfo, "EOS", row_, 8, bg_="lightyellow", relief_="ridge", width_=40)
+        self.create_label(self.window_partInfo, "ID, MaterialType", row_, 5, width_=25, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.window_partInfo, "ID, ShellType", row_, 6, bg_="lightyellow", relief_="ridge", width_=25)
+        self.create_label(self.window_partInfo, "Thickness", row_, 7, bg_="lightyellow", relief_="ridge", width_=10)
+        self.create_label(self.window_partInfo, "EOS", row_, 8, bg_="lightyellow", relief_="ridge", width_=40)
 
         for i in range(len(self.material_ids)):
             row_ += 1
-            self.createLabel(self.window_partInfo, "{} : {}".format(self.material_ids[i], self.map_materialID_type[self.material_ids[i]]), row_, 5, width_=25, bg_="lightblue", relief_="groove")
+            self.create_label(self.window_partInfo, "{} : {}".format(self.material_ids[i], self.map_materialID_type[self.material_ids[i]]), row_, 5, width_=25, bg_="lightblue", relief_="groove")
 
         row_ = 0
         for i in range(len(self.section_ids)):
             row_ += 1
-            self.createLabel(self.window_partInfo, "{} : {}".format(self.section_ids[i], self.map_sectionID_thickness.get(self.section_ids[i],"")[0]), row_, 6, width_=25, bg_="lightblue", relief_="groove")
-            self.createLabel(self.window_partInfo, "{}".format(self.map_sectionID_thickness.get(self.section_ids[i],"")[1]), row_, 7, width_=5, bg_="lightblue", relief_="groove")
+            self.create_label(self.window_partInfo, "{} : {}".format(self.section_ids[i], self.map_sectionID_thickness.get(self.section_ids[i],"")[0]), row_, 6, width_=25, bg_="lightblue", relief_="groove")
+            self.create_label(self.window_partInfo, "{}".format(self.map_sectionID_thickness.get(self.section_ids[i],"")[1]), row_, 7, width_=5, bg_="lightblue", relief_="groove")
 
         row_ = 0
         for i in range(len(self.eos_ids)):
             row_ += 1
-            self.createLabel(self.window_partInfo, "{} : {}".format(self.eos_ids[i], self.map_eosID_type_title[self.eos_ids[i]]), row_, 8, width_=40, bg_="lightblue", relief_="groove")
+            self.create_label(self.window_partInfo, "{} : {}".format(self.eos_ids[i], self.map_eosID_type_title[self.eos_ids[i]]), row_, 8, width_=40, bg_="lightblue", relief_="groove")
 
         self.partInfo_entry = []
         self.partID_label = []
@@ -376,8 +376,8 @@ class VIEWER:
             index += 1
 
         row_ += 2
-        self.createButton(self.window_partInfo, "Save", self.update, row_, 2, sticky_=EW)
-        self.createButton(self.window_partInfo, "Exit", self.close_window_part_info, row_, 3, sticky_=EW)
+        self.create_button(self.window_partInfo, "Save", self.update, row_, 2, sticky_=EW)
+        self.create_button(self.window_partInfo, "Exit", self.close_window_part_info, row_, 3, sticky_=EW)
 
     def update(self):
         """
@@ -582,7 +582,7 @@ class VIEWER:
         self.control_card_popup.grid(row = rowN, column=1)
         self.read_control_card_set.set(self.read_control_cards_type_list[0])
         self.read_control_card_set.trace('w', self.read_control_card_dropdown)
-        self.editControlCardData = self.createButton(self.frame, "Show", self.show_control_card, rowN, 2, sticky_=W)
+        self.editControlCardData = self.create_button(self.frame, "Show", self.show_control_card, rowN, 2, sticky_=W)
 
         rowN += 3
         self.read_define_card = self.read_define_cards_type_list[0]
@@ -591,8 +591,8 @@ class VIEWER:
         popupMenu.grid(row = rowN, column=1)
         self.read_define_card_set.set(self.read_define_card)
         self.read_define_card_set.trace('w', self.read_define_dropdown)
-        self.editDefineData = self.createButton(self.frame, "Show", self.show_define, rowN, 2, sticky_=W)
-        self.updateControlCardData = self.createButton(self.frame, "Update", self.update_control_card, rowN, 2, sticky_=N)
+        self.editDefineData = self.create_button(self.frame, "Show", self.show_define, rowN, 2, sticky_=W)
+        self.updateControlCardData = self.create_button(self.frame, "Update", self.update_control_card, rowN, 2, sticky_=N)
 
     def get_read_control_card_type(self, read_control_card):
         """
@@ -965,8 +965,8 @@ class VIEWER:
             pass
         else:
             define_title = self.read_define_parameters[self.read_define_card][0]
-            self.define_title_label = self.createLabel(self.window_defineCardsInfo_read, "DEFINE_TITLE", rowN, colN, columnspan_=5, fg_='blue')
-            self.define_title_entry = self.createEntry(self.window_defineCardsInfo_read, define_title, rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
+            self.define_title_label = self.create_label(self.window_defineCardsInfo_read, "DEFINE_TITLE", rowN, colN, columnspan_=5, fg_='blue')
+            self.define_title_entry = self.create_entry(self.window_defineCardsInfo_read, define_title, rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
             rowN += 2
 
         for j in range(len(self.curr_define_card_parameters)):
@@ -984,7 +984,7 @@ class VIEWER:
                 continue
 
             if self.curr_define_card_parameters[j] == "CURVE":
-                self.show_curve_button = self.createButton(self.window_defineCardsInfo_read, "ShowCurve", self.show_curve, rowN+1, colN)
+                self.show_curve_button = self.create_button(self.window_defineCardsInfo_read, "ShowCurve", self.show_curve, rowN+1, colN)
                 continue
 
             if curr_define_card_parameters_freq[j].strip().upper() == "Y":
@@ -1046,8 +1046,8 @@ class VIEWER:
         self.curveRowN = 1
         for i in range(self.curveLength):
             self.curveRowN += 1
-            entry1 = self.createEntry(self.window_defineCurve_read, self.curveValList_read[i][0], self.curveRowN, 0,width_=10)
-            entry2 = self.createEntry(self.window_defineCurve_read, self.curveValList_read[i][1], self.curveRowN, 1,width_=10)
+            entry1 = self.create_entry(self.window_defineCurve_read, self.curveValList_read[i][0], self.curveRowN, 0,width_=10)
+            entry2 = self.create_entry(self.window_defineCurve_read, self.curveValList_read[i][1], self.curveRowN, 1,width_=10)
             self.entry_curveValList_read.append([entry1, entry2])
 
         self.save_entry_button = Button(self.window_defineCurve_read, text="Save", command=self.update_curve_read, fg='blue')
@@ -1211,8 +1211,8 @@ class VIEWER:
         else:
             lcid = int(self.load_curve_ids[-1]) + 1
 
-        self.define_title_label = self.createLabel(self.window_defineCardsInfo, "CURVE_TITLE", rowN, colN, columnspan_=5, fg_='blue')
-        self.define_title_entry = self.createEntry(self.window_defineCardsInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
+        self.define_title_label = self.create_label(self.window_defineCardsInfo, "CURVE_TITLE", rowN, colN, columnspan_=5, fg_='blue')
+        self.define_title_entry = self.create_entry(self.window_defineCardsInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
         rowN += 2
 
         for j in range(len(self.curr_define_card_parameters)):
@@ -1239,9 +1239,9 @@ class VIEWER:
             if self.curr_define_card_parameters[j].upper() == "CURVE":
                 self.label_list_define_cards[j].grid(row=rowN, column=colN)
                 # self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
-                self.createButton(self.window_defineCardsInfo, "Add_Table", self.add_curve_info, rowN+1, colN, bg_='lightyellow')
-                self.createButton(self.window_defineCardsInfo, "Import_Table", self.import_curve_info, rowN+1, colN+1, bg_='lightblue')
-                self.createButton(self.window_defineCardsInfo, "Paste_Table", self.paste_curve_info, rowN+1, colN+2, bg_='lightblue')
+                self.create_button(self.window_defineCardsInfo, "Add_Table", self.add_curve_info, rowN+1, colN, bg_='lightyellow')
+                self.create_button(self.window_defineCardsInfo, "Import_Table", self.import_curve_info, rowN+1, colN+1, bg_='lightblue')
+                self.create_button(self.window_defineCardsInfo, "Paste_Table", self.paste_curve_info, rowN+1, colN+2, bg_='lightblue')
                 self.curveValList_str = ""
                 continue
 
@@ -1291,8 +1291,8 @@ class VIEWER:
         :return:
         """
         self.curveRowN += 1
-        self.A1 = self.createEntry(self.window_defineCurve, "", self.curveRowN, 0, width_=20)
-        self.O1 = self.createEntry(self.window_defineCurve, "", self.curveRowN, 1, width_=20)
+        self.A1 = self.create_entry(self.window_defineCurve, "", self.curveRowN, 0, width_=20)
+        self.O1 = self.create_entry(self.window_defineCurve, "", self.curveRowN, 1, width_=20)
         self.curveInfoList.append([self.A1, self.O1])
 
     def save_curve_entry(self):
@@ -1587,8 +1587,8 @@ class VIEWER:
         else:
             secid = int(self.section_ids[-1]) + 1
 
-        self.section_title_label = self.createLabel(self.window_sectionInfo, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
-        self.section_title_entry = self.createEntry(self.window_sectionInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
+        self.section_title_label = self.create_label(self.window_sectionInfo, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
+        self.section_title_entry = self.create_entry(self.window_sectionInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
         rowN += 2
 
         for j in range(len(self.curr_section_parameters)):
@@ -1741,8 +1741,8 @@ class VIEWER:
             pass
         else:
             section_title = self.read_section_parameters[self.read_section_card][0]
-            self.section_title_label = self.createLabel(self.window_sectionInfo_read, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
-            self.section_title_entry = self.createEntry(self.window_sectionInfo_read, section_title, rowN+1, colN, width_=20, ipadx_=100, columnspan_=5, fg_='blue')
+            self.section_title_label = self.create_label(self.window_sectionInfo_read, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
+            self.section_title_entry = self.create_entry(self.window_sectionInfo_read, section_title, rowN+1, colN, width_=20, ipadx_=100, columnspan_=5, fg_='blue')
             rowN += 2
 
         index = 0
@@ -1954,8 +1954,8 @@ class VIEWER:
         #     eosid = int(self.section_ids[-1]) + 1
         eosid = len(self.section_ids) + len(self.eos_ids)
 
-        self.eos_title_label = self.createLabel(self.window_eosInfo, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
-        self.eos_title_entry = self.createEntry(self.window_eosInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
+        self.eos_title_label = self.create_label(self.window_eosInfo, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
+        self.eos_title_entry = self.create_entry(self.window_eosInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
         rowN += 2
 
         for j in range(len(self.curr_eos_parameters)):
@@ -2099,8 +2099,8 @@ class VIEWER:
         else:
             mid = int(self.material_ids[-1]) + 1
 
-        self.material_title_label = self.createLabel(self.window_matInfo, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
-        self.material_title_entry = self.createEntry(self.window_matInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
+        self.material_title_label = self.create_label(self.window_matInfo, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
+        self.material_title_entry = self.create_entry(self.window_matInfo, "", rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
         rowN += 2
 
         for j in range(len(self.curr_material_parameters)):
@@ -2242,19 +2242,19 @@ class VIEWER:
 
         rowN = 0
         self.materialTitle = ""
-        self.createLabel(self.window_newMat, "MAT_TITLE", rowN, 0, width_=20)
-        self.mat_title_entry = self.createEntry(self.window_newMat, "MAT_TITLE", rowN, 1, width_=20)
+        self.create_label(self.window_newMat, "MAT_TITLE", rowN, 0, width_=20)
+        self.mat_title_entry = self.create_entry(self.window_newMat, "MAT_TITLE", rowN, 1, width_=20)
         rowN += 1
-        self.createLabel(self.window_newMat, "PART_TITLE", rowN, 0, width_=20, fg_='blue')
-        self.part_title_entry = self.createEntry(self.window_newMat, "PART_TITLE", rowN, 1, width_=20, fg_='blue')
-        self.part_title_freq = self.createEntry(self.window_newMat, "Y", rowN, 2, width_=5, fg_='blue')
+        self.create_label(self.window_newMat, "PART_TITLE", rowN, 0, width_=20, fg_='blue')
+        self.part_title_entry = self.create_entry(self.window_newMat, "PART_TITLE", rowN, 1, width_=20, fg_='blue')
+        self.part_title_freq = self.create_entry(self.window_newMat, "Y", rowN, 2, width_=5, fg_='blue')
         rowN += 1
-        self.createLabel(self.window_newMat, "CARD_TITLE", rowN, 0, width_=20, fg_='blue')
-        self.card_title_entry = self.createEntry(self.window_newMat, "CARD_TITLE", rowN, 1, width_=20, fg_='blue')
-        self.card_title_freq = self.createEntry(self.window_newMat, "Y", rowN, 2, width_=5, fg_='blue')
+        self.create_label(self.window_newMat, "CARD_TITLE", rowN, 0, width_=20, fg_='blue')
+        self.card_title_entry = self.create_entry(self.window_newMat, "CARD_TITLE", rowN, 1, width_=20, fg_='blue')
+        self.card_title_freq = self.create_entry(self.window_newMat, "Y", rowN, 2, width_=5, fg_='blue')
         rowN += 1
-        self.createLabel(self.window_newMat, "CARD_INFO", rowN, 0, width_=20, fg_='blue')
-        self.createButton(self.window_newMat, "SAVE", self.save_new_mat_info, rowN, 2, fg_='red')
+        self.create_label(self.window_newMat, "CARD_INFO", rowN, 0, width_=20, fg_='blue')
+        self.create_button(self.window_newMat, "SAVE", self.save_new_mat_info, rowN, 2, fg_='red')
         rowN += 1
 
         parameter_label = StringVar()
@@ -2300,9 +2300,9 @@ class VIEWER:
         self.c = Checkbutton(self.window_newMat, variable = var)
         self.c.val = var
         self.c.grid(row = self.matRowN, column = 3)
-        self.material_label = self.createEntry(self.window_newMat, "", self.matRowN, 0, width_=20)
-        self.material_defaults = self.createEntry(self.window_newMat, "", self.matRowN, 1, width_=20)
-        self.material_freq = self.createEntry(self.window_newMat, "", self.matRowN, 2, width_=20)
+        self.material_label = self.create_entry(self.window_newMat, "", self.matRowN, 0, width_=20)
+        self.material_defaults = self.create_entry(self.window_newMat, "", self.matRowN, 1, width_=20)
+        self.material_freq = self.create_entry(self.window_newMat, "", self.matRowN, 2, width_=20)
         self.material_new_info.append([self.material_label, self.material_defaults, self.material_freq, self.c])
 
     def delete_entry(self):
@@ -2532,8 +2532,8 @@ class VIEWER:
         popupMenu.grid(row = rowN, column=1)
         self.read_material_card_set.set(self.read_material_cards_type_list[0])
         self.read_material_card_set.trace('w', self.read_material_dropdown)
-        self.showMatData = self.createButton(self.frame, "Show", self.show_material, rowN, 2, sticky_=W)
-        # self.updateMatData = self.createButton(self.frame, "Update", self.update_material, self.rowN, 3, sticky_=W)
+        self.showMatData = self.create_button(self.frame, "Show", self.show_material, rowN, 2, sticky_=W)
+        # self.updateMatData = self.create_button(self.frame, "Update", self.update_material, self.rowN, 3, sticky_=W)
 
         rowN += 3
         self.read_section_card = self.read_section_cards_type_list[0]
@@ -2542,8 +2542,8 @@ class VIEWER:
         popupMenu.grid(row = rowN, column=1)
         self.read_section_card_set.set(self.read_section_card)
         self.read_section_card_set.trace('w', self.read_section_dropdown)
-        self.showSectionData = self.createButton(self.frame, "Show", self.show_section, rowN, 2, sticky_=W)
-        self.updateSectionData = self.createButton(self.frame, "Update", self.update_material, rowN, 2, sticky_=N)
+        self.showSectionData = self.create_button(self.frame, "Show", self.show_section, rowN, 2, sticky_=W)
+        self.updateSectionData = self.create_button(self.frame, "Update", self.update_material, rowN, 2, sticky_=N)
         if not self.read_eos_cards_type_list == []:
             self.read_eos_parameters.update({self.read_eos_cards_type_list[-1]:[self.read_eos_parameters_title, self.read_eos_parameters_tmp]})
             rowN += 3
@@ -2553,7 +2553,7 @@ class VIEWER:
             eos_popupMenu.grid(row = rowN, column=1)
             self.read_eos_card_set.set(self.read_eos_cards_type_list[0])
             self.read_eos_card_set.trace('w', self.read_eos_dropdown)
-            self.showEosData = self.createButton(self.frame, "Show", self.show_eos, rowN, 2, sticky_=W)
+            self.showEosData = self.create_button(self.frame, "Show", self.show_eos, rowN, 2, sticky_=W)
 
 
     def get_read_eos_type(self, eos_card_type):
@@ -2588,8 +2588,8 @@ class VIEWER:
             pass
         else:
             eos_title = self.read_eos_parameters[self.read_eos_card][0]
-            self.eos_title_label = self.createLabel(self.window_eosInfo_read, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
-            self.eos_title_entry = self.createEntry(self.window_eosInfo_read, eos_title, rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
+            self.eos_title_label = self.create_label(self.window_eosInfo_read, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
+            self.eos_title_entry = self.create_entry(self.window_eosInfo_read, eos_title, rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
             rowN += 2
 
         for j in range(len(self.curr_eos_parameters)):
@@ -2736,8 +2736,8 @@ class VIEWER:
             pass
         else:
             material_title = self.read_material_parameters[self.read_material_card][0]
-            self.material_title_label = self.createLabel(self.window_matInfo_read, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
-            self.material_title_entry = self.createEntry(self.window_matInfo_read, material_title, rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
+            self.material_title_label = self.create_label(self.window_matInfo_read, "PART_TITLE", rowN, colN, columnspan_=5, fg_='blue')
+            self.material_title_entry = self.create_entry(self.window_matInfo_read, material_title, rowN+1, colN, 20, ipadx_=100, columnspan_=5, fg_='blue')
             rowN += 2
 
         for j in range(len(self.curr_material_parameters)):
@@ -3124,7 +3124,7 @@ class VIEWER:
         out,err = p.communicate()
         p.terminate()
 
-    def createButton(self, frame_, buttonName, buttonMethod, rowN, colN, fg_='black', sticky_=N, bg_='lightgray', ipadx_=0):
+    def create_button(self, frame_, buttonName, buttonMethod, rowN, colN, fg_='black', sticky_=N, bg_='lightgray', ipadx_=0):
         """
 
         :return:
@@ -3133,7 +3133,7 @@ class VIEWER:
         button_ = Button(frame_, text=buttonName, command=buttonMethod, fg=fg_, bg=bg_)
         button_.grid(row=rowN, column=colN, sticky=sticky_, ipadx=ipadx_)
 
-    def createLabel(self, frame_, labelName, rowN, colN, width_=10, fg_='black', sticky_=N, bg_="white", ipadx_=0, bd_=2, relief_="flat", columnspan_=1):
+    def create_label(self, frame_, labelName, rowN, colN, width_=10, fg_='black', sticky_=N, bg_="white", ipadx_=0, bd_=2, relief_="flat", columnspan_=1):
         """
 
         :return:
@@ -3141,7 +3141,7 @@ class VIEWER:
         label_ = Label(frame_, text=labelName, width=width_, fg=fg_, bg=bg_, bd=bd_, relief=relief_)
         label_.grid(row=rowN, column=colN, sticky=sticky_, ipadx=ipadx_, columnspan=columnspan_)
 
-    def createEntry(self, frame_, value_, rowN, colN, width_, fg_='black', columnspan_=1, ipadx_=0):
+    def create_entry(self, frame_, value_, rowN, colN, width_, fg_='black', columnspan_=1, ipadx_=0):
         """
 
         :return:
@@ -3153,7 +3153,7 @@ class VIEWER:
 
         return entry_
 
-    def createDropdown(self):
+    def create_dropdown(self):
         """
         :return:
         """
