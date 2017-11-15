@@ -67,9 +67,9 @@ class VIEWER:
         self.material_cards_type_list = set(sorted(self.MaterialCards.material_cards_type))
         self.material_cards_type.set(self.material_card)
 
-        popupMenu = OptionMenu(self.frame, self.material_cards_type, *self.material_cards_type_list, command=self.get_material_type)
-        popupMenu.config(bg='lightyellow')
-        popupMenu.grid(row = self.rowN, column=2, sticky="W", ipadx_=5)
+        self.material_poupManu = OptionMenu(self.frame, self.material_cards_type, *self.material_cards_type_list, command=self.get_material_type)
+        self.material_poupManu.config(bg='lightyellow')
+        self.material_poupManu.grid(row = self.rowN, column=2, sticky="W", ipadx_=5)
         self.material_cards_type.trace('w', self.material_dropdown)
 
         self.add_new_material_card_button = Button(self.frame, text="AddNewMaterial", command=self.add_new_material_card, bg='peachpuff')
@@ -142,9 +142,9 @@ class VIEWER:
         self.control_cards_type_list = set(sorted(self.ControlCards.control_cards_type))
         self.control_cards_type.set(self.control_card)
 
-        popupMenu = OptionMenu(self.frame, self.control_cards_type, *self.control_cards_type_list, command=self.get_control_type)
-        popupMenu.grid(row = self.rowN, column=2, sticky=E)
-        popupMenu.config(bg='lightyellow')
+        self.controlCard_dropdown = OptionMenu(self.frame, self.control_cards_type, *self.control_cards_type_list, command=self.get_control_type)
+        self.controlCard_dropdown.grid(row = self.rowN, column=2, sticky=E)
+        self.controlCard_dropdown.config(bg='lightyellow')
         self.control_cards_type.trace('w', self.control_dropdown)
 
         self.add_new_control_card_button = Button(self.frame, text="AddNewControlCards", command=self.add_new_control_card, bg='peachpuff')
@@ -490,6 +490,101 @@ class VIEWER:
         """
         :return:
         """
+        self.window_newControlCard = Toplevel(self.frame)
+
+        rowN = 0
+        self.controlCardTitle = ""
+        self.create_label(self.window_newControlCard, "CONTROL_TITLE", rowN, 0, width_=20, bg_="lightyellow", relief_="ridge")
+        self.control_title_entry = self.create_entry(self.window_newControlCard, "CONTROL_TITLE", rowN, 1, width_=20)
+        rowN += 1
+        self.create_label(self.window_newControlCard, "CARD_TITLE", rowN, 0, width_=20, bg_="lightyellow", relief_="ridge")
+        self.control_card_title_entry = self.create_entry(self.window_newControlCard, "*CONTROL_TITLE", rowN, 1, width_=20, fg_='blue')
+        self.control_card_title_freq = self.create_entry(self.window_newControlCard, "Y", rowN, 2, width_=5, fg_='blue')
+        rowN += 1
+        self.create_label(self.window_newControlCard, "CARD_INFO", rowN, 0, width_=20, bg_="lightyellow", relief_="ridge")
+        self.create_button(self.window_newControlCard, "SAVE", self.save_new_control_info, rowN, 5, bg_="lightyellow", fg_='red')
+        rowN += 1
+
+        self.create_label(self.window_newControlCard, "PARAMETER_LABEL", rowN, 0, width_=25, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.window_newControlCard, "DEFAULTS", rowN, 1, width_=25, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.window_newControlCard, "FREQUENCY", rowN, 2, width_=25, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.window_newControlCard, "Select_To_Delete", rowN, 3, width_=25, bg_="lightyellow", relief_="ridge")
+
+        self.control_add_new_entry_button = Button(self.window_newControlCard, text="+", command=self.add_control_entry, bg_="lightyellow", fg='blue')
+        self.control_add_new_entry_button.grid(row=rowN, column=4)
+
+        self.control_delete_new_entry_button = Button(self.window_newControlCard, text="-", command=self.delete_control_entry, bg_="lightyellow", fg='red')
+        self.control_delete_new_entry_button.grid(row=rowN, column=5)
+
+        self.controlRowN = rowN
+        self.control_new_info = []
+        self.newControlInfo = []
+        self.newControlInfo_defaults = []
+        self.newControlInfo_freq = []
+
+    def save_new_control_info(self):
+        """
+        :return:
+        """
+        for item in self.control_new_info:
+            self.newControlInfo.append(item[0].get())
+            self.newControlInfo_defaults.append(item[1].get())
+            self.newControlInfo_freq.append(item[2].get())
+
+
+        newControlInfo = ",".join(self.newControlInfo)
+        newControlInfo_defaults = ",".join(self.newControlInfo_defaults)
+        newControlInfo_freq = ",".join(self.newControlInfo_freq)
+
+        self.ControlCards.control_cards_jsonObj.update({self.control_title_entry.get():
+                                  {"Card_Title":[self.control_card_title_entry.get(), self.control_card_title_freq.get()],
+                                   "Control_Parameters":[newControlInfo, newControlInfo_defaults, newControlInfo_freq]}})
+
+        with open(self.ControlCards.control_cards_json_file, 'w') as outFile:
+            json.dump(self.ControlCards.control_cards_jsonObj, outFile)
+
+        self.update_control_dropdown()
+        self.window_newControlCard.destroy()
+
+    def add_control_entry(self):
+        """
+
+        :return:
+        """
+        self.controlRowN += 1
+
+        var = IntVar()
+        self.c = Checkbutton(self.window_newControlCard, variable = var)
+        self.c.val = var
+        self.c.grid(row = self.controlRowN, column = 3)
+        self.control_label = self.create_entry(self.window_newControlCard, "", self.controlRowN, 0, width_=20)
+        self.control_defaults = self.create_entry(self.window_newControlCard, "", self.controlRowN, 1, width_=20)
+        self.control_freq = self.create_entry(self.window_newControlCard, "", self.controlRowN, 2, width_=20)
+        self.control_new_info.append([self.control_label, self.control_defaults, self.control_freq, self.c])
+
+    def delete_control_entry(self):
+        """
+            to delete the entries not required
+        :return:
+        """
+        for rowno, row in reversed(list(enumerate(self.control_new_info))):
+            if row[3].val.get() == 1:
+                for i in row:
+                    i.destroy()
+                self.control_new_info.pop(rowno)
+
+    def update_control_dropdown(self):
+        """
+
+        :return:
+        """
+        self.ControlCards = control_cards.ControlCards()
+        self.control_cards_type_list = set(sorted(self.ControlCards.control_cards_type))
+        menu = self.controlCard_dropdown['menu']
+        menu.delete(0, 'end')
+        for string in self.control_cards_type_list:
+            menu.add_command(label=string,
+                             command=lambda value=string: self.control_cards_type.set(value))
 
     def open_control_card_info(self):
         """
@@ -2288,7 +2383,7 @@ class VIEWER:
         newline = []
         index = 0
         outlines.append("\n")
-        outlines.append(self.MaterialCards.material_cards[self.material_card]["Card_Title"][0])
+        outlines.append(self.MaterialCards.material_cards_jsonObj[self.material_card]["Card_Title"][0])
         header_line = "\n$$"
         outlines.append("\n")
         outlines.append(self.material_title_entry.get())
@@ -2374,45 +2469,30 @@ class VIEWER:
 
         rowN = 0
         self.materialTitle = ""
-        self.create_label(self.window_newMat, "MAT_TITLE", rowN, 0, width_=20)
+        self.create_label(self.window_newMat, "MAT_TITLE", rowN, 0, width_=20, bg_="lightyellow", relief_="ridge")
         self.mat_title_entry = self.create_entry(self.window_newMat, "MAT_TITLE", rowN, 1, width_=20)
         rowN += 1
-        self.create_label(self.window_newMat, "PART_TITLE", rowN, 0, width_=20, fg_='blue')
+        self.create_label(self.window_newMat, "PART_TITLE", rowN, 0, width_=20, bg_="lightyellow", relief_="ridge")
         self.part_title_entry = self.create_entry(self.window_newMat, "PART_TITLE", rowN, 1, width_=20, fg_='blue')
         self.part_title_freq = self.create_entry(self.window_newMat, "Y", rowN, 2, width_=5, fg_='blue')
         rowN += 1
-        self.create_label(self.window_newMat, "CARD_TITLE", rowN, 0, width_=20, fg_='blue')
-        self.card_title_entry = self.create_entry(self.window_newMat, "CARD_TITLE", rowN, 1, width_=20, fg_='blue')
+        self.create_label(self.window_newMat, "CARD_TITLE", rowN, 0, width_=20, bg_="lightyellow", relief_="ridge")
+        self.card_title_entry = self.create_entry(self.window_newMat, "*MAT_TITLE", rowN, 1, width_=20, fg_='blue')
         self.card_title_freq = self.create_entry(self.window_newMat, "Y", rowN, 2, width_=5, fg_='blue')
         rowN += 1
-        self.create_label(self.window_newMat, "CARD_INFO", rowN, 0, width_=20, fg_='blue')
-        self.create_button(self.window_newMat, "SAVE", self.save_new_mat_info, rowN, 2, fg_='red')
+        self.create_label(self.window_newMat, "CARD_INFO", rowN, 0, width_=20, bg_="lightyellow", relief_="ridge")
+        self.create_button(self.window_newMat, "SAVE", self.save_new_mat_info, rowN, 5, bg_="lightyellow", fg_='red')
         rowN += 1
 
-        parameter_label = StringVar()
-        parameter_label_entry = Entry(self.window_newMat, textvariable=parameter_label, state='readonly')
-        parameter_label.set('PARAMETER_LABEL')
-        parameter_label_entry.grid(row=rowN, column=0)
+        self.create_label(self.window_newMat, "PARAMETER_LABEL", rowN, 0, width_=25, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.window_newMat, "DEFAULTS", rowN, 1, width_=25, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.window_newMat, "FREQUENCY", rowN, 2, width_=25, bg_="lightyellow", relief_="ridge")
+        self.create_label(self.window_newMat, "Select_To_Delete", rowN, 3, width_=25, bg_="lightyellow", relief_="ridge")
 
-        parameter_defaults = StringVar()
-        parameter_defaults_entry = Entry(self.window_newMat, textvariable=parameter_defaults, state='readonly')
-        parameter_defaults.set('DEFAULTS')
-        parameter_defaults_entry.grid(row=rowN, column=1)
-
-        parameter_freq = StringVar()
-        parameter_freq_entry = Entry(self.window_newMat, textvariable=parameter_freq, state='readonly')
-        parameter_freq.set('FREQUENCY')
-        parameter_freq_entry.grid(row=rowN, column=2)
-
-        select_ = StringVar()
-        select_entry = Entry(self.window_newMat, textvariable=select_, state='readonly')
-        select_.set('Select_To_Delete')
-        select_entry.grid(row=rowN, column=3)
-
-        self.add_new_entry_button = Button(self.window_newMat, text="+", command=self.add_entry, fg='blue')
+        self.add_new_entry_button = Button(self.window_newMat, text="+", command=self.add_entry, bg_="lightyellow", fg='blue')
         self.add_new_entry_button.grid(row=rowN, column=4)
 
-        self.delete_new_entry_button = Button(self.window_newMat, text="-", command=self.delete_entry, fg='red')
+        self.delete_new_entry_button = Button(self.window_newMat, text="-", command=self.delete_entry, bg_="lightyellow", fg='red')
         self.delete_new_entry_button.grid(row=rowN, column=5)
 
         self.matRowN = rowN
@@ -2463,13 +2543,29 @@ class VIEWER:
         newMatInfo_default = ",".join(self.newMatInfo_defaults)
         newMatInfo_freq = ",".join(self.newMatInfo_freq)
 
-        self.MaterialCards.material_cards.update({self.mat_title_entry.get():
+        self.MaterialCards.material_cards_jsonObj.update({self.mat_title_entry.get():
                                   {"Part_Title":[self.part_title_entry.get(), self.part_title_freq.get()],
                                    "Card_Title":[self.card_title_entry.get(), self.card_title_freq.get()],
                                    "Mat_Parameters":[newMatInfo, newMatInfo_default, newMatInfo_freq]}})
 
         with open(self.MaterialCards.json_file, 'w') as outFile:
-            json.dump(self.MaterialCards.material_cards, outFile)
+            json.dump(self.MaterialCards.material_cards_jsonObj, outFile)
+
+        self.update_material_dropdown()
+        self.window_newMat.destroy()
+
+    def update_material_dropdown(self):
+        """
+
+        :return:
+        """
+        self.MaterialCards = material_cards.MaterialCards()
+        self.material_cards_type_list = set(sorted(self.MaterialCards.material_cards_type))
+        menu = self.material_poupManu['menu']
+        menu.delete(0, 'end')
+        for string in self.material_cards_type_list:
+            menu.add_command(label=string,
+                             command=lambda value=string: self.material_cards_type.set(value))
 
     def read_material(self):
         """
@@ -2686,7 +2782,6 @@ class VIEWER:
             self.read_eos_card_set.set(self.read_eos_cards_type_list[0])
             self.read_eos_card_set.trace('w', self.read_eos_dropdown)
             self.showEosData = self.create_button(self.frame, "Show", self.show_eos, rowN, 2, sticky_=W)
-
 
     def get_read_eos_type(self, eos_card_type):
         """
