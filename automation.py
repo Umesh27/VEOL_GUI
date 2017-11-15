@@ -1,6 +1,6 @@
 __author__ = 'Umesh'
 
-import os, sys, csv, re, shutil
+import os, sys, csv, shutil
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
@@ -8,6 +8,7 @@ import json
 import subprocess
 
 # Import local modules
+import keywordSave
 import material_cards, control_cards
 import material_prop as mat_prop
 import create_input as create_input
@@ -156,20 +157,7 @@ class VIEWER:
         self.add_control_cards_info_button = Button(self.frame, text="AddControlCardsPara", command=self.add_control_cards_info, bg='lightyellow')
         self.add_control_cards_info_button.grid(row=self.rowN, column=3, sticky=W)
 
-        # self.loadingButton = self.create_button(self.frame, "Open Input", self.open_input, self.rowN, 1, sticky_=EW, bg_='lightgreen')
-
         self.rowN += 1
-        # Add default control cards as per Loading type
-        # self.loadingTypeString = StringVar(self.frame)
-        # self.loadingType = self.ControlCards.control_cards_type[0]
-        # self.loadingTypeList = ['Topload', 'Drop', 'Squeeze', 'Vibration', 'Sideclamp']
-        # self.loadingTypeSet = set(sorted(self.loadingTypeList))
-        # self.loadingTypeString.set(self.loadingType)
-        # self.loadingTypeDropdown = OptionMenu(self.frame, self.loadingTypeString, *self.loadingTypeSet, command=self.get_loading_type)
-        # self.loadingTypeDropdown.grid(row = self.rowN, column=1, sticky=E)
-        # self.loadingTypeDropdown.config(bg='lightyellow')
-        # self.loadingTypeString.trace('w', self.loading_dropdown)
-
         self.loadingFileButton = self.create_button(self.frame, "Open ControlCard", self.open_control_card, self.rowN, 1, sticky_=EW, bg_='lightyellow')
         self.loadingFileEntry = self.create_entry(self.frame,"Select control card file",self.rowN, 2, width_=50)
         self.reviewFileButton = self.create_button(self.frame, "Review ControlCard", self.review_control_card, self.rowN, 3, sticky_=EW, bg_='lightyellow')
@@ -897,7 +885,8 @@ class VIEWER:
             Updating control cards
         :return:
         """
-        self.read_control_cards_file_out = os.path.join(os.path.split(self.controlCardDefaultFile)[0], "control_cards_edit.k")
+        # self.read_control_cards_file_out = os.path.join(os.path.split(self.controlCardDefaultFile)[0], "control_cards_edit.k")
+        self.read_control_cards_file_out = self.control_card_out_file
         with open(self.read_control_cards_file_out, 'w') as outFile:
             outFile.write("*KEYWORD")
 
@@ -1587,7 +1576,6 @@ class VIEWER:
         """
         :return:
         """
-        import csv
         fName = filedialog.askopenfilename()
 
         col1 = []
@@ -3043,7 +3031,8 @@ class VIEWER:
         """
         :return:
         """
-        self.read_mat_file_out = os.path.join(os.path.split(self.read_mat_file)[0], "mat_edit.k")
+        # self.read_mat_file_out = os.path.join(os.path.split(self.read_mat_file)[0], "mat_edit.k")
+        self.read_mat_file_out = self.material_out_file
         with open(self.read_mat_file_out, 'w') as outFile:
             outFile.write("*KEYWORD")
 
@@ -3298,7 +3287,6 @@ class VIEWER:
         :return:
         """
         print("Opening Input file !")
-        import keywordSave
         temp_path = os.path.join(self.template_path, "open_save_key.tmp")
         input_path = os.path.abspath(self.input_keyword.Kfile)
         self.Kfile_new = os.path.join(os.path.split(input_path)[0], "out_key.k")
@@ -3347,7 +3335,7 @@ class VIEWER:
         with open(runFile,"w") as f:
             f.write(s)
 
-        p = subprocess.Popen("run.bat", cwd=self.project_path, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        p = subprocess.Popen("run.bat", cwd=self.project_path, shell=True)#, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         out,err = p.communicate()
         p.terminate()
 
@@ -3368,7 +3356,7 @@ class VIEWER:
         label_ = Label(frame_, text=labelName, width=width_, fg=fg_, bg=bg_, bd=bd_, relief=relief_)
         label_.grid(row=rowN, column=colN, sticky=sticky_, ipadx=ipadx_, columnspan=columnspan_)
 
-    def create_entry(self, frame_, value_, rowN, colN, width_, fg_='black', columnspan_=1, ipadx_=0):
+    def create_entry(self, frame_, value_, rowN, colN, fg_='black', width_=10, columnspan_=1, ipadx_=0):
         """
 
         :return:
