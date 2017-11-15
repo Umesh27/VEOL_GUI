@@ -1,9 +1,0 @@
-*KEYWORD
-*TITLE
-TOPLOAD
-*INCLUDE_PATH_RELATIVE
-Output
-*INCLUDE
-mesh.k
-mat.k
-control_cards.k

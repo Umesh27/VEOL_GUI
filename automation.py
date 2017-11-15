@@ -82,6 +82,32 @@ class VIEWER:
         self.add_material_info_button = Button(self.frame, text="AddMaterialPara", command=self.add_material_info, bg='lightyellow')
         self.add_material_info_button.grid(row=self.rowN, column=3, sticky=EW)
 
+        # Read Material Card:
+        self.read_material_cards_type_list = [""]
+        self.read_material_card = self.read_material_cards_type_list[0]
+        self.read_material_card_set = StringVar(self.frame)
+        self.readMaterialDropdown = OptionMenu(self.frame, self.read_material_card_set, *self.read_material_cards_type_list, command=self.get_read_material_type)
+        self.read_material_card_set.set(self.read_material_cards_type_list[0])
+        self.read_material_card_set.trace('w', self.read_material_dropdown)
+        self.showMatData = Button(self.frame, text="Show", command=self.show_material)
+
+        self.read_section_cards_type_list = [""]
+        self.read_section_card = self.read_section_cards_type_list[0]
+        self.read_section_card_set = StringVar(self.frame)
+        self.readSectionDropdown = OptionMenu(self.frame, self.read_section_card_set, *self.read_section_cards_type_list, command=self.get_read_section_type)
+        self.read_section_card_set.set(self.read_section_card)
+        self.read_section_card_set.trace('w', self.read_section_dropdown)
+        self.showSectionData = Button(self.frame, text="Show", command=self.show_section)
+
+        self.read_eos_cards_type_list = [""]
+        self.read_eos_card = self.read_eos_cards_type_list[0]
+        self.read_eos_card_set = StringVar(self.frame)
+        self.readEosDropdown = OptionMenu(self.frame, self.read_eos_card_set, *self.read_eos_cards_type_list, command=self.get_read_eos_type)
+        self.read_eos_card_set.set(self.read_eos_cards_type_list[0])
+        self.read_eos_card_set.trace('w', self.read_eos_dropdown)
+        self.showEosData = Button(self.frame, text="Show", command=self.show_eos)
+        self.updateSectionData = Button(self.frame, text="Update", command=self.update_material)
+
         # Section Block
         self.rowN += 1
         self.section_cards_type = StringVar(self.frame)
@@ -161,6 +187,25 @@ class VIEWER:
         self.loadingFileButton = self.create_button(self.frame, "Open ControlCard", self.open_control_card, self.rowN, 1, sticky_=EW, bg_='lightyellow')
         self.loadingFileEntry = self.create_entry(self.frame,"Select control card file",self.rowN, 2, width_=50)
         self.reviewFileButton = self.create_button(self.frame, "Review ControlCard", self.review_control_card, self.rowN, 3, sticky_=EW, bg_='lightyellow')
+
+        # Read Control Card:
+        self.read_control_cards_type_list = [""]
+        self.read_control_card = self.read_control_cards_type_list[0]
+        self.read_control_card_set = StringVar(self.frame)
+        self.readControlCardDropdown = OptionMenu(self.frame, self.read_control_card_set, *self.read_control_cards_type_list, command=self.get_read_control_card_type)
+        self.read_control_card_set.set(self.read_control_cards_type_list[0])
+        self.read_control_card_set.trace('w', self.read_control_card_dropdown)
+        self.showControlCardData = Button(self.frame, text="Show", command=self.show_control_card)
+
+        self.read_define_cards_type_list = [""]
+        self.read_define_card = self.read_define_cards_type_list[0]
+        self.read_define_card_set = StringVar(self.frame)
+        self.readDefineDropdown = OptionMenu(self.frame, self.read_define_card_set, *self.read_define_cards_type_list, command=self.get_read_define_type)
+        self.read_define_card_set.set(self.read_define_card)
+        self.read_define_card_set.trace('w', self.read_define_dropdown)
+        self.showDefineData = Button(self.frame, text="Show", command=self.show_define)
+
+        self.updateControlCardData = Button(self.frame, text="Update", command=self.update_control_card)
 
         self.rowN += 1
         # Open Input
@@ -326,6 +371,62 @@ class VIEWER:
         for string in self.partInfo_list:
             menu.add_command(label=string,
                              command=lambda value=string: self.parts_info.set(value))
+
+    def update_material_option_menu(self):
+        self.readMaterialDropdown.grid_remove()
+        self.showMatData.grid_remove()
+        self.readSectionDropdown.grid_remove()
+        self.showSectionData.grid_remove()
+        self.readEosDropdown.grid_remove()
+        self.showEosData.grid_remove()
+        self.updateSectionData.grid_remove()
+
+        menu1 = self.readMaterialDropdown['menu']
+        menu1.delete(0, 'end')
+        if len(self.read_material_cards_type_list) > 1:
+            self.read_material_card_set.set(self.read_material_cards_type_list[0])
+        for string in self.read_material_cards_type_list:
+            menu1.add_command(label=string,
+                             command=lambda value=string: self.read_material_card_set.set(value))
+
+        menu2 = self.readSectionDropdown['menu']
+        menu2.delete(0, 'end')
+        if len(self.read_section_cards_type_list) > 1:
+            self.read_section_card_set.set(self.read_section_cards_type_list[0])
+        for string in self.read_section_cards_type_list:
+            menu2.add_command(label=string,
+                             command=lambda value=string: self.read_section_card_set.set(value))
+
+        menu3 = self.readEosDropdown['menu']
+        menu3.delete(0, 'end')
+        if len(self.read_eos_cards_type_list) > 1:
+            self.read_eos_card_set.set(self.read_eos_cards_type_list[0])
+        for string in self.read_eos_cards_type_list:
+            menu3.add_command(label=string,
+                             command=lambda value=string: self.read_eos_card_set.set(value))
+
+    def update_control_card_option_menu(self):
+        self.readControlCardDropdown.grid_remove()
+        self.showControlCardData.grid_remove()
+        self.readDefineDropdown.grid_remove()
+        self.showDefineData.grid_remove()
+        self.updateControlCardData.grid_remove()
+
+        menu1 = self.readControlCardDropdown['menu']
+        menu1.delete(0, 'end')
+        if len(self.read_control_cards_type_list) > 1:
+            self.read_control_card_set.set(self.read_control_cards_type_list[0])
+        for string in self.read_control_cards_type_list:
+            menu1.add_command(label=string,
+                             command=lambda value=string: self.read_control_card_set.set(value))
+
+        menu2 = self.readDefineDropdown['menu']
+        menu2.delete(0, 'end')
+        if len(self.read_define_cards_type_list) > 1:
+            self.read_define_card_set.set(self.read_define_cards_type_list[0])
+        for string in self.read_define_cards_type_list:
+            menu2.add_command(label=string,
+                             command=lambda value=string: self.read_define_card_set.set(value))
 
     def update_part_info(self):
         """
@@ -585,15 +686,6 @@ class VIEWER:
         """
         :return:
         """
-        try:
-            self.control_card_popup.destroy()
-            self.definePopupMenu.destroy()
-            self.editControlCardData.delete()
-            self.editDefineData.delete()
-            self.updateControlCardData.delete()
-        except Exception as ex:
-            print(ex)
-
         with open(self.controlCardDefaultFile, 'r') as readFile:
             inlines = readFile.readlines()
         control_card_title_list = []
@@ -618,6 +710,7 @@ class VIEWER:
         inControlCardBlock = False
         inBPM_Block = False
         inBPM_TitleBlock = False
+        inOtherBlock = False
         print(self.ControlCards.map_control_cards_type_title)
         print(self.ControlCards.map_define_cards_type_title)
         for line in inlines:
@@ -628,6 +721,7 @@ class VIEWER:
                 inDefineBlock = True
                 inBPM_Block = False
                 inControlCardBlock = False
+                inOtherBlock = False
                 define_card_title_tmp = line.strip()
                 if define_card_title_tmp.endswith("_TITLE"):
                     inDefineTitleBlock = True
@@ -656,6 +750,7 @@ class VIEWER:
                 inBPM_Block = True
                 inControlCardBlock = False
                 inDefineBlock = False
+                inOtherBlock = False
                 control_card_title_list.append(control_card_title)
                 count = 1
                 if not self.read_control_cards_parameters_tmp == []:
@@ -667,12 +762,20 @@ class VIEWER:
                 inDefineBlock = False
                 inBPM_Block = False
                 inControlCardBlock = True
+                inOtherBlock = False
                 control_card_title = line.strip()
                 control_card_title_list.append(control_card_title)
                 count = 1
                 if not self.read_control_cards_parameters_tmp == []:
                     self.read_control_cards_parameters.update({control_cards_tmp_line:[self.read_control_parameters_title, self.read_control_cards_parameters_tmp]})
                     self.read_control_cards_parameters_tmp = []
+                continue
+
+            if line.startswith("*"):
+                inDefineBlock = False
+                inBPM_Block = False
+                inControlCardBlock = False
+                inOtherBlock = True
                 continue
 
             if inDefineBlock:
@@ -758,29 +861,28 @@ class VIEWER:
                     self.read_control_cards_parameters_tmp.extend(list1)
                 count += 1
 
+            if inOtherBlock:
+                continue
+
+        self.update_control_card_option_menu()
         if not self.curveValList_read_str == "":
             self.map_curveID_ValList_str.update({define_tmp_line:self.curveValList_read_str})
-        self.read_control_cards_parameters.update({self.read_control_cards_type_list[-1]:[self.read_control_parameters_title, self.read_control_cards_parameters_tmp]})
-        self.read_define_parameters.update({self.read_define_cards_type_list[-1]:[self.read_define_parameters_title, self.read_define_parameters_tmp]})
-        # print(self.read_material_cards_type_list)
-        rowN += 3
-        self.read_control_card = self.read_control_cards_type_list[0]
-        self.read_control_card_set = StringVar(self.frame)
-        self.control_card_popup = OptionMenu(self.frame, self.read_control_card_set, *self.read_control_cards_type_list, command=self.get_read_control_card_type)
-        self.control_card_popup.grid(row = rowN, column=1)
-        self.read_control_card_set.set(self.read_control_cards_type_list[0])
-        self.read_control_card_set.trace('w', self.read_control_card_dropdown)
-        self.editControlCardData = self.create_button(self.frame, "Show", self.show_control_card, rowN, 2, sticky_=W)
 
-        rowN += 3
-        self.read_define_card = self.read_define_cards_type_list[0]
-        self.read_define_card_set = StringVar(self.frame)
-        self.definePopupMenu = OptionMenu(self.frame, self.read_define_card_set, *self.read_define_cards_type_list, command=self.get_read_define_type)
-        self.definePopupMenu.grid(row = rowN, column=1)
-        self.read_define_card_set.set(self.read_define_card)
-        self.read_define_card_set.trace('w', self.read_define_dropdown)
-        self.editDefineData = self.create_button(self.frame, "Show", self.show_define, rowN, 2, sticky_=W)
-        self.updateControlCardData = self.create_button(self.frame, "Update", self.update_control_card, rowN, 2, sticky_=N)
+        if not self.read_control_cards_type_list == []:
+            self.read_control_cards_parameters.update({self.read_control_cards_type_list[-1]:[self.read_control_parameters_title, self.read_control_cards_parameters_tmp]})
+            rowN += 1
+            self.readControlCardDropdown.grid(row = rowN, column=2, sticky=E)
+            self.showControlCardData.grid(row=rowN, column=3, sticky=W)
+
+        if not self.read_define_cards_type_list == []:
+            self.read_define_parameters.update({self.read_define_cards_type_list[-1]:[self.read_define_parameters_title, self.read_define_parameters_tmp]})
+            rowN += 1
+            self.readDefineDropdown.grid(row = rowN, column=2, sticky=E)
+            self.showDefineData.grid(row=rowN, column=3, sticky=W)
+
+        if not self.read_control_cards_type_list == [] or not self.read_define_cards_type_list == []:
+            rowN += 1
+            self.updateControlCardData.grid(row=rowN, column=3, sticky=W)
 
     def get_read_control_card_type(self, read_control_card):
         """
@@ -2587,14 +2689,14 @@ class VIEWER:
         inMatTitleBlock = False
         inEosBlock = False
         inEosTitleBlock = False
-        # print(self.MaterialCards.map_material_cards_type_title)
-        # print(self.MaterialCards.map_section_cards_type_title)
+        inOtherBlock = False
         for line in inlines:
             if line.startswith("*"):
                 if line.startswith("*SECTION"):
                     inSectionBlock = True
                     inMatBlock = False
                     inEosBlock = False
+                    inOtherBlock = False
                     section_card_title_tmp = line.strip()
                     if section_card_title_tmp.endswith("_TITLE"):
                         inSectionTitleBlock = True
@@ -2613,6 +2715,7 @@ class VIEWER:
                     inSectionBlock = False
                     inMatBlock = True
                     inEosBlock = False
+                    inOtherBlock = False
                     card_title_tmp = line.strip()
                     if card_title_tmp.endswith("_TITLE"):
                         inMatTitleBlock = True
@@ -2636,6 +2739,7 @@ class VIEWER:
                     inSectionBlock = False
                     inMatBlock = False
                     inEosBlock = True
+                    inOtherBlock = False
                     eos_card_title_tmp = line.strip()
                     if eos_card_title_tmp.endswith("_TITLE"):
                         inEosTitleBlock = True
@@ -2649,9 +2753,15 @@ class VIEWER:
                         self.read_eos_parameters.update({eos_tmp_line:[self.read_eos_parameters_title, self.read_eos_parameters_tmp]})
                         self.read_eos_parameters_tmp = []
                     continue
+                if line.startswith("*"):
+                    inSectionBlock = False
+                    inMatBlock = False
+                    inEosBlock = False
+                    inOtherBlock = True
+                    continue
 
             if inSectionBlock:
-                print(line)
+                # print(line)
                 if inSectionTitleBlock:
                     section_part_title = line[:].strip()
                     self.read_section_parameters_title = section_part_title
@@ -2661,7 +2771,7 @@ class VIEWER:
                     continue
                 if count == 1:
                     section_id = int(line[:10].strip())
-                    print(section_card_title, str(self.MaterialCards.map_section_cards_type_title[section_card_title]))
+                    # print(section_card_title, str(self.MaterialCards.map_section_cards_type_title[section_card_title]))
                     section_tmp_line = ",".join([str(self.MaterialCards.map_section_cards_type_title[section_card_title]), str(section_id)])
                     self.read_section_cards_type_list.append(section_tmp_line)
                 list1 = re.findall('.{%d}'%10, line)
@@ -2686,7 +2796,7 @@ class VIEWER:
                     continue
                 if count == 1:
                     eos_id = int(line[:10].strip())
-                    print(eos_card_title, str(self.MaterialCards.map_eos_cards_type_title[eos_card_title]))
+                    # print(eos_card_title, str(self.MaterialCards.map_eos_cards_type_title[eos_card_title]))
                     eos_tmp_line = ",".join([str(self.MaterialCards.map_eos_cards_type_title[eos_card_title]), str(eos_id)])
                     self.read_eos_cards_type_list.append(eos_tmp_line)
                 list1 = re.findall('.{%d}'%10, line)
@@ -2738,38 +2848,31 @@ class VIEWER:
                     self.read_material_parameters_tmp.extend(list1)
                 count += 1
 
-        self.read_material_parameters.update({self.read_material_cards_type_list[-1]:[self.read_material_parameters_title, self.read_material_parameters_tmp]})
-        self.read_section_parameters.update({self.read_section_cards_type_list[-1]:[self.read_section_parameters_title, self.read_section_parameters_tmp]})
-        # print(self.read_material_cards_type_list)
-        rowN += 3
-        self.read_material_card = self.read_material_cards_type_list[0]
-        self.read_material_card_set = StringVar(self.frame)
-        popupMenu = OptionMenu(self.frame, self.read_material_card_set, *self.read_material_cards_type_list, command=self.get_read_material_type)
-        popupMenu.grid(row = rowN, column=1)
-        self.read_material_card_set.set(self.read_material_cards_type_list[0])
-        self.read_material_card_set.trace('w', self.read_material_dropdown)
-        self.showMatData = self.create_button(self.frame, "Show", self.show_material, rowN, 2, sticky_=W)
-        # self.updateMatData = self.create_button(self.frame, "Update", self.update_material, self.rowN, 3, sticky_=W)
+            if inOtherBlock:
+                continue
 
-        rowN += 3
-        self.read_section_card = self.read_section_cards_type_list[0]
-        self.read_section_card_set = StringVar(self.frame)
-        popupMenu = OptionMenu(self.frame, self.read_section_card_set, *self.read_section_cards_type_list, command=self.get_read_section_type)
-        popupMenu.grid(row = rowN, column=1)
-        self.read_section_card_set.set(self.read_section_card)
-        self.read_section_card_set.trace('w', self.read_section_dropdown)
-        self.showSectionData = self.create_button(self.frame, "Show", self.show_section, rowN, 2, sticky_=W)
-        self.updateSectionData = self.create_button(self.frame, "Update", self.update_material, rowN, 2, sticky_=N)
+        self.update_material_option_menu()
+        if not self.read_material_cards_type_list == []:
+            self.read_material_parameters.update({self.read_material_cards_type_list[-1]:[self.read_material_parameters_title, self.read_material_parameters_tmp]})
+            rowN += 1
+            self.readMaterialDropdown.grid(row = rowN, column=1, sticky=W)
+            self.showMatData.grid(row=rowN, column=2, sticky=W)
+
+        if not self.read_section_cards_type_list == []:
+            self.read_section_parameters.update({self.read_section_cards_type_list[-1]:[self.read_section_parameters_title, self.read_section_parameters_tmp]})
+            rowN += 1
+            self.readSectionDropdown.grid(row = rowN, column=1, sticky=W)
+            self.showSectionData.grid(row=rowN, column=2, sticky=W)
+
         if not self.read_eos_cards_type_list == []:
             self.read_eos_parameters.update({self.read_eos_cards_type_list[-1]:[self.read_eos_parameters_title, self.read_eos_parameters_tmp]})
-            rowN += 3
-            self.read_eos_card = self.read_eos_cards_type_list[0]
-            self.read_eos_card_set = StringVar(self.frame)
-            eos_popupMenu = OptionMenu(self.frame, self.read_eos_card_set, *self.read_eos_cards_type_list, command=self.get_read_eos_type)
-            eos_popupMenu.grid(row = rowN, column=1)
-            self.read_eos_card_set.set(self.read_eos_cards_type_list[0])
-            self.read_eos_card_set.trace('w', self.read_eos_dropdown)
-            self.showEosData = self.create_button(self.frame, "Show", self.show_eos, rowN, 2, sticky_=W)
+            rowN += 1
+            self.readEosDropdown.grid(row = rowN, column=1, sticky=W)
+            self.showEosData.grid(row=rowN, column=2, sticky=W)
+
+        if not self.read_material_cards_type_list == [] or not self.read_section_cards_type_list == [] or not self.read_eos_cards_type_list == []:
+            rowN += 1
+            self.updateSectionData.grid(row=rowN, column=2, sticky=W)
 
     def get_read_eos_type(self, eos_card_type):
         """

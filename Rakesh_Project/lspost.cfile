@@ -1,6 +1,0 @@
-$# LS-PrePost command file created by LS-PrePost(R) V4.3 (Beta) - 26May2016(08:00) -64bit-Window
-$# Created on Oct-17-2017 (08:34:50)
-open keyword "D:\Umesh\Office\VEOL_GUI\Rakesh_Project\orig_input.k"
-Message 1
-save keywordoutversion 8
-Message 0
