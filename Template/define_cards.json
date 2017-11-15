@@ -5,5 +5,10 @@
 								"y,n,n,n,n,n,n,n,y"
 							  ], 
 		"Card_Title": ["*DEFINE_CURVE_TITLE", "y"]
+	},
+ "SD_ORIENTATION":
+	{
+		"Control_Parameters":["VID,IOP,XT,YT,ZT,NID1,NID2","1,0,0.0,0.0,0.0,0,0","Y,Y,Y,Y,Y,Y,Y"],
+		"Card_Title":["*DEFINE_SD_ORIENTATION_TITLE","Y"]
 	}
 }
