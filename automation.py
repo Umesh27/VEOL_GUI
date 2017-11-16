@@ -890,9 +890,12 @@ class VIEWER:
                     continue
                 if count == 1:
                     define_id = line[:10].strip()
-                    print(self.read_define_parameters_title, str(self.ControlCards.map_define_cards_type_title[define_card_title]))
-                    define_tmp_line = ",".join([str(self.ControlCards.map_define_cards_type_title[define_card_title]), str(define_id)])
-                    self.read_define_cards_type_list.append(define_tmp_line)
+                    try:
+                        print(self.read_define_parameters_title, str(self.ControlCards.map_define_cards_type_title[define_card_title]))
+                        define_tmp_line = ",".join([str(self.ControlCards.map_define_cards_type_title[define_card_title]), str(define_id)])
+                        self.read_define_cards_type_list.append(define_tmp_line)
+                    except Exception as Ex:
+                        print(Ex)
 
                 if count > 1:
                     self.curveValList_read_str += line
@@ -928,10 +931,13 @@ class VIEWER:
                     bpm_part_id = ",".join([bpm_id, part_id])
                 except NameError:
                     bpm_part_id = ",".join(["", part_id])
-
-                controlCardType = str(self.ControlCards.map_control_cards_type_title[control_card_title])
-                control_cards_tmp_line = ",".join([str(self.ControlCards.map_control_cards_type_title[control_card_title]), bpm_part_id])
-                self.read_control_cards_type_list.append(control_cards_tmp_line)
+                try:
+                    controlCardType = str(self.ControlCards.map_control_cards_type_title[control_card_title])
+                    control_cards_tmp_line = ",".join([str(self.ControlCards.map_control_cards_type_title[control_card_title]), bpm_part_id])
+                    self.read_control_cards_type_list.append(control_cards_tmp_line)
+                except Exception as Ex:
+                    control_cards_tmp_line = control_card_title
+                    print(Ex)
                 list1 = re.findall('.{10}', line)
                 if len(list1) == 8:
                     self.read_control_cards_parameters_tmp.extend(list1)
@@ -948,9 +954,13 @@ class VIEWER:
                     continue
                 if count == 1:
                     # control_card_id = int(line[:10].strip())
-                    controlCardType = str(self.ControlCards.map_control_cards_type_title[control_card_title])
-                    control_cards_tmp_line = ",".join([str(self.ControlCards.map_control_cards_type_title[control_card_title]), ""])
-                    self.read_control_cards_type_list.append(control_cards_tmp_line)
+                    try:
+                        controlCardType = str(self.ControlCards.map_control_cards_type_title[control_card_title])
+                        control_cards_tmp_line = ",".join([str(self.ControlCards.map_control_cards_type_title[control_card_title]), ""])
+                        self.read_control_cards_type_list.append(control_cards_tmp_line)
+                    except Exception as Ex:
+                        control_cards_tmp_line = control_card_title
+                        print(Ex)
 
                 list1 = re.findall('.{10}', line)
                 if len(list1) == 8:
@@ -1006,57 +1016,62 @@ class VIEWER:
         rowN = 1
         self.window_controlCardsInfo_read = Toplevel(self.frame)
         control_card_type = self.read_control_card.split(',')[0]
-        self.curr_control_card_parameters = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][0].split(',')
-        curr_control_card_parameters_freq = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][2].split(',')
-        count = 0
-        colN = 0
-        self.label_list_control_cards = []
-        self.entry_list_control_cards = []
+        try:
+            self.curr_control_card_parameters = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][0].split(',')
+            curr_control_card_parameters_freq = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][2].split(',')
 
-        if not self.read_control_cards_parameters[self.read_control_card][0] == "":
-            BPM_Title = self.read_control_cards_parameters[self.read_control_card][0]
-            BPM_ID = self.read_control_card.split(',')[-2]
-            self.BPM_ID_label = self.create_label(self.window_controlCardsInfo_read, "ID", rowN, 0, width_=10, fg_="blue")
-            self.BPM_ID_entry = self.create_entry(self.window_controlCardsInfo_read, BPM_ID, rowN+1, 0, width_=10, fg_="blue")
 
-            self.BPM_Title_label = self.create_label(self.window_controlCardsInfo_read, "TITLE", rowN, 1, width_=70, fg_="blue", columnspan_=5)
-            self.BPM_Title_entry = self.create_entry(self.window_controlCardsInfo_read, BPM_Title, rowN+1, 1, width_=70, fg_="blue", columnspan_=5)
-            rowN += 2
+            count = 0
+            colN = 0
+            self.label_list_control_cards = []
+            self.entry_list_control_cards = []
 
-        index = 0
-        for j in range(len(self.curr_control_card_parameters)):
-            if count == 8:
+            if not self.read_control_cards_parameters[self.read_control_card][0] == "":
+                BPM_Title = self.read_control_cards_parameters[self.read_control_card][0]
+                BPM_ID = self.read_control_card.split(',')[-2]
+                self.BPM_ID_label = self.create_label(self.window_controlCardsInfo_read, "ID", rowN, 0, width_=10, fg_="blue")
+                self.BPM_ID_entry = self.create_entry(self.window_controlCardsInfo_read, BPM_ID, rowN+1, 0, width_=10, fg_="blue")
+
+                self.BPM_Title_label = self.create_label(self.window_controlCardsInfo_read, "TITLE", rowN, 1, width_=70, fg_="blue", columnspan_=5)
+                self.BPM_Title_entry = self.create_entry(self.window_controlCardsInfo_read, BPM_Title, rowN+1, 1, width_=70, fg_="blue", columnspan_=5)
                 rowN += 2
-                colN = 0
-                count = 0
 
-            if self.curr_control_card_parameters[j] == "":
-                self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j], width=10))
-                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10))
-                rowN += 2
-                colN = 0
-                count = 0
-                continue
+            index = 0
+            for j in range(len(self.curr_control_card_parameters)):
+                if count == 8:
+                    rowN += 2
+                    colN = 0
+                    count = 0
 
-            if curr_control_card_parameters_freq[j].strip().upper() == "Y":
-                self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j].upper(), width=10, fg="blue"))
-                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10, fg="blue"))
-            else:
-                self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j].upper(), width=10))
-                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10))
-            self.label_list_control_cards[j].grid(row=rowN, column=colN)
+                if self.curr_control_card_parameters[j] == "":
+                    self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j], width=10))
+                    self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10))
+                    rowN += 2
+                    colN = 0
+                    count = 0
+                    continue
 
-            self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
+                if curr_control_card_parameters_freq[j].strip().upper() == "Y":
+                    self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j].upper(), width=10, fg="blue"))
+                    self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10, fg="blue"))
+                else:
+                    self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j].upper(), width=10))
+                    self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10))
+                self.label_list_control_cards[j].grid(row=rowN, column=colN)
 
-            try:
-                self.entry_list_control_cards[j].insert(0,self.read_control_cards_parameters[self.read_control_card][1][j])
-            except Exception as Ex:
-                print(Ex, index)
-                self.entry_list_control_cards[j].insert(0,"")
+                self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
 
-            count += 1
-            colN += 1
-            index += 1
+                try:
+                    self.entry_list_control_cards[j].insert(0,self.read_control_cards_parameters[self.read_control_card][1][j])
+                except Exception as Ex:
+                    print(Ex, index)
+                    self.entry_list_control_cards[j].insert(0,"")
+
+                count += 1
+                colN += 1
+                index += 1
+        except Exception as Ex:
+            print(Ex)
 
         rowN += 3
         button_ = Button(self.window_controlCardsInfo_read, text="Save", command=self.save_control_card)
@@ -1103,21 +1118,25 @@ class VIEWER:
             control_card_type = key.split(',')[0]
             print(control_card_type)
             outlines_control.append('\n')
-            curr_control_parameters = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][0].split(',')
+            try:
+                curr_control_parameters = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][0].split(',')
 
-            if self.read_control_cards_parameters[key][0] == "":
-                card_title = self.ControlCards.control_cards_jsonObj[control_card_type]["Card_Title"][0]
-                outlines_control.append(card_title)
-            else:
-                card_title = self.ControlCards.control_cards_jsonObj[control_card_type]["Card_Title"][0] + "_ID"
-                outlines_control.append(card_title)
-                outlines_control.append("\n")
-                Id = key.split(',')[1]
-                Title = self.read_control_cards_parameters[key][0]
-                line = Id.rjust(10) + Title.ljust(70)
-                outlines_control.append(line)
+                if self.read_control_cards_parameters[key][0] == "":
+                    card_title = self.ControlCards.control_cards_jsonObj[control_card_type]["Card_Title"][0]
+                    outlines_control.append(card_title)
+                else:
+                    card_title = self.ControlCards.control_cards_jsonObj[control_card_type]["Card_Title"][0] + "_ID"
+                    outlines_control.append(card_title)
+                    outlines_control.append("\n")
+                    Id = key.split(',')[1]
+                    Title = self.read_control_cards_parameters[key][0]
+                    line = Id.rjust(10) + Title.ljust(70)
+                    outlines_control.append(line)
 
-                # outlines_control.append('\n')
+                    # outlines_control.append('\n')
+            except Exception as Ex:
+                curr_control_parameters = []
+                print(Ex)
 
             header_line = "\n$$"
             for j in range(len(curr_control_parameters)):
@@ -1171,7 +1190,11 @@ class VIEWER:
             print(define_card_type)
             if index == 0:
                 outlines_define.append('\n')
-            curr_define_parameters = self.ControlCards.define_cards_jsonObj[define_card_type]["Control_Parameters"][0].split(',')
+            try:
+                curr_define_parameters = self.ControlCards.define_cards_jsonObj[define_card_type]["Control_Parameters"][0].split(',')
+            except Exception as Ex:
+                print(Ex)
+                curr_define_parameters = []
             if self.read_define_parameters[key][0] == "":
                 card_title = self.ControlCards.define_cards_jsonObj[define_card_type]["Card_Title"][0].split('_TITLE')[0]
                 outlines_define.append(card_title)
@@ -3297,8 +3320,12 @@ class VIEWER:
                     header_line += curr_material_parameters[j].rjust(8)
                 else:
                     header_line += curr_material_parameters[j].rjust(10)
-                tmp_prop = self.read_material_parameters[key][1][j]
-                newline.append(tmp_prop.rjust(10))
+                try:
+                    tmp_prop = self.read_material_parameters[key][1][j]
+                    newline.append(tmp_prop.rjust(10))
+                except Exception as IndexError:
+                    print(IndexError)
+                    continue
 
                 if j == (len(curr_material_parameters)-1):
                     line1 = "".join(newline)
@@ -3356,8 +3383,12 @@ class VIEWER:
                     header_line += curr_section_parameters[j].rjust(8)
                 else:
                     header_line += curr_section_parameters[j].rjust(10)
-                tmp_prop = self.read_section_parameters[key][1][j]
-                newline.append(tmp_prop.rjust(10))
+                try:
+                    tmp_prop = self.read_section_parameters[key][1][j]
+                    newline.append(tmp_prop.rjust(10))
+                except Exception as IndexError:
+                    print(IndexError)
+                    continue
 
                 if j == (len(curr_section_parameters)-1):
                     line1 = "".join(newline)
@@ -3415,8 +3446,12 @@ class VIEWER:
                     header_line += curr_eos_parameters[j].rjust(8)
                 else:
                     header_line += curr_eos_parameters[j].rjust(10)
-                tmp_prop = self.read_eos_parameters[key][1][j]
-                newline.append(tmp_prop.rjust(10))
+                try:
+                    tmp_prop = self.read_eos_parameters[key][1][j]
+                    newline.append(tmp_prop.rjust(10))
+                except Exception as IndexError:
+                    print(IndexError)
+                    continue
 
                 if j == (len(curr_eos_parameters)-1):
                     line1 = "".join(newline)
@@ -3583,7 +3618,7 @@ class VIEWER:
         label_ = Label(frame_, text=labelName, width=width_, fg=fg_, bg=bg_, bd=bd_, relief=relief_)
         label_.grid(row=rowN, column=colN, sticky=sticky_, ipadx=ipadx_, columnspan=columnspan_)
 
-    def create_entry(self, frame_, value_, rowN, colN, fg_='black', width_=10, columnspan_=1, ipadx_=0):
+    def create_entry(self, frame_, value_, rowN, colN, width_=10, columnspan_=1, ipadx_=0, fg_='black'):
         """
 
         :return:
