@@ -60,4 +60,39 @@
 	"Card_Title": ["*DATABASE_MATSUM", "y"]
 	}, 
 "RCFORC": {
-	"Control_Parameters": ["DT,BINARY,LCUR,IOPT", "0.0,0,0,1", "y,y,y,y"], "Card_Title": ["*DATABASE_RCFORC", "y"]}, "RWFORC": {"Control_Parameters": ["DT,BINARY,LCUR,IOPT", "0.0,0,0,1", "y,y,y,y"], "Card_Title": ["*DATABASE_RWFORC", "y"]}, "SSSTAT": {"Control_Parameters": ["DT,BINARY,LCUR,IOPT", "0.0,0,0,1", "y,y,y,y"], "Card_Title": ["*DATABASE_SSSTAT", "y"]}, "BINARY_D3PLOT": {"Control_Parameters": ["DT/CYCL,LCDT,BEAM,NPLTC,PSETID,,IOOPT", ",,0,,,,0", "y,y,y,y,Y,Y,N"], "Card_Title": ["*DATABASE_BINARY_D3PLOT", "y"]}, "EXTENT_BINARY": {"Control_Parameters": ["NEIPH,NEIPS,MAXINT,STRFLG,SIGFLG,EPSFLG,RLTFLG,ENGFLG,CMPFLG,IEVERP,BEAMIP,DCOMP,SHGE,STSSZ,N3THDT,IALEMAT,NINTSLD,PKP SEN,SCLP,HYDRO,MSSCL,THERM,INTOUT,NODOUT,DTDT,RESPLT,NEIPB", "0,0,3,0,1,1,1,1,0,0,0,1,1,1,2,1,0,0,1.0,0,0,0,,,0,0,", "n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n"], "Card_Title": ["*DATABASE_EXTENT_BINARY", "y"]}, "PRESCRIBED_MOTION_RIGID": {"Control_Parameters": ["PID,DOF,VAD,LCID,SF,VID,DEATH,BIRTH", ",0,0,,1.0,,1.0E+28,0.0", "y,y,y,y,y,n,n,n"], "Card_Title": ["*BOUNDARY_PRESCRIBED_MOTION_RIGID", "y"]}, "BODY_Y": {"Control_Parameters": ["LCID,SF,LCIDDR,XC,YC,ZC,CID", ",1.0,0,0.0,0.0,0.0,0", "y,y,y,y,y,n,n"], "Card_Title": ["*LOAD_BODY_Y", "y"]}, "BODY_PARTS": {"Control_Parameters": ["PSID", "", "y"], "Card_Title": ["*LOAD_BODY_PARTS", "y"]}, "TERMINATION2": {"Card_Title": ["*CONTROL_TERMINATION2", "Y"], "Control_Parameters": ["ENDTIM,ENDCYC", "0.0,0", "Y,Y"]}, "TIMESTEP2": {"Card_Title": ["*CONTROL_TIMESTEP2", "Y"], "Control_Parameters": ["TESTING1,TESTING2", "0.0,0.0", "Y,Y"]}}
+	"Control_Parameters": ["DT,BINARY,LCUR,IOPT", "0.0,0,0,1", "y,y,y,y"], 
+	"Card_Title": ["*DATABASE_RCFORC", "y"]
+	}, 
+"RWFORC": {
+	"Control_Parameters": ["DT,BINARY,LCUR,IOPT", "0.0,0,0,1", "y,y,y,y"], 
+	"Card_Title": ["*DATABASE_RWFORC", "y"]
+	}, 
+"SSSTAT": {
+	"Control_Parameters": ["DT,BINARY,LCUR,IOPT", "0.0,0,0,1", "y,y,y,y"], 
+	"Card_Title": ["*DATABASE_SSSTAT", "y"]
+	}, 
+"BINARY_D3PLOT": {
+	"Control_Parameters": ["DT/CYCL,LCDT,BEAM,NPLTC,PSETID,,IOOPT", ",,0,,,,0", "y,y,y,y,Y,Y,N"], 
+	"Card_Title": ["*DATABASE_BINARY_D3PLOT", "y"]
+	}, 
+"EXTENT_BINARY": {
+	"Control_Parameters": ["NEIPH,NEIPS,MAXINT,STRFLG,SIGFLG,EPSFLG,RLTFLG,ENGFLG,CMPFLG,IEVERP,BEAMIP,DCOMP,SHGE,STSSZ,N3THDT,IALEMAT,NINTSLD,PKP SEN,SCLP,HYDRO,MSSCL,THERM,INTOUT,NODOUT,DTDT,RESPLT,NEIPB", "0,0,3,0,1,1,1,1,0,0,0,1,1,1,2,1,0,0,1.0,0,0,0,,,0,0,", "n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n"], 
+	"Card_Title": ["*DATABASE_EXTENT_BINARY", "y"]
+	}, 
+"PRESCRIBED_MOTION_RIGID": {
+	"Control_Parameters": ["PID,DOF,VAD,LCID,SF,VID,DEATH,BIRTH", ",0,0,,1.0,,1.0E+28,0.0", "y,y,y,y,y,n,n,n"], 
+	"Card_Title": ["*BOUNDARY_PRESCRIBED_MOTION_RIGID", "y"]
+	}, 
+"SPC_SET": {
+	"Control_Parameters": ["NSID,CID,DOFX,DOFY,DOFZ,DOFRX,DOFRY,DOFRZ", "0,0,0,0,0,0,0,0", "y,y,y,y,y,n,n,n"], 
+	"Card_Title": ["*BOUNDARY_SPC_SET", "y"]
+	}, 
+"BODY_Y": {
+	"Control_Parameters": ["LCID,SF,LCIDDR,XC,YC,ZC,CID", ",1.0,0,0.0,0.0,0.0,0", "y,y,y,y,y,n,n"], 
+	"Card_Title": ["*LOAD_BODY_Y", "y"]
+	}, 
+"BODY_PARTS": {
+	"Control_Parameters": ["PSID", "", "y"], 
+	"Card_Title": ["*LOAD_BODY_PARTS", "y"]
+	}
+}

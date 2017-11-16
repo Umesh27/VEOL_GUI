@@ -24,13 +24,12 @@ class VIEWER:
         self.master = master
         self.frame = Frame(self.master)
         self.frame.pack()
+
         self.baseDir = os.path.dirname(sys.argv[0])
         self.template_path = os.path.join(self.baseDir, "Template")
-        self.material_ids = []
-        self.section_ids = []
-        self.eos_ids = []
-        self.load_curve_ids = [""]
-        self.load_curve_ids_title = [""]
+        self.partInfo = {}; self.map_part_id_name = {}; self.map_partId_Info = {}; self.setDict = {}
+        self.map_materialID_type = {}; self.map_sectionID_thickness = {}; self.map_eosID_type_title = {}; self.partSetIdList = [""]; self.nodeSetIdList = [""]
+        self.material_ids = []; self.section_ids = []; self.eos_ids = []; self.load_curve_ids = [""]; self.load_curve_ids_title = [""]
 
         self.rowN = 0
         self.project_path_button = self.create_button(self.frame, "ProjectPath", self.open_projectPath, self.rowN, 1, sticky_=EW, bg_='lightyellow')
@@ -44,13 +43,8 @@ class VIEWER:
         self.meshFile = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1\mesh.k"
         self.input_path_entry = self.create_entry(self.frame,self.meshFile, self.rowN, 2, width_=50)
         self.create_button(self.frame, "Get_Info", self.get_info, self.rowN, 3, sticky_=EW, bg_='lightyellow')
-        self.input_parts = []
         self.partInfo = {"":""}
         self.partRowNo = self.rowN
-        self.map_materialID_type = {}
-        self.map_sectionID_thickness = {}
-        self.map_eosID_type_title = {}
-        self.partSetIdList = [""]
 
         self.parts_info = StringVar(self.frame)
         self.parts_info.set("PARTS")
@@ -142,11 +136,6 @@ class VIEWER:
         # Control Cards Info
         self.rowN += 1
         # Define Curve
-        self.curveTitleList = []
-        self.curveIdList = []
-        self.curveInfo = {}
-        self.curveValList = []
-        self.curveLines = []
         self.ControlCards = control_cards.ControlCards()
         self.define_cards_type = StringVar(self.frame)
         self.define_card = self.ControlCards.define_cards_type[0]
@@ -158,12 +147,9 @@ class VIEWER:
         self.define_popupMenu.config(bg='lightyellow')
         self.define_cards_type.trace('w', self.define_dropdown)
 
-        # self.create_label(self.frame, "DefineCurve", self.rowN, 2, sticky_=E, bg_='yellow', ipadx_=15)
-        # self.create_button(self.frame, "Import_Info", self.import_curve_info, self.rowN, 2, ipadx_=40, sticky_=W, bg_='lightblue')
         self.create_button(self.frame, "Add_Info", self.add_define_cards_info, self.rowN, 3, sticky_=EW, bg_='lightyellow')
 
         self.rowN += 1
-        # self.ControlCards = control_cards.ControlCards()
         self.control_cards_type = StringVar(self.frame)
         self.control_card = self.ControlCards.control_cards_type[0]
         self.control_cards_type_list = set(sorted(self.ControlCards.control_cards_type))
@@ -216,6 +202,96 @@ class VIEWER:
         self.create_button(self.frame, "Run", self.run_info, self.rowN, 2, sticky_=E, ipadx_=55, bg_='lightgreen')
         # Exit
         self.create_button(self.frame, "Exit", self.frame.quit, self.rowN, 3, sticky_=EW, bg_='lightgreen')
+        # Post-Process
+        self.create_button(self.frame, "Post-Process", self.post_process, self.rowN, 4, sticky_=EW, bg_='lightgreen')
+
+    def post_process(self):
+        """
+        :return:
+        """
+        print("In post-processing")
+        rowN = 0
+        self.window_postProcessing = Toplevel(self.frame)
+        self.openD3plot_button = self.create_button(self.window_postProcessing, "D3PLOT", self.open_d3plot, rowN, 0)
+        self.openD3plot_entry = self.create_entry(self.window_postProcessing,"Select D3plot", rowN, 1, width_=70, columnspan_=2)
+        self.runD3plot_button = self.create_button(self.window_postProcessing,"Run", self.run_d3plot, rowN, 4)
+
+        rowN += 1
+        self.prestress_button = self.create_button(self.window_postProcessing, "Prestress", self.generate_prestress_script, rowN, 0)
+
+    def open_d3plot(self):
+        """
+        :return:
+        """
+        outlines = []
+        # self.d3path = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.simulation_path = filedialog.askdirectory(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.d3path = os.path.join(self.simulation_path, "d3plot")
+        print(self.d3path)
+        self.openD3plot_entry.delete(0,'end')
+        self.openD3plot_entry.insert(0,self.d3path)
+        template = os.path.join(self.template_path, "open_d3plot.tmp")
+        # self.simulation_path = os.path.split(self.d3path)[0]
+        self.result_path = os.path.join(self.simulation_path, "Result_Dir")
+        if not os.path.exists(self.result_path):
+            os.mkdir(self.result_path)
+        sclFile= os.path.join(self.result_path, "open_d3plot.scl")
+        self.create_scl(template, self.d3path, sclFile)
+
+        outlines.append("runscript %s\n"%sclFile)
+        self.cFile= os.path.join(self.result_path, "run.cfile")
+        with open(self.cFile, 'w') as outFile:
+            outFile.writelines(outlines)
+
+    def create_scl(self, template, d3plot, sclFile):
+        """
+
+        :param tmplate:
+        :param d3plot:
+        :param sclFile:
+        :return:
+        """
+
+        with open(template, 'r') as tmp:
+            tmp_lines = tmp.read()
+
+        line1 = tmp_lines.replace("$PATH$", d3plot)
+
+        with open(sclFile, 'w') as file:
+            file.write(line1)
+
+    def run_d3plot(self):
+        """
+        :return:
+        """
+        import platform
+        if platform.system() == "Linux":
+            p1 = subprocess.Popen([r"/opt/lsprepost/lspp43", "c=%s" % self.cFile])
+        else:
+            p1 = subprocess.Popen([r"C:\LSTC\LS-PrePost\4.3-x64\lsprepost4.3_x64.exe", "c=%s"%self.cFile], shell=True)
+
+        p1.wait()
+
+    def generate_prestress_script(self):
+        """
+        :return:
+        """
+        self.parts = ""
+        preStressTmp = os.path.join(self.template_path,"prestress.scl")
+        with open(preStressTmp) as f:
+            s = f.read()
+
+        s = s.replace("$D3PLOTPATH$", os.path.normpath(os.path.join(self.simulation_path,"d3plot")))
+        s = s.replace("$OUTFILEPATH$",os.path.normpath(os.path.join(self.simulation_path,"prestress_initial.txt")))
+        s = s.replace("$WRAP_PLATES_PARTS$", self.parts)
+        fOut = os.path.join(self.result_path, "prestress.scl")
+        with open(fOut,"w") as f:
+            f.write(s)
+
+        # copy prestress.cfile to self.run_dir
+        cFile = os.path.join(self.result_path, 'prestress.cfile')
+        with open(cFile, 'w') as file:
+            file.writelines('runscript "%s"'%fOut)
 
     def open_control_card(self):
         """
@@ -296,17 +372,18 @@ class VIEWER:
                 *SET_PART_LIST
         :return:
         """
-        self.partInfo = {}
-        self.map_part_id_name = {}
-        self.map_partId_Info = {}
         with open(self.meshFile) as readFile:
             readlines = readFile.readlines()
 
         inOtherBlock = False
         inPartBlock = False
         inSetPartListBlock = False
+        inSetNodeListBlock = False
         inTitleBlock = False
         inPartIdBlock = False
+        inSetTitleBlock = False
+        setType = ""
+        setTitle = ""
         for line in readlines:
             count = 0
             if line.startswith("*PART"):
@@ -316,12 +393,20 @@ class VIEWER:
                 inSetPartListBlock = False
                 # print(line)
                 continue
-            if line.startswith("*SET_PART_LIST"):
+            if line.startswith("*SET"):
+                if line.__contains__("TITLE"):
+                    inSetTitleBlock = True
+                if line.__contains__("PART"):
+                    inSetPartListBlock = True
+                    inSetNodeListBlock = False
+                    setType = 'PART'
+                if line.__contains__("NODE"):
+                    inSetPartListBlock = False
+                    inSetNodeListBlock = True
+                    setType = 'NODE'
                 inPartBlock = False
                 inTitleBlock = False
                 inOtherBlock = False
-                inSetPartListBlock = True
-                # print(line)
                 continue
             if line.__contains__("*"):
                 inOtherBlock = True
@@ -350,9 +435,25 @@ class VIEWER:
                     inPartIdBlock = False
                     inTitleBlock = True
                     continue
+            if inSetNodeListBlock:
+                if line.startswith("$"):
+                    continue
+                if inSetTitleBlock:
+                    setTitle = line[:].strip()
+                    continue
+                # self.partSetIdList.append(line[:10].strip())
+                setID = line[:10].strip()
+                self.setDict.update({setType:[setID,setTitle]})
+                self.nodeSetIdList.append(setID)
+                inSetNodeListBlock = False
             if inSetPartListBlock:
                 if line.startswith("$"):
                     continue
+                if inSetTitleBlock:
+                    setTitle = line[:].strip()
+                    continue
+                setID = line[:10].strip()
+                self.setDict.update({setType:[setID,setTitle]})
                 self.partSetIdList.append(line[:10].strip())
                 inSetPartListBlock = False
             if inOtherBlock:
@@ -796,7 +897,7 @@ class VIEWER:
                 if count > 1:
                     self.curveValList_read_str += line
                 else:
-                    list1 = re.findall('.{%d}'%10, line)
+                    list1 = re.findall('.{10}', line)
                     if len(list1) == 8:
                         self.read_define_parameters_tmp.extend(list1)
                     if len(list1) < 8:
@@ -831,7 +932,7 @@ class VIEWER:
                 controlCardType = str(self.ControlCards.map_control_cards_type_title[control_card_title])
                 control_cards_tmp_line = ",".join([str(self.ControlCards.map_control_cards_type_title[control_card_title]), bpm_part_id])
                 self.read_control_cards_type_list.append(control_cards_tmp_line)
-                list1 = re.findall('.{%d}'%10, line)
+                list1 = re.findall('.{10}', line)
                 if len(list1) == 8:
                     self.read_control_cards_parameters_tmp.extend(list1)
                 elif len(list1) < 8:
@@ -851,7 +952,7 @@ class VIEWER:
                     control_cards_tmp_line = ",".join([str(self.ControlCards.map_control_cards_type_title[control_card_title]), ""])
                     self.read_control_cards_type_list.append(control_cards_tmp_line)
 
-                list1 = re.findall('.{%d}'%10, line)
+                list1 = re.findall('.{10}', line)
                 if len(list1) == 8:
                     self.read_control_cards_parameters_tmp.extend(list1)
                 elif len(list1) < 8:
@@ -1230,6 +1331,17 @@ class VIEWER:
                 count += 1
                 colN += 1
                 continue
+            elif self.curr_control_card_parameters[j] == "NSID":
+                self.label_list_control_cards[j].grid(row=rowN, column=colN)
+                self.nodeSetID_info = StringVar(self.window_controlCardsInfo)
+                self.nodeSetID_info.set("")
+                self.nodeSetPopup = OptionMenu(self.window_controlCardsInfo, self.nodeSetID_info, *self.nodeSetIdList, command=self.get_nodeSet_ID)
+                self.nodeSetPopup.config(bg='lightyellow')
+                self.nodeSetPopup.grid(row = rowN+1, column=colN)
+                self.nodeSetID_info.trace('w', self.nodeSet_dropdown)
+                count += 1
+                colN += 1
+                continue
             else:
                 self.label_list_control_cards[j].grid(row=rowN, column=colN)
                 self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
@@ -1346,7 +1458,7 @@ class VIEWER:
 
         curve_lines = self.map_curveID_ValList_str[self.read_define_card]
         for line in curve_lines.splitlines():
-            list1 = re.findall('.{%d}'%20, line)
+            list1 = re.findall('.{20}', line)
             self.curveValList_read.append([list1[0].strip(), list1[1].strip()])
 
         self.curveRowN = 0
@@ -1850,6 +1962,8 @@ class VIEWER:
                 tmp_prop = self.curve_info.get().split(',')[0]
             elif self.curr_control_card_parameters[j] == "PSID":
                 tmp_prop = self.partSetID_info.get()
+            elif self.curr_control_card_parameters[j] == "NSID":
+                tmp_prop = self.nodeSetID_info.get()
             else:
                 tmp_prop = self.entry_list_control_cards[index].get().strip()
             if header_line == "\n$$":
@@ -2775,7 +2889,7 @@ class VIEWER:
                     # print(section_card_title, str(self.MaterialCards.map_section_cards_type_title[section_card_title]))
                     section_tmp_line = ",".join([str(self.MaterialCards.map_section_cards_type_title[section_card_title]), str(section_id)])
                     self.read_section_cards_type_list.append(section_tmp_line)
-                list1 = re.findall('.{%d}'%10, line)
+                list1 = re.findall('.{10}', line)
                 if len(list1) == 8:
                     self.read_section_parameters_tmp.extend(list1)
                 elif len(list1) < 8:
@@ -2800,7 +2914,7 @@ class VIEWER:
                     # print(eos_card_title, str(self.MaterialCards.map_eos_cards_type_title[eos_card_title]))
                     eos_tmp_line = ",".join([str(self.MaterialCards.map_eos_cards_type_title[eos_card_title]), str(eos_id)])
                     self.read_eos_cards_type_list.append(eos_tmp_line)
-                list1 = re.findall('.{%d}'%10, line)
+                list1 = re.findall('.{10}', line)
                 if len(list1) == 8:
                     self.read_eos_parameters_tmp.extend(list1)
                 elif len(list1) < 8:
@@ -2838,7 +2952,7 @@ class VIEWER:
                         tmp_line = ",".join([matType, str(mat_id)])
                         self.read_material_cards_type_list.append(tmp_line)
 
-                list1 = re.findall('.{%d}'%10, line)
+                list1 = re.findall('.{10}', line)
                 if len(list1) == 8:
                     self.read_material_parameters_tmp.extend(list1)
                 elif len(list1) < 8:
@@ -3335,6 +3449,15 @@ class VIEWER:
         :return:
         """
         self.partSetID = self.partSetID_info.get()
+
+    def get_nodeSet_ID(self, nodeSetID):
+        self.nodeSetID = nodeSetID
+
+    def nodeSet_dropdown(self, *args):
+        """
+        :return:
+        """
+        self.nodeSetID = self.nodeSetID_info.get()
 
     def open_projectPath(self):
         """

@@ -1,0 +1,18 @@
+{
+ "LINEAR_POLYNOMIAL":
+	{
+		"Eos_Parameters":["EOSID,C0,C1,C2,C3,C4,C5,C6,E0,V0", 
+							"1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,,", 
+							"Y,Y,Y,Y,Y,Y,Y,Y,Y,Y"],
+		"Card_Title":["*EOS_LINEAR_POLYNOMIAL_TITLE","Y"],
+		"Part_Title":["Part_Title","Y"]
+	},
+ "GRUNEISEN":
+	{
+		"Eos_Parameters":["EOSID,C,S1,S2,S3,GAMAO,A,E0,V0", 
+							"1,,,,,,,,", 
+							"Y,Y,Y,Y,Y,Y,Y,Y,Y"],
+		"Card_Title":["*EOS_GRUNEISEN_TITLE","Y"],
+		"Part_Title":["Part_Title","Y"]
+	}
+}

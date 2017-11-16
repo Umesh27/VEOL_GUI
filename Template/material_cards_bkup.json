@@ -1,0 +1,25 @@
+{"MAT_55": 
+	{
+		"Mat_Parameters": ["mid,ro,ea,eb,(ec),prba,(prca),(prcb),gab,gbc,gca,(kf),aopt,2way,,xp,yp,zp,a1,a2,a3,mangle,,v1,v2,v3,d1,d2,d3,dfailm,dfails,tfail,alph,soft,fbrt,ycfac,dfailt,dfailc,efs,xc,xt,yc,yt,sc,crit,beta,,pel,epsf,epsr,tsmd,soft2,,slimt1,slimc1,slimt2,slimc2,slims,ncyred,softg", 
+							"0,4.4E-09,5029.9333,1050,5029.9333,0.32,0.32,0.32,1905.2778,397.7273,1905.2778,0,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,0,0,0,0,0.00,0.00,1.00,0.00,2.00,0.00,0.00,0.00,22.59,45.182,5.504,11.01,0.00,0.00,0.00,,0.00,0.00,0.00,0.00,0.1,,0.00,0.00,0.00,0.00,0.00,0.00,0.1", 
+							"y,y,y,y,n,y,n,n,y,y,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n, n, y, y, y, n, n, n,y, y, y, y, n, y, n,n,n,n,n,n,y,n,n,n,n,n,n,n,n"], 
+		"Card_Title": ["*MAT_ENHANCED_COMPOSITE_DAMAGE", "y"], 
+		"Part_Title": ["Part1", "y"]}, 
+ "MAT_54": 
+	{
+		"Mat_Parameters": ["mid,ro,ea,eb,(ec),prba,(prca),(prcb),gab,gbc,gca,(kf),aopt,2way,,xp,yp,zp,a1,a2,a3,mangle,,v1,v2,v3,d1,d2,d3,dfailm,dfails,tfail,alph,soft,fbrt,ycfac,dfailt,dfailc,efs,xc,xt,yc,yt,sc,crit,beta,,pel,epsf,epsr,tsmd,soft2,,slimt1,slimc1,slimt2,slimc2,slims,ncyred,softg,,lcxc, lcxt, lcyc, lcyt, lcsc, dt", 
+							"0,4.4E-09,5029.9333,1050,5029.9333,0.32,0.32,0.32,1905.2778,397.7273,1905.2778,0,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,0,0,0,0,0.00,0.00,1.00,0.00,2.00,0.00,0.00,0.00,22.59,45.182,5.504,11.01,0.00,0.00,0.00,,0.00,0.00,0.00,0.00,0.1,,0.00,0.00,0.00,0.00,0.00,0.00,0.1,,,,,,,",
+							"y,y,y,y,n,y,n,n,y,y,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n, n, y, y, y, n, n, n,y, y, y, y, n, y, n,n,n,n,n,n,y,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n"], 
+		"Card_Title": ["*MAT_ENHANCED_COMPOSITE_DAMAGE", "y"], 
+		"Part_Title": ["Part1", "y"]}, 
+ "MAT_20": 
+	{
+		"Mat_Parameters": ["mid,ro,e,pr,n,couple,m,alias,cmo,con1,con2,,lco or a1,a2,a3,v1,v2,v3", "0,4.40E-09,2920,0.4,0,0,0,,0,,,,0,,,,,0", "y,y,y,y,n,n,n,n,y,y,y,n,n,n,n,n,n,n"], 
+		"Card_Title": ["*MAT_RIGID", "y"], 
+		"Part_Title": ["Part1", "y"]}, 
+ "MAT_24": 
+	{
+		"Mat_Parameters": ["mid2,ro,e,pr,sigy,etan,fail,tdel,c,p,lcss,lcsr,vp,lcf,,eps1,eps2,eps3,eps4,eps5,eps6,eps7,eps8,es1,es2,es3,es4,es5,es6,es7,es8", "0,4.40E-09,2920,0.4,0,0,1.00E+21,0,0,0,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "y,y,y,y,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n"], 
+		"Card_Title": ["*MAT_PIECEWISE_LINEAR_PLASTICITY", "y"], 
+		"Part_Title": ["Part1", "y"]}, 
+}
