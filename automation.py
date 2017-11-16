@@ -5,6 +5,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
 import json
+import platform
 import subprocess
 
 # Import local modules
@@ -264,7 +265,6 @@ class VIEWER:
         """
         :return:
         """
-        import platform
         if platform.system() == "Linux":
             p1 = subprocess.Popen([r"/opt/lsprepost/lspp43", "c=%s" % self.cFile])
         else:
@@ -1166,8 +1166,7 @@ class VIEWER:
                     tmp_prop = self.read_control_cards_parameters[key][1][j]
                     newline.append(tmp_prop.rjust(10))
                 except Exception as Ex:
-                    print(Ex)
-                    continue
+                    pass
 
                 if j == (len(curr_control_parameters)-1):
                     line1 = "".join(newline)
@@ -1248,7 +1247,6 @@ class VIEWER:
                     tmp_prop = self.read_define_parameters[key][1][j]
                     newline.append(tmp_prop.rjust(10))
                 except Exception as Ex:
-                    print(Ex)
                     pass
 
                 if j == (len(curr_define_parameters)-1):
@@ -3259,10 +3257,11 @@ class VIEWER:
                 count = 0
                 index += 1
                 continue
-
-            tmp_prop = self.entry_list[index].get().strip()
-            self.read_material_parameters[self.read_material_card][1][j] = tmp_prop
-
+            try:
+                tmp_prop = self.entry_list[index].get().strip()
+                self.read_material_parameters[self.read_material_card][1][j] = tmp_prop
+            except Exception as Ex:
+                pass
             count += 1
             index += 1
 
@@ -3324,8 +3323,7 @@ class VIEWER:
                     tmp_prop = self.read_material_parameters[key][1][j]
                     newline.append(tmp_prop.rjust(10))
                 except Exception as IndexError:
-                    print(IndexError)
-                    continue
+                    pass
 
                 if j == (len(curr_material_parameters)-1):
                     line1 = "".join(newline)
@@ -3387,8 +3385,7 @@ class VIEWER:
                     tmp_prop = self.read_section_parameters[key][1][j]
                     newline.append(tmp_prop.rjust(10))
                 except Exception as IndexError:
-                    print(IndexError)
-                    continue
+                    pass
 
                 if j == (len(curr_section_parameters)-1):
                     line1 = "".join(newline)
@@ -3450,8 +3447,7 @@ class VIEWER:
                     tmp_prop = self.read_eos_parameters[key][1][j]
                     newline.append(tmp_prop.rjust(10))
                 except Exception as IndexError:
-                    print(IndexError)
-                    continue
+                    pass
 
                 if j == (len(curr_eos_parameters)-1):
                     line1 = "".join(newline)
@@ -3586,20 +3582,23 @@ class VIEWER:
         """
         :return:
         """
-        tmpFile = os.path.join(self.template_path,"run_windows.tmp")
-        with open(tmpFile,"r") as f:
-            s = f.read()
+        if platform.system() == "Linux":
+            ""
+        else:
+            tmpFile = os.path.join(self.template_path,"run_windows.tmp")
+            with open(tmpFile,"r") as f:
+                s = f.read()
 
-        s = s.replace("$INPUTFILEPATH$", self.input_keyword.Kfile)
-        s = s.replace("$NCPU$", self.ncpu_entry.get())
-        s = s.replace("$MEMORY$", self.memory_entry.get())
-        runFile = os.path.join(self.project_path,"run.bat")
-        with open(runFile,"w") as f:
-            f.write(s)
+            s = s.replace("$INPUTFILEPATH$", self.input_keyword.Kfile)
+            s = s.replace("$NCPU$", self.ncpu_entry.get())
+            s = s.replace("$MEMORY$", self.memory_entry.get())
+            runFile = os.path.join(self.project_path,"run.bat")
+            with open(runFile,"w") as f:
+                f.write(s)
 
-        p = subprocess.Popen("run.bat", cwd=self.project_path, shell=True)#, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-        out,err = p.communicate()
-        p.terminate()
+            p = subprocess.Popen("run.bat", cwd=self.project_path, shell=True)#, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            out,err = p.communicate()
+            p.terminate()
 
     def create_button(self, frame_, buttonName, buttonMethod, rowN, colN, fg_='black', sticky_=N, bg_='lightgray', ipadx_=0):
         """
