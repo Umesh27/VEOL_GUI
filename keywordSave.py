@@ -1,6 +1,6 @@
 __author__ = 'Administrator'
 
-import os, sys
+import os, sys, platform
 
 
 def saveKey(filName):
@@ -37,10 +37,10 @@ def createSCL(fileName, keyIn, keyOut):
     #print(str1)
     with open(outPathCfile, 'w') as outCfile:
         outCfile.write(str1)
-
-    # lsppCommand = r"C:\LSTC\LS-PrePost\4.3-x64\lsprepost4.3_x64.exe c=%s -nographics"%outPathCfile
-    lsppCommand = r"C:\LSTC\LS-PrePost\4.3-x64\lsprepost4.3_x64.exe c=%s "%outPathCfile
-    #print(lsppCommand)
+    if platform.system() == "Linux":
+        lsppCommand = r"/opt/lsprepost/lspp43  c=%s"%outPathCfile
+    else:
+        lsppCommand = r"C:\LSTC\LS-PrePost\4.3-x64\lsprepost4.3_x64.exe c=%s "%outPathCfile
 
     os.system(lsppCommand)
 

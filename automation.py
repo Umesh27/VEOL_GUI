@@ -3583,7 +3583,20 @@ class VIEWER:
         :return:
         """
         if platform.system() == "Linux":
-            ""
+            tmpFile = os.path.join(self.template_path, "run_linux.tmp")
+            with open(tmpFile, "r") as f:
+                s = f.read()
+
+            s = s.replace("$INPUTFILEPATH$", self.input_keyword.Kfile)
+            s = s.replace("$NCPU$", self.ncpu_entry.get())
+            s = s.replace("$MEMORY$", self.memory_entry.get())
+            runFile = os.path.join(self.project_path, "run.sh")
+            with open(runFile, "w+") as f:
+                f.write(s)
+            os.chmod(runFile, 0o777)
+            p = subprocess.Popen("gnome-terminal -e ./run.sh", cwd=self.project_path, shell=True)  # , stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            out, err = p.communicate()
+            p.terminate()
         else:
             tmpFile = os.path.join(self.template_path,"run_windows.tmp")
             with open(tmpFile,"r") as f:
