@@ -229,6 +229,7 @@ class VIEWER:
         print(self.controlCardDefaultFile_read)
         print(self.controlCardDefaultFile)
         shutil.copy2(self.controlCardDefaultFile_read, self.controlCardDefaultFile)
+        self.read_control_card_info()
 
     def review_control_card(self):
         """
