@@ -848,6 +848,11 @@ class VIEWER:
                     self.map_curveID_ValList_str.update({define_tmp_line:self.curveValList_read_str})
                     self.curveValList_read = []
                     self.curveValList_read_str = ""
+                if define_card_title in self.ControlCards.map_define_cards_type_title.keys():
+                    define_card_type = str(self.ControlCards.map_define_cards_type_title[define_card_title])
+                else:
+                    messagebox.showwarning('WARNING', "%s card not present in the database !!!"%define_card_title)
+                    inDefineBlock = False
                 continue
 
             if line.startswith("*BOUNDARY"):
@@ -869,7 +874,12 @@ class VIEWER:
                 if not self.read_control_cards_parameters_tmp == []:
                     self.read_control_cards_parameters.update({control_cards_tmp_line:[self.read_control_parameters_title, self.read_control_cards_parameters_tmp]})
                     self.read_control_cards_parameters_tmp = []
-                continue
+                    continue
+                if control_card_title in self.ControlCards.map_control_cards_type_title.keys():
+                    controlCardType = str(self.ControlCards.map_control_cards_type_title[control_card_title])
+                else:
+                    messagebox.showwarning('WARNING', "%s card not present in the database !!!"%control_card_title)
+                    inControlCardBlock = False
 
             if line.startswith(("*CONTROL", "*DATABASE", "*LOAD")):
                 inDefineBlock = False
@@ -882,6 +892,11 @@ class VIEWER:
                 if not self.read_control_cards_parameters_tmp == []:
                     self.read_control_cards_parameters.update({control_cards_tmp_line:[self.read_control_parameters_title, self.read_control_cards_parameters_tmp]})
                     self.read_control_cards_parameters_tmp = []
+                if control_card_title in self.ControlCards.map_control_cards_type_title.keys():
+                    controlCardType = str(self.ControlCards.map_control_cards_type_title[control_card_title])
+                else:
+                    messagebox.showwarning('WARNING', "%s card not present in the database !!!"%control_card_title)
+                    inControlCardBlock = False
                 continue
 
             if line.startswith("*"):
@@ -901,12 +916,8 @@ class VIEWER:
                     continue
                 if count == 1:
                     define_id = line[:10].strip()
-                    try:
-                        print(self.read_define_parameters_title, str(self.ControlCards.map_define_cards_type_title[define_card_title]))
-                        define_tmp_line = ",".join([str(self.ControlCards.map_define_cards_type_title[define_card_title]), str(define_id)])
-                        self.read_define_cards_type_list.append(define_tmp_line)
-                    except Exception as Ex:
-                        print(Ex)
+                    define_tmp_line = ",".join([define_card_type, str(define_id)])
+                    self.read_define_cards_type_list.append(define_tmp_line)
 
                 if count > 1:
                     self.curveValList_read_str += line
@@ -942,13 +953,8 @@ class VIEWER:
                     bpm_part_id = ",".join([bpm_id, part_id])
                 except NameError:
                     bpm_part_id = ",".join(["", part_id])
-                try:
-                    controlCardType = str(self.ControlCards.map_control_cards_type_title[control_card_title])
-                    control_cards_tmp_line = ",".join([str(self.ControlCards.map_control_cards_type_title[control_card_title]), bpm_part_id])
-                    self.read_control_cards_type_list.append(control_cards_tmp_line)
-                except Exception as Ex:
-                    control_cards_tmp_line = control_card_title
-                    print(Ex)
+                control_cards_tmp_line = ",".join([controlCardType, bpm_part_id])
+                self.read_control_cards_type_list.append(control_cards_tmp_line)
                 list1 = re.findall('.{10}', line)
                 if len(list1) == 8:
                     self.read_control_cards_parameters_tmp.extend(list1)
@@ -964,14 +970,8 @@ class VIEWER:
                 if line.startswith("$"):
                     continue
                 if count == 1:
-                    # control_card_id = int(line[:10].strip())
-                    try:
-                        controlCardType = str(self.ControlCards.map_control_cards_type_title[control_card_title])
-                        control_cards_tmp_line = ",".join([str(self.ControlCards.map_control_cards_type_title[control_card_title]), ""])
-                        self.read_control_cards_type_list.append(control_cards_tmp_line)
-                    except Exception as Ex:
-                        control_cards_tmp_line = control_card_title
-                        print(Ex)
+                    control_cards_tmp_line = ",".join([controlCardType, ""])
+                    self.read_control_cards_type_list.append(control_cards_tmp_line)
 
                 list1 = re.findall('.{10}', line)
                 if len(list1) == 8:
@@ -1023,66 +1023,62 @@ class VIEWER:
         """
         :return:
         """
-        # print("In edit button !")
         rowN = 1
         self.window_controlCardsInfo_read = Toplevel(self.frame)
         control_card_type = self.read_control_card.split(',')[0]
-        try:
-            self.curr_control_card_parameters = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][0].split(',')
-            curr_control_card_parameters_freq = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][2].split(',')
+        self.curr_control_card_parameters = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][0].split(',')
+        curr_control_card_parameters_freq = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][2].split(',')
 
 
-            count = 0
-            colN = 0
-            self.label_list_control_cards = []
-            self.entry_list_control_cards = []
+        count = 0
+        colN = 0
+        self.label_list_control_cards = []
+        self.entry_list_control_cards = []
 
-            if not self.read_control_cards_parameters[self.read_control_card][0] == "":
-                BPM_Title = self.read_control_cards_parameters[self.read_control_card][0]
-                BPM_ID = self.read_control_card.split(',')[-2]
-                self.BPM_ID_label = self.create_label(self.window_controlCardsInfo_read, "ID", rowN, 0, width_=10, fg_="blue")
-                self.BPM_ID_entry = self.create_entry(self.window_controlCardsInfo_read, BPM_ID, rowN+1, 0, width_=10, fg_="blue")
+        if not self.read_control_cards_parameters[self.read_control_card][0] == "":
+            BPM_Title = self.read_control_cards_parameters[self.read_control_card][0]
+            BPM_ID = self.read_control_card.split(',')[-2]
+            self.BPM_ID_label = self.create_label(self.window_controlCardsInfo_read, "ID", rowN, 0, width_=10, fg_="blue")
+            self.BPM_ID_entry = self.create_entry(self.window_controlCardsInfo_read, BPM_ID, rowN+1, 0, width_=10, fg_="blue")
 
-                self.BPM_Title_label = self.create_label(self.window_controlCardsInfo_read, "TITLE", rowN, 1, width_=70, fg_="blue", columnspan_=5)
-                self.BPM_Title_entry = self.create_entry(self.window_controlCardsInfo_read, BPM_Title, rowN+1, 1, width_=70, fg_="blue", columnspan_=5)
+            self.BPM_Title_label = self.create_label(self.window_controlCardsInfo_read, "TITLE", rowN, 1, width_=70, fg_="blue", columnspan_=5)
+            self.BPM_Title_entry = self.create_entry(self.window_controlCardsInfo_read, BPM_Title, rowN+1, 1, width_=70, fg_="blue", columnspan_=5)
+            rowN += 2
+
+        index = 0
+        for j in range(len(self.curr_control_card_parameters)):
+            if count == 8:
                 rowN += 2
+                colN = 0
+                count = 0
 
-            index = 0
-            for j in range(len(self.curr_control_card_parameters)):
-                if count == 8:
-                    rowN += 2
-                    colN = 0
-                    count = 0
+            if self.curr_control_card_parameters[j] == "":
+                self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j], width=10))
+                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10))
+                rowN += 2
+                colN = 0
+                count = 0
+                continue
 
-                if self.curr_control_card_parameters[j] == "":
-                    self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j], width=10))
-                    self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10))
-                    rowN += 2
-                    colN = 0
-                    count = 0
-                    continue
+            if curr_control_card_parameters_freq[j].strip().upper() == "Y":
+                self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j].upper(), width=10, fg="blue"))
+                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10, fg="blue"))
+            else:
+                self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j].upper(), width=10))
+                self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10))
+            self.label_list_control_cards[j].grid(row=rowN, column=colN)
 
-                if curr_control_card_parameters_freq[j].strip().upper() == "Y":
-                    self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j].upper(), width=10, fg="blue"))
-                    self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10, fg="blue"))
-                else:
-                    self.label_list_control_cards.append(Label(self.window_controlCardsInfo_read, text=self.curr_control_card_parameters[j].upper(), width=10))
-                    self.entry_list_control_cards.append(Entry(self.window_controlCardsInfo_read, width=10))
-                self.label_list_control_cards[j].grid(row=rowN, column=colN)
+            self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
 
-                self.entry_list_control_cards[j].grid(row=rowN+1, column=colN)
+            try:
+                self.entry_list_control_cards[j].insert(0,self.read_control_cards_parameters[self.read_control_card][1][j])
+            except Exception as Ex:
+                print(Ex, index)
+                self.entry_list_control_cards[j].insert(0,"")
 
-                try:
-                    self.entry_list_control_cards[j].insert(0,self.read_control_cards_parameters[self.read_control_card][1][j])
-                except Exception as Ex:
-                    print(Ex, index)
-                    self.entry_list_control_cards[j].insert(0,"")
-
-                count += 1
-                colN += 1
-                index += 1
-        except Exception as Ex:
-            print(Ex)
+            count += 1
+            colN += 1
+            index += 1
 
         rowN += 3
         button_ = Button(self.window_controlCardsInfo_read, text="Save", command=self.save_control_card)
@@ -1125,29 +1121,23 @@ class VIEWER:
         index = 0
         newline = []
         for key in self.read_control_cards_parameters.keys():
-            try:
-                print(key)
-                control_card_type = key.split(',')[0]
-                print(control_card_type)
-                curr_control_parameters = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][0].split(',')
-                outlines_control.append('\n')
+            print(key)
+            control_card_type = key.split(',')[0]
+            print(control_card_type)
+            curr_control_parameters = self.ControlCards.control_cards_jsonObj[control_card_type]["Control_Parameters"][0].split(',')
+            outlines_control.append('\n')
 
-                if self.read_control_cards_parameters[key][0] == "":
-                    card_title = self.ControlCards.control_cards_jsonObj[control_card_type]["Card_Title"][0]
-                    outlines_control.append(card_title)
-                else:
-                    card_title = self.ControlCards.control_cards_jsonObj[control_card_type]["Card_Title"][0] + "_ID"
-                    outlines_control.append(card_title)
-                    outlines_control.append("\n")
-                    Id = key.split(',')[1]
-                    Title = self.read_control_cards_parameters[key][0]
-                    line = Id.rjust(10) + Title.ljust(70)
-                    outlines_control.append(line)
-
-                    # outlines_control.append('\n')
-            except Exception as Ex:
-                curr_control_parameters = []
-                print(Ex)
+            if self.read_control_cards_parameters[key][0] == "":
+                card_title = self.ControlCards.control_cards_jsonObj[control_card_type]["Card_Title"][0]
+                outlines_control.append(card_title)
+            else:
+                card_title = self.ControlCards.control_cards_jsonObj[control_card_type]["Card_Title"][0] + "_ID"
+                outlines_control.append(card_title)
+                outlines_control.append("\n")
+                Id = key.split(',')[1]
+                Title = self.read_control_cards_parameters[key][0]
+                line = Id.rjust(10) + Title.ljust(70)
+                outlines_control.append(line)
 
             header_line = "\n$$"
             for j in range(len(curr_control_parameters)):
@@ -1200,11 +1190,7 @@ class VIEWER:
             print(define_card_type)
             if index == 0:
                 outlines_define.append('\n')
-            try:
-                curr_define_parameters = self.ControlCards.define_cards_jsonObj[define_card_type]["Control_Parameters"][0].split(',')
-            except Exception as Ex:
-                print(Ex)
-                curr_define_parameters = []
+            curr_define_parameters = self.ControlCards.define_cards_jsonObj[define_card_type]["Control_Parameters"][0].split(',')
             if self.read_define_parameters[key][0] == "":
                 card_title = self.ControlCards.define_cards_jsonObj[define_card_type]["Card_Title"][0].split('_TITLE')[0]
                 outlines_define.append(card_title)
@@ -2987,6 +2973,12 @@ class VIEWER:
                         self.map_sectionID_thickness.update({section_id:[sectionType_partTitle,thickness]})
                         self.read_section_parameters.update({section_tmp_line:[self.read_section_parameters_title, self.read_section_parameters_tmp]})
                         self.read_section_parameters_tmp = []
+                    if section_card_title in self.MaterialCards.map_section_cards_type_title.keys():
+                        sectionType = str(self.MaterialCards.map_section_cards_type_title[section_card_title])
+                    else:
+                        messagebox.showwarning("WARNING", "%s card not present in the database !!!"%section_card_title)
+                        inSectionBlock = False
+                        continue
                     continue
 
                 if line.startswith("*MAT"):
@@ -3015,6 +3007,12 @@ class VIEWER:
                             materialCard_partTitle = "{}, {}".format(matType, self.read_material_parameters_title)
                             self.map_materialID_type.update({mat_id: materialCard_partTitle})
                             self.read_material_parameters_tmp = []
+                        if card_title in self.MaterialCards.map_material_cards_type_title.keys():
+                            matType = str(self.MaterialCards.map_material_cards_type_title[card_title])
+                        else:
+                            messagebox.showwarning("WARNING", "%s card not present in the database !!!"%card_title)
+                            inMatBlock = False
+                            continue
                     continue
 
                 if line.startswith("*EOS"):
@@ -3036,6 +3034,12 @@ class VIEWER:
                         eosType_partTitle = "{}, {}".format(eosType, self.read_eos_parameters_title)
                         self.map_eosID_type_title.update({eos_id:[eosType_partTitle]})
                         self.read_eos_parameters_tmp = []
+                    if eos_card_title in self.MaterialCards.map_eos_cards_type_title.keys():
+                        eosType = str(self.MaterialCards.map_eos_cards_type_title[eos_card_title])
+                    else:
+                        messagebox.showwarning("WARNING", "%s card not present in the database !!!"%eos_card_title)
+                        inEosBlock = False
+                        continue
                     continue
                 if line.startswith("*"):
                     inSectionBlock = False
@@ -3057,13 +3061,10 @@ class VIEWER:
                 if count == 1:
                     section_id = str(int(line[:10].strip()))
                     self.section_ids.append(section_id)
-                    sectionType = str(self.MaterialCards.map_section_cards_type_title[section_card_title])
                     section_tmp_line = ",".join([sectionType, str(section_id)])
                     self.read_section_cards_type_list.append(section_tmp_line)
                 if count == 2:
                     thickness = str(float(line[:10].strip()))
-                # count += 1
-
 
                 list1 = re.findall('.{10}', line)
                 if len(list1) == 8:
@@ -3088,7 +3089,6 @@ class VIEWER:
                 if count == 1:
                     eos_id = int(line[:10].strip())
                     self.eos_ids.append(eos_id)
-                    eosType = str(self.MaterialCards.map_eos_cards_type_title[eos_card_title])
                     eos_tmp_line = ",".join([eosType, str(eos_id)])
                     self.read_eos_cards_type_list.append(eos_tmp_line)
                 list1 = re.findall('.{10}', line)
@@ -3115,10 +3115,8 @@ class VIEWER:
                     mat_id = line[:10].strip()
                     self.material_ids.append(mat_id)
                     if not card_title == "*MAT_ENHANCED_COMPOSITE_DAMAGE_TITLE":
-                        matType = str(self.MaterialCards.map_material_cards_type_title[card_title])
                         tmp_line = ",".join([matType, str(mat_id)])
                         self.read_material_cards_type_list.append(tmp_line)
-
                 if count == 6:
                     crit_fail = int(float(line[51:60].strip()))
                     if crit_fail == 54:
