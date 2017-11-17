@@ -34,7 +34,11 @@ class VIEWER:
 
         self.rowN = 0
         self.project_path_button = self.create_button(self.frame, "ProjectPath", self.open_projectPath, self.rowN, 1, sticky_=EW, bg_='lightyellow')
-        self.project_path = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1"
+        if platform.system() == "Linux":
+            self.initialdir_ = r"/root/Umesh/Primary_Package_Simulation/Project1"
+        else:
+            self.initialdir_ = r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1"
+        self.project_path = self.initialdir_
         self.project_path_entry = self.create_entry(self.frame, self.project_path, self.rowN, 2, width_=50)
         self.create_button(self.frame, "Create_Input", self.create_input, self.rowN, 3, sticky_=EW, bg_='lightyellow')
 
@@ -226,7 +230,7 @@ class VIEWER:
         """
         outlines = []
         # self.d3path = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
-        self.simulation_path = filedialog.askdirectory(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.simulation_path = filedialog.askdirectory(initialdir=self.initialdir_)
         self.d3path = os.path.join(self.simulation_path, "d3plot")
         print(self.d3path)
         self.openD3plot_entry.delete(0,'end')
@@ -298,7 +302,7 @@ class VIEWER:
         :return:
         """
         print("Opening Control Card file !")
-        self.controlCardDefaultFile_read = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.controlCardDefaultFile_read = filedialog.askopenfilename(initialdir=self.initialdir_)
         self.loadingFileEntry.delete(0,'end')
         self.loadingFileEntry.insert(0,self.controlCardDefaultFile_read)
         self.controlCardDefaultFile = os.path.join(self.project_path, 'control_cards.k')
@@ -362,7 +366,7 @@ class VIEWER:
         """
         :return:
         """
-        self.meshFile = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.meshFile = filedialog.askopenfilename(initialdir=self.initialdir_)
         self.input_path_entry.delete(0,'end')
         self.input_path_entry.insert(0,self.meshFile)
 
@@ -781,7 +785,7 @@ class VIEWER:
         """
         :return:
         """
-        self.controlCardDefaultFile = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.controlCardDefaultFile = filedialog.askopenfilename(initialdir=self.initialdir_)
         self.read_control_card_info()
 
     def read_control_card_info(self):
@@ -2798,7 +2802,7 @@ class VIEWER:
 
         :return:
         """
-        self.read_mat_file = filedialog.askopenfilename(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        self.read_mat_file = filedialog.askopenfilename(initialdir=self.initialdir_)
         with open(self.read_mat_file, 'r') as readFile:
             inlines = readFile.readlines()
 
@@ -3495,7 +3499,7 @@ class VIEWER:
 
         :return:
         """
-        project_path = filedialog.askdirectory(initialdir=r"D:\Umesh\AxiomProject\VEOL_GUI\Rakesh_Project\Test1")
+        project_path = filedialog.askdirectory(initialdir=self.initialdir_)
         self.project_path_entry.delete(0,'end')
         self.project_path_entry.insert(0,project_path)
 
